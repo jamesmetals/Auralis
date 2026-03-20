@@ -43,6 +43,7 @@ public sealed class ExplorerVerbRegistrationService(IAuthorizationService author
         verbKey?.SetValue("NeverDefault", string.Empty);
         verbKey?.SetValue("SeparatorBefore", string.Empty);
         verbKey?.SetValue("SeparatorAfter", string.Empty);
+        verbKey?.DeleteValue("SubCommands", throwOnMissingValue: false);
         verbKey?.DeleteSubKeyTree("shell", throwOnMissingSubKey: false);
 
         using var commandKey = verbKey?.CreateSubKey("command", true);

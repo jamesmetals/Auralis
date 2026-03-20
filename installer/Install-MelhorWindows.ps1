@@ -51,6 +51,7 @@ function Register-FolderVerb {
     $directoryVerbKey.SetValue("NeverDefault", "")
     $directoryVerbKey.SetValue("SeparatorBefore", "")
     $directoryVerbKey.SetValue("SeparatorAfter", "")
+    $directoryVerbKey.DeleteValue("SubCommands", $false)
     $directoryVerbKey.DeleteSubKeyTree("shell", $false)
 
     $commandKey = $directoryVerbKey.CreateSubKey("command", $true)
