@@ -1,15 +1,10 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MelhorWindows.Application.Abstractions;
 using MelhorWindows.Application.Models;
 using MelhorWindows.Domain.Enums;
-using SharpVectors.Converters;
-using SharpVectors.Renderers.Wpf;
 using SixLabors.ImageSharp.Formats.Png;
 using ImageSharpImage = SixLabors.ImageSharp.Image;
 
@@ -17,19 +12,7 @@ namespace MelhorWindows.Infrastructure.Imaging;
 
 public sealed class SystemDrawingIconConversionService : IImageIconConversionService
 {
-    private const string UnsupportedImageMessage = "Nao foi possivel ler essa imagem. Use SVG, PNG, JPG, JPEG, BMP, ICO, WEBP, GIF ou TIFF.";
     private static readonly int[] IconSizes = [16, 32, 48, 64, 128, 256];
-    private static readonly HashSet<string> ImageSharpSupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".bmp",
-        ".webp",
-        ".gif",
-        ".tif",
-        ".tiff"
-    };
 
     public async Task<PreparedIconAsset> PrepareIconAsync(
         PrepareIconRequest request,
@@ -71,31 +54,19 @@ public sealed class SystemDrawingIconConversionService : IImageIconConversionSer
     {
         try
         {
-            if (IsSvgPath(sourceImagePath))
+            if (ImageAssetFormats.IsSvgPath(sourceImagePath))
             {
-                return NormalizeSvgToPng(sourceImagePath);
+                return SvgRasterizer.NormalizeToPng(sourceImagePath);
             }
 
-            return ShouldUseImageSharpPipeline(sourceImagePath)
+            return ImageAssetFormats.UsesImageSharpPipeline(sourceImagePath)
                 ? NormalizeSourceImageToPngWithImageSharp(sourceImagePath)
                 : NormalizeSourceImageToPngWithWpfDecoder(sourceImagePath);
         }
-        catch (Exception exception) when (IsUnsupportedImageException(exception))
+        catch (Exception exception) when (ImageAssetFormats.IsUnsupportedImageException(exception))
         {
-            throw new InvalidOperationException(UnsupportedImageMessage, exception);
+            throw new InvalidOperationException(ImageAssetFormats.UnsupportedImageMessage, exception);
         }
-    }
-
-    private static byte[] NormalizeSvgToPng(string sourceImagePath)
-    {
-        var drawing = LoadSvgDrawing(sourceImagePath);
-        var bounds = ResolveDrawingBounds(drawing);
-        var maxDimension = Math.Max(bounds.Width, bounds.Height);
-        var targetMaxDimension = Math.Clamp((int)Math.Ceiling(maxDimension), 512, 1024);
-        var scale = targetMaxDimension / maxDimension;
-        var pixelWidth = Math.Max(1, (int)Math.Ceiling(bounds.Width * scale));
-        var pixelHeight = Math.Max(1, (int)Math.Ceiling(bounds.Height * scale));
-        return RenderDrawingToPngBytes(drawing, bounds, pixelWidth, pixelHeight);
     }
 
     private static byte[] NormalizeSourceImageToPngWithImageSharp(string sourceImagePath)
@@ -117,7 +88,7 @@ public sealed class SystemDrawingIconConversionService : IImageIconConversionSer
 
         if (decoder.Frames.Count == 0)
         {
-            throw new InvalidOperationException(UnsupportedImageMessage);
+            throw new InvalidOperationException(ImageAssetFormats.UnsupportedImageMessage);
         }
 
         var encoder = new PngBitmapEncoder();
@@ -253,98 +224,6 @@ public sealed class SystemDrawingIconConversionService : IImageIconConversionSer
         bitmap.Save(stream, ImageFormat.Png);
         return stream.ToArray();
     }
-
-    private static bool ShouldUseImageSharpPipeline(string sourceImagePath)
-    {
-        var extension = Path.GetExtension(sourceImagePath);
-        return !string.IsNullOrWhiteSpace(extension) && ImageSharpSupportedExtensions.Contains(extension);
-    }
-
-    private static bool IsSvgPath(string sourceImagePath) =>
-        string.Equals(Path.GetExtension(sourceImagePath), ".svg", StringComparison.OrdinalIgnoreCase);
-
-    private static DrawingGroup LoadSvgDrawing(string sourceImagePath)
-    {
-        var settings = new WpfDrawingSettings
-        {
-            IncludeRuntime = false,
-            TextAsGeometry = false,
-            EnsureViewboxPosition = true,
-            EnsureViewboxSize = true
-        };
-
-        using var reader = new FileSvgReader(settings);
-        var drawing = reader.Read(sourceImagePath);
-
-        if (drawing is null)
-        {
-            throw new InvalidOperationException(UnsupportedImageMessage);
-        }
-
-        if (drawing.CanFreeze)
-        {
-            drawing.Freeze();
-        }
-
-        return drawing;
-    }
-
-    private static byte[] RenderDrawingToPngBytes(DrawingGroup drawing, Rect bounds, int pixelWidth, int pixelHeight)
-    {
-        var brush = new DrawingBrush(drawing)
-        {
-            AlignmentX = AlignmentX.Center,
-            AlignmentY = AlignmentY.Center,
-            Stretch = Stretch.Uniform,
-            ViewboxUnits = BrushMappingMode.Absolute,
-            Viewbox = bounds
-        };
-
-        if (brush.CanFreeze)
-        {
-            brush.Freeze();
-        }
-
-        var visual = new DrawingVisual();
-
-        using (var context = visual.RenderOpen())
-        {
-            context.DrawRectangle(System.Windows.Media.Brushes.Transparent, null, new Rect(0, 0, pixelWidth, pixelHeight));
-            context.DrawRectangle(brush, null, new Rect(0, 0, pixelWidth, pixelHeight));
-        }
-
-        var bitmap = new RenderTargetBitmap(pixelWidth, pixelHeight, 96, 96, PixelFormats.Pbgra32);
-        bitmap.Render(visual);
-
-        var encoder = new PngBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(bitmap));
-
-        using var stream = new MemoryStream();
-        encoder.Save(stream);
-        return stream.ToArray();
-    }
-
-    private static Rect ResolveDrawingBounds(DrawingGroup drawing)
-    {
-        var bounds = drawing.Bounds;
-
-        if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
-        {
-            return new Rect(0, 0, 256, 256);
-        }
-
-        return bounds;
-    }
-
-    private static bool IsUnsupportedImageException(Exception exception) =>
-        exception is
-            NotSupportedException or
-            ArgumentException or
-            OutOfMemoryException or
-            COMException or
-            System.Xml.XmlException or
-            SixLabors.ImageSharp.UnknownImageFormatException or
-            SixLabors.ImageSharp.InvalidImageContentException;
 
     private static Task<T> RunStaAsync<T>(Func<T> action, CancellationToken cancellationToken)
     {

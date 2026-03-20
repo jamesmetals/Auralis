@@ -1,9 +1,11 @@
 using MelhorWindows.Application.Abstractions;
 using MelhorWindows.Application.Models;
 using MelhorWindows.Domain.Authorization;
+using System.Runtime.Versioning;
 
 namespace MelhorWindows.Application.Services;
 
+[SupportedOSPlatform("windows")]
 public sealed class WindowsFeatureWorkflowService(
     IAuthorizationService authorizationService,
     IRegistryEditingService registryEditingService,

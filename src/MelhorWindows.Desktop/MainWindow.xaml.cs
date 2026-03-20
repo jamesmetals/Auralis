@@ -8,9 +8,8 @@ using MelhorWindows.Application.Models;
 using MelhorWindows.Domain.Authorization;
 using MelhorWindows.Domain.Entities;
 using MelhorWindows.Domain.Enums;
+using MelhorWindows.Infrastructure.Imaging;
 using Microsoft.Win32;
-using SharpVectors.Converters;
-using SharpVectors.Renderers.Wpf;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Processing;
@@ -21,33 +20,6 @@ namespace MelhorWindows.Desktop;
 
 public partial class MainWindow : Window
 {
-    private const string UnsupportedImageMessage = "Nao foi possivel abrir essa imagem. Use SVG, PNG, JPG, JPEG, BMP, ICO, WEBP, GIF ou TIFF.";
-    private const string SupportedImageDialogFilter = "Image Files|*.svg;*.png;*.jpg;*.jpeg;*.bmp;*.ico;*.webp;*.gif;*.tif;*.tiff|All Files|*.*";
-    private static readonly HashSet<string> SupportedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".svg",
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".bmp",
-        ".ico",
-        ".webp",
-        ".gif",
-        ".tif",
-        ".tiff"
-    };
-
-    private static readonly HashSet<string> ImageSharpPreviewExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".bmp",
-        ".webp",
-        ".gif",
-        ".tif",
-        ".tiff"
-    };
     private readonly DesktopServices _services = DesktopComposition.Create();
     private readonly LaunchOptions _launchOptions = LaunchOptions.Parse(Environment.GetCommandLineArgs());
 
@@ -856,7 +828,7 @@ public partial class MainWindow : Window
     {
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            Filter = SupportedImageDialogFilter,
+            Filter = ImageAssetFormats.SupportedImageDialogFilter,
             Multiselect = false,
             CheckFileExists = true
         };
@@ -884,13 +856,7 @@ public partial class MainWindow : Window
 
     private static bool IsSupportedImagePath(string? path)
     {
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return false;
-        }
-
-        var extension = Path.GetExtension(path);
-        return !string.IsNullOrWhiteSpace(extension) && SupportedImageExtensions.Contains(extension);
+        return ImageAssetFormats.IsSupportedPath(path);
     }
 
     private string EnsureBuiltInIconImage(BuiltInIconItem iconItem)
@@ -939,18 +905,18 @@ public partial class MainWindow : Window
     {
         try
         {
-            if (IsSvgPath(imagePath))
+            if (ImageAssetFormats.IsSvgPath(imagePath))
             {
-                return ReadSvgInfo(imagePath);
+                return SvgRasterizer.ReadImageInfo(imagePath);
             }
 
-            return ShouldUseImageSharpPreviewPipeline(imagePath)
+            return ImageAssetFormats.UsesImageSharpPipeline(imagePath)
                 ? ReadImageInfoWithImageSharp(imagePath)
                 : ReadImageInfoWithWpfDecoder(imagePath);
         }
-        catch (Exception exception) when (IsUnsupportedImageException(exception))
+        catch (Exception exception) when (ImageAssetFormats.IsUnsupportedImageException(exception))
         {
-            throw new InvalidOperationException(UnsupportedImageMessage, exception);
+            throw new InvalidOperationException(ImageAssetFormats.UnsupportedImageMessage, exception);
         }
     }
 
@@ -958,18 +924,18 @@ public partial class MainWindow : Window
     {
         try
         {
-            if (IsSvgPath(imagePath))
+            if (ImageAssetFormats.IsSvgPath(imagePath))
             {
-                return CreateBitmapImageFromSvgPath(imagePath, decodePixelWidth);
+                return CreateBitmapImageFromBytes(SvgRasterizer.RenderPreviewToPng(imagePath, decodePixelWidth));
             }
 
-            return ShouldUseImageSharpPreviewPipeline(imagePath)
+            return ImageAssetFormats.UsesImageSharpPipeline(imagePath)
                 ? CreateBitmapImageFromPathWithImageSharp(imagePath, decodePixelWidth)
                 : CreateBitmapImageFromPathWithWpfDecoder(imagePath, decodePixelWidth);
         }
-        catch (Exception exception) when (IsUnsupportedImageException(exception))
+        catch (Exception exception) when (ImageAssetFormats.IsUnsupportedImageException(exception))
         {
-            throw new InvalidOperationException(UnsupportedImageMessage, exception);
+            throw new InvalidOperationException(ImageAssetFormats.UnsupportedImageMessage, exception);
         }
     }
 
@@ -1013,22 +979,6 @@ public partial class MainWindow : Window
         return bitmap;
     }
 
-    private static (int Width, int Height) ReadSvgInfo(string imagePath)
-    {
-        var drawing = LoadSvgDrawing(imagePath);
-        var bounds = ResolveDrawingBounds(drawing);
-        return ((int)Math.Ceiling(bounds.Width), (int)Math.Ceiling(bounds.Height));
-    }
-
-    private static BitmapImage CreateBitmapImageFromSvgPath(string imagePath, int decodePixelWidth)
-    {
-        var drawing = LoadSvgDrawing(imagePath);
-        var bounds = ResolveDrawingBounds(drawing);
-        var (pixelWidth, pixelHeight) = ResolveSvgRenderSize(bounds, decodePixelWidth);
-        var pngBytes = RenderDrawingToPngBytes(drawing, bounds, pixelWidth, pixelHeight);
-        return CreateBitmapImageFromBytes(pngBytes);
-    }
-
     private static (int Width, int Height) ReadImageInfoWithImageSharp(string imagePath)
     {
         using var stream = OpenImageReadStream(imagePath);
@@ -1036,7 +986,7 @@ public partial class MainWindow : Window
 
         if (info is null)
         {
-            throw new InvalidOperationException(UnsupportedImageMessage);
+            throw new InvalidOperationException(ImageAssetFormats.UnsupportedImageMessage);
         }
 
         return (info.Width, info.Height);
@@ -1052,7 +1002,7 @@ public partial class MainWindow : Window
 
         if (decoder.Frames.Count == 0)
         {
-            throw new InvalidOperationException(UnsupportedImageMessage);
+            throw new InvalidOperationException(ImageAssetFormats.UnsupportedImageMessage);
         }
 
         var frame = decoder.Frames[0];
@@ -1101,117 +1051,6 @@ public partial class MainWindow : Window
 
     private static FileStream OpenImageReadStream(string imagePath) =>
         File.Open(imagePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-
-    private static bool IsSvgPath(string imagePath) =>
-        string.Equals(Path.GetExtension(imagePath), ".svg", StringComparison.OrdinalIgnoreCase);
-
-    private static bool ShouldUseImageSharpPreviewPipeline(string imagePath)
-    {
-        var extension = Path.GetExtension(imagePath);
-        return !string.IsNullOrWhiteSpace(extension) && ImageSharpPreviewExtensions.Contains(extension);
-    }
-
-    private static DrawingGroup LoadSvgDrawing(string imagePath)
-    {
-        var settings = new WpfDrawingSettings
-        {
-            IncludeRuntime = false,
-            TextAsGeometry = false,
-            EnsureViewboxPosition = true,
-            EnsureViewboxSize = true
-        };
-
-        using var reader = new FileSvgReader(settings);
-        var drawing = reader.Read(imagePath);
-
-        if (drawing is null)
-        {
-            throw new InvalidOperationException(UnsupportedImageMessage);
-        }
-
-        if (drawing.CanFreeze)
-        {
-            drawing.Freeze();
-        }
-
-        return drawing;
-    }
-
-    private static Rect ResolveDrawingBounds(DrawingGroup drawing)
-    {
-        var bounds = drawing.Bounds;
-
-        if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
-        {
-            return new Rect(0, 0, 256, 256);
-        }
-
-        return bounds;
-    }
-
-    private static (int PixelWidth, int PixelHeight) ResolveSvgRenderSize(Rect bounds, int decodePixelWidth)
-    {
-        var width = Math.Max(1d, bounds.Width);
-        var height = Math.Max(1d, bounds.Height);
-
-        if (decodePixelWidth > 0)
-        {
-            var scale = Math.Min(decodePixelWidth / width, decodePixelWidth / height);
-
-            if (scale > 0)
-            {
-                width *= scale;
-                height *= scale;
-            }
-        }
-
-        return ((int)Math.Ceiling(width), (int)Math.Ceiling(height));
-    }
-
-    private static byte[] RenderDrawingToPngBytes(DrawingGroup drawing, Rect bounds, int pixelWidth, int pixelHeight)
-    {
-        var brush = new DrawingBrush(drawing)
-        {
-            AlignmentX = AlignmentX.Center,
-            AlignmentY = AlignmentY.Center,
-            Stretch = Stretch.Uniform,
-            ViewboxUnits = BrushMappingMode.Absolute,
-            Viewbox = bounds
-        };
-
-        if (brush.CanFreeze)
-        {
-            brush.Freeze();
-        }
-
-        var visual = new DrawingVisual();
-
-        using (var context = visual.RenderOpen())
-        {
-            context.DrawRectangle(System.Windows.Media.Brushes.Transparent, null, new Rect(0, 0, pixelWidth, pixelHeight));
-            context.DrawRectangle(brush, null, new Rect(0, 0, pixelWidth, pixelHeight));
-        }
-
-        var bitmap = new RenderTargetBitmap(pixelWidth, pixelHeight, 96, 96, PixelFormats.Pbgra32);
-        bitmap.Render(visual);
-
-        var encoder = new PngBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(bitmap));
-
-        using var stream = new MemoryStream();
-        encoder.Save(stream);
-        return stream.ToArray();
-    }
-
-    private static bool IsUnsupportedImageException(Exception exception) =>
-        exception is
-            NotSupportedException or
-            ArgumentException or
-            OutOfMemoryException or
-            System.Runtime.InteropServices.COMException or
-            System.Xml.XmlException or
-            UnknownImageFormatException or
-            InvalidImageContentException;
 
     private static readonly SolidColorBrush StatusSuccessBackgroundBrush =
         new(System.Windows.Media.Color.FromRgb(0x10, 0x2A, 0x22));

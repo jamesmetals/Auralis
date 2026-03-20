@@ -1,8 +1,10 @@
 using MelhorWindows.Application.Models;
 using Microsoft.Win32;
+using System.Runtime.Versioning;
 
 namespace MelhorWindows.Application.Services;
 
+[SupportedOSPlatform("windows")]
 public static class WindowsFeatureCatalog
 {
     public static IReadOnlyList<WindowsFeatureDefinition> DefaultFeatures { get; } =
