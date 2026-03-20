@@ -6,14 +6,14 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $installRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "MelhorWindows.lnk"
-$startMenuFolder = Join-Path ([Environment]::GetFolderPath("Programs")) "MelhorWindows"
-$startMenuShortcut = Join-Path $startMenuFolder "MelhorWindows.lnk"
-$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\MelhorWindows.ChangeFolderIcon"
-$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\MelhorWindows.ChangeFolderIcon"
-$uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\MelhorWindows"
+$desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "Auralis.lnk"
+$startMenuFolder = Join-Path ([Environment]::GetFolderPath("Programs")) "Auralis"
+$startMenuShortcut = Join-Path $startMenuFolder "Auralis.lnk"
+$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon"
+$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis.ChangeFolderIcon"
+$uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Auralis"
 
-Get-Process MelhorWindows.Desktop -ErrorAction SilentlyContinue | Where-Object {
+Get-Process Auralis -ErrorAction SilentlyContinue | Where-Object {
     $_.Path -and $_.Path -like "$installRoot*"
 } | Stop-Process -Force
 
@@ -34,5 +34,5 @@ Start-Process -FilePath "cmd.exe" -ArgumentList $cleanupCommand -WindowStyle Hid
 
 if (-not $Silent) {
     Add-Type -AssemblyName PresentationFramework
-    [System.Windows.MessageBox]::Show("MelhorWindows removido.", "MelhorWindows")
+    [System.Windows.MessageBox]::Show("Auralis removido.", "Auralis")
 }

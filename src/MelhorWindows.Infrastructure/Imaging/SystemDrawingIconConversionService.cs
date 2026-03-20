@@ -252,7 +252,7 @@ public sealed class SystemDrawingIconConversionService : IImageIconConversionSer
         });
 
         thread.IsBackground = true;
-        thread.Name = "MelhorWindows.ImageDecode";
+        thread.Name = "Auralis.ImageDecode";
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
 

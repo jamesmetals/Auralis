@@ -13,14 +13,14 @@ function Assert-Administrator {
     }
 }
 
-$packageName = "MelhorWindows.MelhorWindowsDesktop"
-$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\MelhorWindows.ChangeFolderIcon"
-$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\MelhorWindows.ChangeFolderIcon"
+$packageName = "Auralis.AuralisDesktop"
+$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon"
+$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis.ChangeFolderIcon"
 $certificateFile = Get-ChildItem $PSScriptRoot -Filter *.cer | Select-Object -First 1
 
 $installedPackage = Get-AppxPackage $packageName -ErrorAction SilentlyContinue
 if ($installedPackage) {
-    $executablePath = Join-Path $installedPackage.InstallLocation "MelhorWindows.Desktop.exe"
+    $executablePath = Join-Path $installedPackage.InstallLocation "Auralis.exe"
     if (Test-Path $executablePath) {
         Start-Process -FilePath $executablePath -ArgumentList "--unregister-folder-verb" -WindowStyle Hidden -Wait
     }
@@ -49,4 +49,4 @@ if ($RemoveCertificate -and $certificateFile) {
     }
 }
 
-Write-Output "MelhorWindows MSIX removed."
+Write-Output "Auralis MSIX removed."

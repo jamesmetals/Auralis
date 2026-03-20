@@ -7,8 +7,8 @@ namespace MelhorWindows.WindowsIntegration.Explorer;
 
 public sealed class ExplorerVerbRegistrationService(IAuthorizationService authorizationService) : IExplorerVerbRegistrationService
 {
-    private const string VerbName = "MelhorWindows.ChangeFolderIcon";
-    private const string VerbLabel = "Alterar icone com MelhorWindows";
+    private const string VerbName = "Auralis.ChangeFolderIcon";
+    private const string VerbLabel = "Trocar icone com Auralis";
 
     public Task RegisterFolderVerbAsync(string appExecutablePath, CancellationToken cancellationToken = default)
     {

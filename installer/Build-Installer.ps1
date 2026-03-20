@@ -14,13 +14,13 @@ $buildDirectory = Join-Path $installerRoot "build"
 $payloadStage = Join-Path $buildDirectory "payload"
 $packageStage = Join-Path $buildDirectory "package"
 $bootstrapperPublishDirectory = Join-Path $buildDirectory "bootstrapper"
-$payloadZip = Join-Path $packageStage "MelhorWindows.Payload.zip"
+$payloadZip = Join-Path $packageStage "Auralis.Payload.zip"
 $bootstrapperProject = Join-Path $installerRoot "MelhorWindows.SetupBootstrapper\MelhorWindows.SetupBootstrapper.csproj"
-$targetInstaller = Join-Path $outputDirectory "MelhorWindows-Setup.exe"
-$targetPayload = Join-Path $outputDirectory "MelhorWindows.Payload.zip"
-$targetInstallScript = Join-Path $outputDirectory "Install-MelhorWindows.ps1"
+$targetInstaller = Join-Path $outputDirectory "Auralis-Setup.exe"
+$targetPayload = Join-Path $outputDirectory "Auralis.Payload.zip"
+$targetInstallScript = Join-Path $outputDirectory "Install-Auralis.ps1"
 $bundleDirectory = Join-Path $buildDirectory "bundle"
-$bundleZip = Join-Path $outputDirectory "MelhorWindows-Installer.zip"
+$bundleZip = Join-Path $outputDirectory "Auralis-Installer.zip"
 
 if (!(Test-Path $publishDirectory)) {
     throw "Publish directory not found: $publishDirectory"
@@ -48,7 +48,7 @@ New-Item -ItemType Directory -Path $bundleDirectory -Force | Out-Null
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 Copy-Item -Path (Join-Path $publishDirectory "*") -Destination $payloadStage -Recurse -Force
-Copy-Item -Path (Join-Path $installerRoot "Uninstall-MelhorWindows.ps1") -Destination $payloadStage -Force
+Copy-Item -Path (Join-Path $installerRoot "Uninstall-MelhorWindows.ps1") -Destination (Join-Path $payloadStage "Uninstall-Auralis.ps1") -Force
 
 if (Test-Path $payloadZip) {
     Remove-Item -Path $payloadZip -Force
@@ -59,7 +59,7 @@ if (Test-Path $payloadZip) {
     $payloadZip,
     [System.IO.Compression.CompressionLevel]::Optimal,
     $false)
-Copy-Item -Path (Join-Path $installerRoot "Install-MelhorWindows.ps1") -Destination $packageStage -Force
+Copy-Item -Path (Join-Path $installerRoot "Install-MelhorWindows.ps1") -Destination (Join-Path $packageStage "Install-Auralis.ps1") -Force
 
 dotnet publish $bootstrapperProject `
     -c Release `
@@ -85,7 +85,7 @@ if (Test-Path $bundleZip) {
     Remove-Item -Path $bundleZip -Force
 }
 
-$publishedBootstrapper = Join-Path $bootstrapperPublishDirectory "MelhorWindows.SetupBootstrapper.exe"
+$publishedBootstrapper = Join-Path $bootstrapperPublishDirectory "Auralis.Setup.exe"
 if (!(Test-Path $publishedBootstrapper)) {
     throw "Bootstrapper was not generated: $publishedBootstrapper"
 }

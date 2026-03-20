@@ -3,6 +3,9 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <RootNamespace>MelhorWindows.Desktop</RootNamespace>
+    <AssemblyName>Auralis</AssemblyName>
+    <Product>Auralis</Product>
+    <Title>Auralis</Title>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
     <UseWPF>true</UseWPF>

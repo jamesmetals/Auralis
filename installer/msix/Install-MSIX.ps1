@@ -17,9 +17,9 @@ function Assert-Administrator {
 
 $packagePath = [System.IO.Path]::GetFullPath($PackagePath)
 $certificatePath = [System.IO.Path]::GetFullPath($CertificatePath)
-$packageName = "MelhorWindows.MelhorWindowsDesktop"
-$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\MelhorWindows.ChangeFolderIcon"
-$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\MelhorWindows.ChangeFolderIcon"
+$packageName = "Auralis.AuralisDesktop"
+$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon"
+$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis.ChangeFolderIcon"
 
 Assert-Administrator
 
@@ -56,7 +56,7 @@ if ($existingPackages) {
 Add-AppxPackage -Path $packagePath -ForceApplicationShutdown
 
 $installedPackage = Get-AppxPackage $packageName -ErrorAction Stop
-$executablePath = Join-Path $installedPackage.InstallLocation "MelhorWindows.Desktop.exe"
+$executablePath = Join-Path $installedPackage.InstallLocation "Auralis.exe"
 
 if (!(Test-Path $executablePath)) {
     throw "Installed executable not found: $executablePath"

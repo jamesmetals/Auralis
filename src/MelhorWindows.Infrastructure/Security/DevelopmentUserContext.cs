@@ -7,7 +7,9 @@ public sealed class DevelopmentUserContext : IUserContext
 {
     public DevelopmentUserContext()
     {
-        var configuredRoles = Environment.GetEnvironmentVariable("MELHORWINDOWS_ACTIVE_ROLES");
+        var configuredRoles =
+            Environment.GetEnvironmentVariable("AURALIS_ACTIVE_ROLES") ??
+            Environment.GetEnvironmentVariable("MELHORWINDOWS_ACTIVE_ROLES");
 
         RoleNames = string.IsNullOrWhiteSpace(configuredRoles)
             ? [BuiltInRoles.Admin]
@@ -23,4 +25,3 @@ public sealed class DevelopmentUserContext : IUserContext
 
     public IReadOnlyCollection<string> RoleNames { get; }
 }
-

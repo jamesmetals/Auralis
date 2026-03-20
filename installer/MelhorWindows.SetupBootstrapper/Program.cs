@@ -3,8 +3,8 @@ using System.Windows.Forms;
 
 var isSilent = args.Any(argument => string.Equals(argument, "--silent", StringComparison.OrdinalIgnoreCase));
 var baseDirectory = AppContext.BaseDirectory;
-var installScriptPath = Path.Combine(baseDirectory, "Install-MelhorWindows.ps1");
-var payloadPath = Path.Combine(baseDirectory, "MelhorWindows.Payload.zip");
+var installScriptPath = Path.Combine(baseDirectory, "Install-Auralis.ps1");
+var payloadPath = Path.Combine(baseDirectory, "Auralis.Payload.zip");
 
 if (!File.Exists(installScriptPath) || !File.Exists(payloadPath))
 {
@@ -30,7 +30,7 @@ try
     using var process = Process.Start(processStartInfo);
     if (process is null)
     {
-        ShowError("Nao foi possivel iniciar o instalador do MelhorWindows.", isSilent);
+        ShowError("Nao foi possivel iniciar o instalador do Auralis.", isSilent);
         return 1;
     }
 
@@ -48,8 +48,8 @@ try
     if (!isSilent)
     {
         MessageBox.Show(
-            "MelhorWindows instalado com sucesso.",
-            "MelhorWindows Setup",
+            "Auralis instalado com sucesso.",
+            "Auralis Setup",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
     }
@@ -71,7 +71,7 @@ static void ShowError(string message, bool isSilent)
 
     MessageBox.Show(
         message,
-        "MelhorWindows Setup",
+        "Auralis Setup",
         MessageBoxButtons.OK,
         MessageBoxIcon.Error);
 }

@@ -7,7 +7,7 @@ public sealed class AppDataPaths
         RootDirectory = rootDirectory ??
             Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "MelhorWindows");
+                "Auralis");
 
         IconCacheDirectory = Path.Combine(RootDirectory, "icons");
         PreviewCacheDirectory = Path.Combine(RootDirectory, "previews");

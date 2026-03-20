@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Auralis.Setup</AssemblyName>
+    <Product>Auralis</Product>
     <ApplicationIcon>..\..\src\MelhorWindows.Desktop\Assets\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
 

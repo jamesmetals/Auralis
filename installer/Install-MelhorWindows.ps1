@@ -1,5 +1,5 @@
 param(
-    [string]$InstallRoot = "$env:LOCALAPPDATA\Programs\MelhorWindows"
+    [string]$InstallRoot = "$env:LOCALAPPDATA\Programs\Auralis"
 )
 
 Set-StrictMode -Version Latest
@@ -33,7 +33,7 @@ function Register-FolderVerb {
 
     $directoryShellPath = "Software\Classes\Directory\shell"
     $folderShellPath = "Software\Classes\Folder\shell"
-    $verbName = "MelhorWindows.ChangeFolderIcon"
+    $verbName = "Auralis.ChangeFolderIcon"
     $commandValue = "`"$ExecutablePath`" `"%1`""
 
     $directoryShellKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($directoryShellPath, $true)
@@ -41,7 +41,7 @@ function Register-FolderVerb {
 
     [Microsoft.Win32.Registry]::CurrentUser.DeleteSubKeyTree("$folderShellPath\$verbName", $false)
 
-    $directoryVerbKey.SetValue("MUIVerb", "Alterar icone com MelhorWindows")
+    $directoryVerbKey.SetValue("MUIVerb", "Trocar icone com Auralis")
     $directoryVerbKey.SetValue("Icon", $ExecutablePath)
     $directoryVerbKey.SetValue("Position", "Top")
     $directoryVerbKey.SetValue("MultiSelectModel", "Single")
@@ -63,8 +63,8 @@ function Register-UninstallEntry {
         [string]$ExecutablePath
     )
 
-    $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\MelhorWindows"
-    $uninstallScript = Join-Path $InstallDirectory "Uninstall-MelhorWindows.ps1"
+    $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Auralis"
+    $uninstallScript = Join-Path $InstallDirectory "Uninstall-Auralis.ps1"
     $uninstallCommand = "powershell.exe -ExecutionPolicy Bypass -NoProfile -File `"$uninstallScript`""
 
     $displayVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($ExecutablePath).FileVersion
@@ -73,9 +73,9 @@ function Register-UninstallEntry {
     }
 
     $null = New-Item -Path $uninstallKey -Force
-    New-ItemProperty -Path $uninstallKey -Name "DisplayName" -Value "MelhorWindows" -PropertyType String -Force | Out-Null
+    New-ItemProperty -Path $uninstallKey -Name "DisplayName" -Value "Auralis" -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $uninstallKey -Name "DisplayVersion" -Value $displayVersion -PropertyType String -Force | Out-Null
-    New-ItemProperty -Path $uninstallKey -Name "Publisher" -Value "MelhorWindows" -PropertyType String -Force | Out-Null
+    New-ItemProperty -Path $uninstallKey -Name "Publisher" -Value "Auralis" -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $uninstallKey -Name "InstallLocation" -Value $InstallDirectory -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $uninstallKey -Name "DisplayIcon" -Value $ExecutablePath -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $uninstallKey -Name "UninstallString" -Value $uninstallCommand -PropertyType String -Force | Out-Null
@@ -94,19 +94,19 @@ function Refresh-Explorer {
 }
 
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
-$payloadZip = Join-Path $scriptDirectory "MelhorWindows.Payload.zip"
+$payloadZip = Join-Path $scriptDirectory "Auralis.Payload.zip"
 
 if (!(Test-Path $payloadZip)) {
     throw "Payload not found: $payloadZip"
 }
 
-$temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("MelhorWindows.Setup." + [guid]::NewGuid().ToString("N"))
+$temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("Auralis.Setup." + [guid]::NewGuid().ToString("N"))
 
 try {
     New-Item -ItemType Directory -Path $temporaryDirectory -Force | Out-Null
     Expand-Archive -Path $payloadZip -DestinationPath $temporaryDirectory -Force
 
-    $processes = Get-Process MelhorWindows.Desktop -ErrorAction SilentlyContinue | Where-Object {
+    $processes = Get-Process Auralis -ErrorAction SilentlyContinue | Where-Object {
         $_.Path -and $_.Path -like "$InstallRoot*"
     }
 
@@ -121,9 +121,9 @@ try {
     New-Item -ItemType Directory -Path $InstallRoot -Force | Out-Null
     Copy-Item -Path (Join-Path $temporaryDirectory "*") -Destination $InstallRoot -Recurse -Force
 
-    $executablePath = Join-Path $InstallRoot "MelhorWindows.Desktop.exe"
-    $desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "MelhorWindows.lnk"
-    $startMenuShortcut = Join-Path ([Environment]::GetFolderPath("Programs")) "MelhorWindows\MelhorWindows.lnk"
+    $executablePath = Join-Path $InstallRoot "Auralis.exe"
+    $desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "Auralis.lnk"
+    $startMenuShortcut = Join-Path ([Environment]::GetFolderPath("Programs")) "Auralis\Auralis.lnk"
 
     Register-FolderVerb -ExecutablePath $executablePath
     Register-UninstallEntry -InstallDirectory $InstallRoot -ExecutablePath $executablePath
@@ -131,7 +131,7 @@ try {
     New-Shortcut -ShortcutPath $startMenuShortcut -TargetPath $executablePath -WorkingDirectory $InstallRoot
     Refresh-Explorer
 
-    Write-Output "Installed MelhorWindows to $InstallRoot"
+    Write-Output "Installed Auralis to $InstallRoot"
 }
 finally {
     if (Test-Path $temporaryDirectory) {

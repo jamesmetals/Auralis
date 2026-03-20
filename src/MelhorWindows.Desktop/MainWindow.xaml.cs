@@ -861,7 +861,7 @@ public partial class MainWindow : Window
 
     private string EnsureBuiltInIconImage(BuiltInIconItem iconItem)
     {
-        var outputDirectory = Path.Combine(Path.GetTempPath(), "MelhorWindows", "LibraryIcons");
+        var outputDirectory = Path.Combine(Path.GetTempPath(), "Auralis", "LibraryIcons");
         Directory.CreateDirectory(outputDirectory);
 
         var outputPath = Path.Combine(outputDirectory, $"{iconItem.Id}.png");

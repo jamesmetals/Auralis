@@ -2,7 +2,7 @@
     x:Class="MelhorWindows.Desktop.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="MelhorWindows"
+    Title="Auralis"
     Width="980"
     Height="780"
     MinWidth="940"
@@ -528,7 +528,7 @@
                                     <StackPanel>
                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Explorer" />
                                         <TextBlock Margin="0,10,0,0" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Integracao com clique direito" />
-                                        <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="Registre ou remova o atalho do MelhorWindows no Explorer." TextWrapping="Wrap" />
+                                        <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedBrush}" Text="Registre ou remova o atalho do Auralis no Explorer." TextWrapping="Wrap" />
                                         <WrapPanel Margin="0,18,0,0">
                                             <Button Style="{StaticResource PrimaryButtonStyle}" Click="RegisterVerbButton_Click" Content="Registrar no Explorer" />
                                             <Button Margin="12,0,0,0" Click="UnregisterVerbButton_Click" Content="Remover do Explorer" />

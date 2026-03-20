@@ -1,9 +1,9 @@
 param(
     [string]$PublishDirectory = "$PSScriptRoot\..\..\publish\MelhorWindows.Desktop",
     [string]$OutputDirectory = "$PSScriptRoot\dist",
-    [string]$Publisher = "CN=MelhorWindows Dev",
-    [string]$PackageName = "MelhorWindows.MelhorWindowsDesktop",
-    [string]$CertificatePassword = "MelhorWindowsDev!"
+    [string]$Publisher = "CN=Auralis Dev",
+    [string]$PackageName = "Auralis.AuralisDesktop",
+    [string]$CertificatePassword = "AuralisDev!"
 )
 
 Set-StrictMode -Version Latest
@@ -103,21 +103,21 @@ $makeAppxPath = Get-WindowsKitToolPath -ToolName "makeappx.exe"
 $signToolPath = Get-WindowsKitToolPath -ToolName "signtool.exe"
 $dayOfYear = (Get-Date).DayOfYear.ToString("000")
 $version = "1.0.$((Get-Date).ToString('yy'))$dayOfYear.$((Get-Date).ToString('HHmm'))"
-$packageFileName = "MelhorWindows_${version}_x64.msix"
+$packageFileName = "Auralis_${version}_x64.msix"
 $packagePath = Join-Path $outputDirectory $packageFileName
-$certificateBaseName = "MelhorWindows.Dev"
+$certificateBaseName = "Auralis.Dev"
 $certificatePfxPath = Join-Path $certsDirectory "$certificateBaseName.pfx"
 $certificateCerPath = Join-Path $outputDirectory "$certificateBaseName.cer"
 $installScriptSource = Join-Path $msixRoot "Install-MSIX.ps1"
 $uninstallScriptSource = Join-Path $msixRoot "Uninstall-MSIX.ps1"
 $installCommandSource = Join-Path $msixRoot "Install-MSIX.cmd"
 $uninstallCommandSource = Join-Path $msixRoot "Uninstall-MSIX.cmd"
-$installScriptOutput = Join-Path $outputDirectory "Install-MelhorWindows-MSIX.ps1"
-$uninstallScriptOutput = Join-Path $outputDirectory "Uninstall-MelhorWindows-MSIX.ps1"
-$installCommandOutput = Join-Path $outputDirectory "Install-MelhorWindows-MSIX.cmd"
-$uninstallCommandOutput = Join-Path $outputDirectory "Uninstall-MelhorWindows-MSIX.cmd"
+$installScriptOutput = Join-Path $outputDirectory "Install-Auralis-MSIX.ps1"
+$uninstallScriptOutput = Join-Path $outputDirectory "Uninstall-Auralis-MSIX.ps1"
+$installCommandOutput = Join-Path $outputDirectory "Install-Auralis-MSIX.cmd"
+$uninstallCommandOutput = Join-Path $outputDirectory "Uninstall-Auralis-MSIX.cmd"
 $bundleDirectory = Join-Path $buildDirectory "bundle"
-$bundleZipPath = Join-Path $outputDirectory "MelhorWindows-MSIX.zip"
+$bundleZipPath = Join-Path $outputDirectory "Auralis-MSIX.zip"
 
 if (!(Test-Path $publishDirectory)) {
     throw "Publish directory not found: $publishDirectory"
@@ -164,8 +164,8 @@ $manifestContent = @"
   IgnorableNamespaces="uap uap10 desktop6 rescap">
   <Identity Name="$PackageName" Version="$version" Publisher="$Publisher" ProcessorArchitecture="x64" />
   <Properties>
-    <DisplayName>MelhorWindows</DisplayName>
-    <PublisherDisplayName>MelhorWindows</PublisherDisplayName>
+    <DisplayName>Auralis</DisplayName>
+    <PublisherDisplayName>Auralis</PublisherDisplayName>
     <Description>Hub de personalizacao, automacao e otimizacao do Windows.</Description>
     <Logo>Assets\StoreLogo.png</Logo>
     <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
@@ -182,12 +182,12 @@ $manifestContent = @"
   </Capabilities>
   <Applications>
     <Application
-      Id="MelhorWindowsDesktop"
-      Executable="MelhorWindows.Desktop.exe"
+      Id="AuralisDesktop"
+      Executable="Auralis.exe"
       uap10:RuntimeBehavior="packagedClassicApp"
       uap10:TrustLevel="mediumIL">
       <uap:VisualElements
-        DisplayName="MelhorWindows"
+        DisplayName="Auralis"
         Description="Hub de personalizacao, automacao e otimizacao do Windows."
         BackgroundColor="#0B1730"
         Square150x150Logo="Assets\Square150x150Logo.png"

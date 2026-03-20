@@ -1,4 +1,4 @@
-# MelhorWindows
+# Auralis
 
 Aplicativo Windows focado em personalizacao, automacao e operacoes controladas do sistema, com base nativa em .NET e autorizacao por RBAC.
 
@@ -65,19 +65,19 @@ powershell -ExecutionPolicy Bypass -File .\installer\Build-Installer.ps1
 Saida esperada:
 
 ```powershell
-.\installer\dist\MelhorWindows-Setup.exe
-.\installer\dist\MelhorWindows.Payload.zip
-.\installer\dist\Install-MelhorWindows.ps1
-.\installer\dist\MelhorWindows-Installer.zip
+.\installer\dist\Auralis-Setup.exe
+.\installer\dist\Auralis.Payload.zip
+.\installer\dist\Install-Auralis.ps1
+.\installer\dist\Auralis-Installer.zip
 ```
 
 Instalacao padrao:
 
-- `%LOCALAPPDATA%\Programs\MelhorWindows`
+- `%LOCALAPPDATA%\Programs\Auralis`
 - atalho na area de trabalho
 - atalho no menu Iniciar
-- registro do menu de contexto em `HKCU\Software\Classes\Directory\shell\MelhorWindows.ChangeFolderIcon`
-- bundle pronto para distribuicao em `.\installer\dist\MelhorWindows-Installer.zip`
+- registro do menu de contexto em `HKCU\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon`
+- bundle pronto para distribuicao em `.\installer\dist\Auralis-Installer.zip`
 
 ## MSIX
 
@@ -90,25 +90,25 @@ powershell -ExecutionPolicy Bypass -File .\installer\msix\Build-MSIX.ps1
 Arquivos gerados:
 
 ```powershell
-.\installer\msix\dist\MelhorWindows_*.msix
-.\installer\msix\dist\MelhorWindows.Dev.cer
-.\installer\msix\dist\Install-MelhorWindows-MSIX.ps1
-.\installer\msix\dist\Uninstall-MelhorWindows-MSIX.ps1
-.\installer\msix\dist\Install-MelhorWindows-MSIX.cmd
-.\installer\msix\dist\Uninstall-MelhorWindows-MSIX.cmd
-.\installer\msix\dist\MelhorWindows-MSIX.zip
+.\installer\msix\dist\Auralis_*.msix
+.\installer\msix\dist\Auralis.Dev.cer
+.\installer\msix\dist\Install-Auralis-MSIX.ps1
+.\installer\msix\dist\Uninstall-Auralis-MSIX.ps1
+.\installer\msix\dist\Install-Auralis-MSIX.cmd
+.\installer\msix\dist\Uninstall-Auralis-MSIX.cmd
+.\installer\msix\dist\Auralis-MSIX.zip
 ```
 
 Instalacao local do MSIX:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\installer\msix\dist\Install-MelhorWindows-MSIX.ps1
+powershell -ExecutionPolicy Bypass -File .\installer\msix\dist\Install-Auralis-MSIX.ps1
 ```
 
 Atalho mais pratico para instalar com elevacao:
 
 ```powershell
-.\installer\msix\dist\Install-MelhorWindows-MSIX.cmd
+.\installer\msix\dist\Install-Auralis-MSIX.cmd
 ```
 
 ## Execucao inicial
@@ -116,26 +116,26 @@ Atalho mais pratico para instalar com elevacao:
 O app pode receber o caminho da pasta como argumento:
 
 ```powershell
-MelhorWindows.Desktop.exe "C:\Caminho\Da\Pasta"
+Auralis.exe "C:\Caminho\Da\Pasta"
 ```
 
 Argumentos auxiliares:
 
 ```powershell
-MelhorWindows.Desktop.exe --register-folder-verb
-MelhorWindows.Desktop.exe --unregister-folder-verb
+Auralis.exe --register-folder-verb
+Auralis.exe --unregister-folder-verb
 ```
 
-BAT criado na area de trabalho:
+Launcher rapido na area de trabalho:
 
 ```powershell
-C:\Users\james\OneDrive\Área de Trabalho\MelhorWindows.bat
+C:\Users\james\OneDrive\Área de Trabalho\Auralis.bat
 ```
 
 Variavel util para desenvolvimento:
 
 ```powershell
-$env:MELHORWINDOWS_ACTIVE_ROLES = "admin"
+$env:AURALIS_ACTIVE_ROLES = "admin"
 ```
 
 ## Seguranca
