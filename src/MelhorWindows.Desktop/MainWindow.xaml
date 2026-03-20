@@ -245,18 +245,37 @@
                     </Grid>
                 </Border>
 
-                <Border
-                    x:Name="StatusBorder"
-                    Grid.Row="1"
-                    Margin="30,16,30,0"
-                    Padding="14,12"
-                    Background="#102A22"
-                    BorderBrush="#2A5946"
-                    BorderThickness="1"
-                    CornerRadius="14"
-                    Visibility="Collapsed">
-                    <TextBlock x:Name="StatusTextBlock" Foreground="#A5F4CB" TextWrapping="Wrap" />
-                </Border>
+                <StackPanel Grid.Row="1" Margin="30,16,30,0">
+                    <Border
+                        x:Name="StatusBorder"
+                        Padding="14,12"
+                        Background="#102A22"
+                        BorderBrush="#2A5946"
+                        BorderThickness="1"
+                        CornerRadius="14"
+                        Visibility="Collapsed">
+                        <TextBlock x:Name="StatusTextBlock" Foreground="#A5F4CB" TextWrapping="Wrap" />
+                    </Border>
+
+                    <Border
+                        x:Name="UpdateNoticeBorder"
+                        Margin="0,12,0,0"
+                        Padding="14,12"
+                        Background="#12254C"
+                        BorderBrush="#32569F"
+                        BorderThickness="1"
+                        CornerRadius="14"
+                        Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="UpdateNoticeTextBlock" Margin="0,0,14,0" Foreground="{StaticResource PrimaryBrush}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                            <Button Grid.Column="1" Click="OpenUpdateButton_Click" Content="Abrir GitHub" Style="{StaticResource PrimaryButtonStyle}" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
 
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" CanContentScroll="False">
                     <StackPanel x:Name="QuickChangeHost" Margin="24,18,24,14">
@@ -532,6 +551,7 @@
                                         <WrapPanel Margin="0,18,0,0">
                                             <Button Style="{StaticResource PrimaryButtonStyle}" Click="RegisterVerbButton_Click" Content="Registrar no Explorer" />
                                             <Button Margin="12,0,0,0" Click="UnregisterVerbButton_Click" Content="Remover do Explorer" />
+                                            <Button Margin="12,0,0,0" Click="CheckUpdatesButton_Click" Content="Verificar atualizacoes" />
                                         </WrapPanel>
                                     </StackPanel>
                                 </Border>

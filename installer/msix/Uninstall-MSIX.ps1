@@ -14,8 +14,10 @@ function Assert-Administrator {
 }
 
 $packageName = "Auralis.AuralisDesktop"
-$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon"
-$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis.ChangeFolderIcon"
+$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis"
+$legacyDirectoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon"
+$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis"
+$legacyFolderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis.ChangeFolderIcon"
 $certificateFile = Get-ChildItem $PSScriptRoot -Filter *.cer | Select-Object -First 1
 
 $installedPackage = Get-AppxPackage $packageName -ErrorAction SilentlyContinue
@@ -29,7 +31,9 @@ if ($installedPackage) {
 }
 
 Remove-Item -Path $directoryVerbKey -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path $legacyDirectoryVerbKey -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $folderVerbKey -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path $legacyFolderVerbKey -Recurse -Force -ErrorAction SilentlyContinue
 
 if ($RemoveCertificate -and $certificateFile) {
     Assert-Administrator

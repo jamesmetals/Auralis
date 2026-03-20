@@ -18,8 +18,10 @@ function Assert-Administrator {
 $packagePath = [System.IO.Path]::GetFullPath($PackagePath)
 $certificatePath = [System.IO.Path]::GetFullPath($CertificatePath)
 $packageName = "Auralis.AuralisDesktop"
-$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon"
-$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis.ChangeFolderIcon"
+$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis"
+$legacyDirectoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon"
+$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis"
+$legacyFolderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis.ChangeFolderIcon"
 
 Assert-Administrator
 
@@ -72,4 +74,10 @@ Write-Output "Installed location: $($installedPackage.InstallLocation)"
 Write-Output "Explorer verb key: $directoryVerbKey"
 if (Test-Path $folderVerbKey) {
     Write-Output "Warning: stale folder verb key still exists: $folderVerbKey"
+}
+if (Test-Path $legacyDirectoryVerbKey) {
+    Write-Output "Warning: stale legacy directory verb key still exists: $legacyDirectoryVerbKey"
+}
+if (Test-Path $legacyFolderVerbKey) {
+    Write-Output "Warning: stale legacy folder verb key still exists: $legacyFolderVerbKey"
 }

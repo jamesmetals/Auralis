@@ -9,8 +9,10 @@ $installRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "Auralis.lnk"
 $startMenuFolder = Join-Path ([Environment]::GetFolderPath("Programs")) "Auralis"
 $startMenuShortcut = Join-Path $startMenuFolder "Auralis.lnk"
-$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon"
-$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis.ChangeFolderIcon"
+$directoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis"
+$legacyDirectoryVerbKey = "HKCU:\Software\Classes\Directory\shell\Auralis.ChangeFolderIcon"
+$folderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis"
+$legacyFolderVerbKey = "HKCU:\Software\Classes\Folder\shell\Auralis.ChangeFolderIcon"
 $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Auralis"
 
 Get-Process Auralis -ErrorAction SilentlyContinue | Where-Object {
@@ -18,7 +20,9 @@ Get-Process Auralis -ErrorAction SilentlyContinue | Where-Object {
 } | Stop-Process -Force
 
 Remove-Item -Path $directoryVerbKey -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path $legacyDirectoryVerbKey -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $folderVerbKey -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path $legacyFolderVerbKey -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $uninstallKey -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $desktopShortcut -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $startMenuShortcut -Force -ErrorAction SilentlyContinue

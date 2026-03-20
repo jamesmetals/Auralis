@@ -33,24 +33,53 @@ function Register-FolderVerb {
 
     $directoryShellPath = "Software\Classes\Directory\shell"
     $folderShellPath = "Software\Classes\Folder\shell"
-    $verbName = "Auralis.ChangeFolderIcon"
-    $commandValue = "`"$ExecutablePath`" `"%1`""
+    $verbName = "Auralis"
+    $legacyVerbName = "Auralis.ChangeFolderIcon"
+    $changeIconCommandValue = "`"$ExecutablePath`" `"%1`""
+    $openDashboardCommandValue = "`"$ExecutablePath`""
+    $checkUpdatesCommandValue = "`"$ExecutablePath`" --check-updates"
 
     $directoryShellKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($directoryShellPath, $true)
     $directoryVerbKey = $directoryShellKey.CreateSubKey($verbName, $true)
 
     [Microsoft.Win32.Registry]::CurrentUser.DeleteSubKeyTree("$folderShellPath\$verbName", $false)
+    [Microsoft.Win32.Registry]::CurrentUser.DeleteSubKeyTree("$directoryShellPath\$legacyVerbName", $false)
+    [Microsoft.Win32.Registry]::CurrentUser.DeleteSubKeyTree("$folderShellPath\$legacyVerbName", $false)
 
-    $directoryVerbKey.SetValue("MUIVerb", "Trocar icone com Auralis")
+    $directoryVerbKey.SetValue("MUIVerb", "Auralis")
     $directoryVerbKey.SetValue("Icon", $ExecutablePath)
     $directoryVerbKey.SetValue("Position", "Top")
     $directoryVerbKey.SetValue("MultiSelectModel", "Single")
     $directoryVerbKey.SetValue("NeverDefault", "")
+    $directoryVerbKey.SetValue("SubCommands", "")
 
-    $commandKey = $directoryVerbKey.CreateSubKey("command", $true)
-    $commandKey.SetValue("", $commandValue)
+    $shellKey = $directoryVerbKey.CreateSubKey("shell", $true)
 
-    $commandKey.Dispose()
+    $changeIconKey = $shellKey.CreateSubKey("change-icon", $true)
+    $changeIconKey.SetValue("MUIVerb", "Trocar icone da pasta")
+    $changeIconKey.SetValue("Icon", $ExecutablePath)
+    $changeIconCommandKey = $changeIconKey.CreateSubKey("command", $true)
+    $changeIconCommandKey.SetValue("", $changeIconCommandValue)
+
+    $openDashboardKey = $shellKey.CreateSubKey("open-dashboard", $true)
+    $openDashboardKey.SetValue("MUIVerb", "Abrir painel do Auralis")
+    $openDashboardKey.SetValue("Icon", $ExecutablePath)
+    $openDashboardCommandKey = $openDashboardKey.CreateSubKey("command", $true)
+    $openDashboardCommandKey.SetValue("", $openDashboardCommandValue)
+
+    $checkUpdatesKey = $shellKey.CreateSubKey("check-updates", $true)
+    $checkUpdatesKey.SetValue("MUIVerb", "Verificar atualizacoes")
+    $checkUpdatesKey.SetValue("Icon", $ExecutablePath)
+    $checkUpdatesCommandKey = $checkUpdatesKey.CreateSubKey("command", $true)
+    $checkUpdatesCommandKey.SetValue("", $checkUpdatesCommandValue)
+
+    $changeIconCommandKey.Dispose()
+    $changeIconKey.Dispose()
+    $openDashboardCommandKey.Dispose()
+    $openDashboardKey.Dispose()
+    $checkUpdatesCommandKey.Dispose()
+    $checkUpdatesKey.Dispose()
+    $shellKey.Dispose()
     $directoryVerbKey.Dispose()
     $directoryShellKey.Dispose()
 }

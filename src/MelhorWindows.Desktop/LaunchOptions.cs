@@ -5,13 +5,15 @@ namespace MelhorWindows.Desktop;
 internal sealed record LaunchOptions(
     string? FolderPath,
     bool RegisterFolderVerb,
-    bool UnregisterFolderVerb)
+    bool UnregisterFolderVerb,
+    bool CheckForUpdates)
 {
     public static LaunchOptions Parse(string[] args)
     {
         string? folderPath = null;
         var registerFolderVerb = false;
         var unregisterFolderVerb = false;
+        var checkForUpdates = false;
 
         foreach (var rawArgument in args.Skip(1))
         {
@@ -30,9 +32,15 @@ internal sealed record LaunchOptions(
             if (string.Equals(rawArgument, "--unregister-folder-verb", StringComparison.OrdinalIgnoreCase))
             {
                 unregisterFolderVerb = true;
+                continue;
+            }
+
+            if (string.Equals(rawArgument, "--check-updates", StringComparison.OrdinalIgnoreCase))
+            {
+                checkForUpdates = true;
             }
         }
 
-        return new LaunchOptions(folderPath, registerFolderVerb, unregisterFolderVerb);
+        return new LaunchOptions(folderPath, registerFolderVerb, unregisterFolderVerb, checkForUpdates);
     }
 }

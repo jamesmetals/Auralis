@@ -3,6 +3,7 @@ using MelhorWindows.Application.Services;
 using MelhorWindows.Infrastructure.Imaging;
 using MelhorWindows.Infrastructure.Security;
 using MelhorWindows.Infrastructure.Storage;
+using MelhorWindows.Infrastructure.Updates;
 using MelhorWindows.WindowsIntegration.Explorer;
 using MelhorWindows.WindowsIntegration.Registry;
 
@@ -20,6 +21,7 @@ internal static class DesktopComposition
         var registryAuditRepository = new JsonRegistryAuditRepository(appDataPaths);
         var iconStorageService = new FileSystemIconStorageService(appDataPaths);
         var imageService = new SystemDrawingIconConversionService();
+        var appUpdateService = new GitHubAppUpdateService();
         var folderIconIntegrationService = new DesktopIniFolderIconIntegrationService();
         var registryInspectionService = new WindowsRegistryInspectionService();
         var folderIconWorkflowService = new FolderIconWorkflowService(
@@ -44,6 +46,7 @@ internal static class DesktopComposition
             protectedStateStore,
             historyRepository,
             registryAuditRepository,
+            appUpdateService,
             imageService,
             folderIconIntegrationService,
             folderIconWorkflowService,
@@ -60,6 +63,7 @@ internal sealed record DesktopServices(
     IProtectedStateStore ProtectedStateStore,
     IIconHistoryRepository IconHistoryRepository,
     IRegistryAuditRepository RegistryAuditRepository,
+    IAppUpdateService AppUpdateService,
     IImageIconConversionService ImageIconConversionService,
     IFolderIconIntegrationService FolderIconIntegrationService,
     FolderIconWorkflowService FolderIconWorkflowService,

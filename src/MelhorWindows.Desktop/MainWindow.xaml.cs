@@ -1,5 +1,6 @@
 using System.IO;
 using System.Globalization;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -33,6 +34,7 @@ public partial class MainWindow : Window
 
     private CancellationTokenSource? _previewGenerationCts;
     private int _busyOperations;
+    private AppUpdateInfo? _availableUpdate;
 
     public MainWindow()
     {
@@ -56,6 +58,9 @@ public partial class MainWindow : Window
             LoadBuiltInIconLibrary();
             UpdateSettingsVisibility();
             await LoadHistoryAsync();
+            await CheckForUpdatesAsync(
+                showNoUpdateMessage: _launchOptions.CheckForUpdates,
+                showErrors: _launchOptions.CheckForUpdates);
 
             if (CanManageWindowsFeatures())
             {
@@ -727,6 +732,11 @@ public partial class MainWindow : Window
         await LoadAuditAsync();
     }
 
+    private async void CheckUpdatesButton_Click(object sender, RoutedEventArgs e)
+    {
+        await CheckForUpdatesAsync(showNoUpdateMessage: true, showErrors: true);
+    }
+
     private async Task LoadHistoryAsync()
     {
         var entries = await _services.IconHistoryRepository.GetByUserIdAsync(_services.UserContext.UserId);
@@ -798,6 +808,68 @@ public partial class MainWindow : Window
 
     private bool CanManageWindowsFeatures() =>
         _services.AuthorizationService.HasPermission(DefaultPermissions.EditWindowsRegistry);
+
+    private async Task CheckForUpdatesAsync(bool showNoUpdateMessage, bool showErrors)
+    {
+        try
+        {
+            var updateInfo = await _services.AppUpdateService.CheckForUpdatesAsync();
+
+            if (updateInfo.IsUpdateAvailable)
+            {
+                ShowUpdateNotice(updateInfo);
+                SetStatus(
+                    $"Atualizacao disponivel no GitHub. Commit {updateInfo.LatestCommitShortSha} encontrado para o Auralis.",
+                    isError: false);
+                return;
+            }
+
+            HideUpdateNotice();
+
+            if (showNoUpdateMessage)
+            {
+                SetStatus(
+                    $"Auralis atualizado. Versao atual {updateInfo.CurrentVersionLabel}.",
+                    isError: false);
+            }
+        }
+        catch (Exception exception)
+        {
+            if (showErrors)
+            {
+                SetStatus($"Nao foi possivel verificar atualizacoes: {exception.Message}", isError: true);
+            }
+        }
+    }
+
+    private void ShowUpdateNotice(AppUpdateInfo updateInfo)
+    {
+        _availableUpdate = updateInfo;
+        UpdateNoticeTextBlock.Text =
+            $"Atualizacao disponivel. Atual: {updateInfo.CurrentVersionLabel} ({updateInfo.CurrentCommitShortSha}) • GitHub: {updateInfo.LatestCommitShortSha} em {updateInfo.LatestCommitDateUtc.ToLocalTime():dd/MM/yyyy HH:mm}.";
+        UpdateNoticeBorder.Visibility = Visibility.Visible;
+    }
+
+    private void HideUpdateNotice()
+    {
+        _availableUpdate = null;
+        UpdateNoticeTextBlock.Text = string.Empty;
+        UpdateNoticeBorder.Visibility = Visibility.Collapsed;
+    }
+
+    private void OpenUpdateButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_availableUpdate is null)
+        {
+            return;
+        }
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = _availableUpdate.LatestCommitUrl,
+            UseShellExecute = true
+        });
+    }
 
     private static string ResolveUserInitials(string userName)
     {
