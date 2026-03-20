@@ -15,3 +15,5 @@ packages/
 *.msix
 *.msixbundle
 [Dd]esktop.ini
+installer/build/
+installer/dist/

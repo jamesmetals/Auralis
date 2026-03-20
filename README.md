@@ -54,6 +54,31 @@ dotnet test MelhorWindows.sln -c Release --no-build
 dotnet publish src\MelhorWindows.Desktop\MelhorWindows.Desktop.csproj -c Release -r win-x64 --self-contained true -o publish\MelhorWindows.Desktop
 ```
 
+## Instalador
+
+Geracao do instalador local:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\installer\Build-Installer.ps1
+```
+
+Saida esperada:
+
+```powershell
+.\installer\dist\MelhorWindows-Setup.exe
+.\installer\dist\MelhorWindows.Payload.zip
+.\installer\dist\Install-MelhorWindows.ps1
+.\installer\dist\MelhorWindows-Installer.zip
+```
+
+Instalacao padrao:
+
+- `%LOCALAPPDATA%\Programs\MelhorWindows`
+- atalho na area de trabalho
+- atalho no menu Iniciar
+- registro do menu de contexto em `HKCU\Software\Classes\Directory\shell\MelhorWindows.ChangeFolderIcon`
+- bundle pronto para distribuicao em `.\installer\dist\MelhorWindows-Installer.zip`
+
 ## Execucao inicial
 
 O app pode receber o caminho da pasta como argumento:
