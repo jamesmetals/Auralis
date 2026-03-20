@@ -72,12 +72,3 @@ Get-Item $packagePath | Select-Object FullName, Length | Format-Table -AutoSize
 Write-Output "Installed package: $($installedPackage.PackageFullName)"
 Write-Output "Installed location: $($installedPackage.InstallLocation)"
 Write-Output "Explorer verb key: $directoryVerbKey"
-if (Test-Path $folderVerbKey) {
-    Write-Output "Warning: stale folder verb key still exists: $folderVerbKey"
-}
-if (Test-Path $legacyDirectoryVerbKey) {
-    Write-Output "Warning: stale legacy directory verb key still exists: $legacyDirectoryVerbKey"
-}
-if (Test-Path $legacyFolderVerbKey) {
-    Write-Output "Warning: stale legacy folder verb key still exists: $legacyFolderVerbKey"
-}

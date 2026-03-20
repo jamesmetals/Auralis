@@ -35,9 +35,7 @@ function Register-FolderVerb {
     $folderShellPath = "Software\Classes\Folder\shell"
     $verbName = "Auralis"
     $legacyVerbName = "Auralis.ChangeFolderIcon"
-    $changeIconCommandValue = "`"$ExecutablePath`" `"%1`""
-    $openDashboardCommandValue = "`"$ExecutablePath`""
-    $checkUpdatesCommandValue = "`"$ExecutablePath`" --check-updates"
+    $commandValue = "`"$ExecutablePath`" `"%1`""
 
     $directoryShellKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($directoryShellPath, $true)
     $directoryVerbKey = $directoryShellKey.CreateSubKey($verbName, $true)
@@ -51,35 +49,14 @@ function Register-FolderVerb {
     $directoryVerbKey.SetValue("Position", "Top")
     $directoryVerbKey.SetValue("MultiSelectModel", "Single")
     $directoryVerbKey.SetValue("NeverDefault", "")
-    $directoryVerbKey.SetValue("SubCommands", "")
+    $directoryVerbKey.SetValue("SeparatorBefore", "")
+    $directoryVerbKey.SetValue("SeparatorAfter", "")
+    $directoryVerbKey.DeleteSubKeyTree("shell", $false)
 
-    $shellKey = $directoryVerbKey.CreateSubKey("shell", $true)
+    $commandKey = $directoryVerbKey.CreateSubKey("command", $true)
+    $commandKey.SetValue("", $commandValue)
 
-    $changeIconKey = $shellKey.CreateSubKey("change-icon", $true)
-    $changeIconKey.SetValue("MUIVerb", "Trocar icone da pasta")
-    $changeIconKey.SetValue("Icon", $ExecutablePath)
-    $changeIconCommandKey = $changeIconKey.CreateSubKey("command", $true)
-    $changeIconCommandKey.SetValue("", $changeIconCommandValue)
-
-    $openDashboardKey = $shellKey.CreateSubKey("open-dashboard", $true)
-    $openDashboardKey.SetValue("MUIVerb", "Abrir painel do Auralis")
-    $openDashboardKey.SetValue("Icon", $ExecutablePath)
-    $openDashboardCommandKey = $openDashboardKey.CreateSubKey("command", $true)
-    $openDashboardCommandKey.SetValue("", $openDashboardCommandValue)
-
-    $checkUpdatesKey = $shellKey.CreateSubKey("check-updates", $true)
-    $checkUpdatesKey.SetValue("MUIVerb", "Verificar atualizacoes")
-    $checkUpdatesKey.SetValue("Icon", $ExecutablePath)
-    $checkUpdatesCommandKey = $checkUpdatesKey.CreateSubKey("command", $true)
-    $checkUpdatesCommandKey.SetValue("", $checkUpdatesCommandValue)
-
-    $changeIconCommandKey.Dispose()
-    $changeIconKey.Dispose()
-    $openDashboardCommandKey.Dispose()
-    $openDashboardKey.Dispose()
-    $checkUpdatesCommandKey.Dispose()
-    $checkUpdatesKey.Dispose()
-    $shellKey.Dispose()
+    $commandKey.Dispose()
     $directoryVerbKey.Dispose()
     $directoryShellKey.Dispose()
 }
