@@ -1,0 +1,17 @@
+bin/
+obj/
+.vs/
+.idea/
+.vscode/
+TestResults/
+artifacts/
+publish/
+packages/
+*.user
+*.suo
+*.nupkg
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+[Dd]esktop.ini

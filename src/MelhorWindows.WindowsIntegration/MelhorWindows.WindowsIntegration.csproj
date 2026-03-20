@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MelhorWindows.Application\MelhorWindows.Application.csproj" />
+    <ProjectReference Include="..\MelhorWindows.Domain\MelhorWindows.Domain.csproj" />
+  </ItemGroup>
+</Project>
+
