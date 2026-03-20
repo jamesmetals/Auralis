@@ -17,3 +17,6 @@ packages/
 [Dd]esktop.ini
 installer/build/
 installer/dist/
+installer/msix/build/
+installer/msix/dist/
+installer/msix/certs/

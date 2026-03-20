@@ -79,6 +79,38 @@ Instalacao padrao:
 - registro do menu de contexto em `HKCU\Software\Classes\Directory\shell\MelhorWindows.ChangeFolderIcon`
 - bundle pronto para distribuicao em `.\installer\dist\MelhorWindows-Installer.zip`
 
+## MSIX
+
+Geracao do pacote MSIX:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\installer\msix\Build-MSIX.ps1
+```
+
+Arquivos gerados:
+
+```powershell
+.\installer\msix\dist\MelhorWindows_*.msix
+.\installer\msix\dist\MelhorWindows.Dev.cer
+.\installer\msix\dist\Install-MelhorWindows-MSIX.ps1
+.\installer\msix\dist\Uninstall-MelhorWindows-MSIX.ps1
+.\installer\msix\dist\Install-MelhorWindows-MSIX.cmd
+.\installer\msix\dist\Uninstall-MelhorWindows-MSIX.cmd
+.\installer\msix\dist\MelhorWindows-MSIX.zip
+```
+
+Instalacao local do MSIX:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\installer\msix\dist\Install-MelhorWindows-MSIX.ps1
+```
+
+Atalho mais pratico para instalar com elevacao:
+
+```powershell
+.\installer\msix\dist\Install-MelhorWindows-MSIX.cmd
+```
+
 ## Execucao inicial
 
 O app pode receber o caminho da pasta como argumento:
