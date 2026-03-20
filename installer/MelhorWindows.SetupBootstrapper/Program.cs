@@ -48,7 +48,7 @@ try
     if (!isSilent)
     {
         MessageBox.Show(
-            "Auralis instalado com sucesso.",
+            BuildInstallationMessage(),
             "Auralis Setup",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
@@ -74,4 +74,39 @@ static void ShowError(string message, bool isSilent)
         "Auralis Setup",
         MessageBoxButtons.OK,
         MessageBoxIcon.Error);
+}
+
+static string BuildInstallationMessage()
+{
+    var installedExecutablePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "Programs",
+        "Auralis",
+        "Auralis.exe");
+
+    var version = GetVersionLabel(installedExecutablePath);
+
+    return string.Join(
+        Environment.NewLine,
+        [
+            "Auralis instalado com sucesso.",
+            string.Empty,
+            $"Versao {version}",
+            "Desenvolvido por James B."
+        ]);
+}
+
+static string GetVersionLabel(string executablePath)
+{
+    if (!File.Exists(executablePath))
+    {
+        return "1.0.0";
+    }
+
+    var versionInfo = FileVersionInfo.GetVersionInfo(executablePath);
+    var rawVersion = versionInfo.FileVersion;
+
+    return string.IsNullOrWhiteSpace(rawVersion)
+        ? "1.0.0"
+        : rawVersion;
 }
