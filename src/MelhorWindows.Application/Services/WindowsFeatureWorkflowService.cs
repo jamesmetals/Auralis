@@ -10,7 +10,9 @@ public sealed class WindowsFeatureWorkflowService(
     IAuthorizationService authorizationService,
     IRegistryEditingService registryEditingService,
     IRegistryInspectionService registryInspectionService,
-    IRegistryAuditRepository registryAuditRepository)
+    IRegistryAuditRepository registryAuditRepository,
+    IProtectedStateStore protectedStateStore,
+    IWindowsRestorePointService windowsRestorePointService)
 {
     public async Task<IReadOnlyList<WindowsFeatureState>> GetStatesAsync(CancellationToken cancellationToken = default)
     {
@@ -45,6 +47,25 @@ public sealed class WindowsFeatureWorkflowService(
         }
 
         var changes = enabled ? feature.EnableChanges : feature.DisableChanges;
+
+        var safetySettings = await protectedStateStore.LoadAsync<OptimizationSafetySettings>(
+                                 OptimizationStateKeys.SafetySettings,
+                                 cancellationToken) ??
+                             OptimizationSafetySettings.Default;
+
+        if (safetySettings.CreateRestorePointBeforeApply)
+        {
+            var restorePointResult = await windowsRestorePointService.CreateRestorePointAsync(
+                $"System changes - {feature.DisplayName}",
+                cancellationToken);
+
+            if (!restorePointResult.Succeeded)
+            {
+                return OperationResult<WindowsFeatureState>.Failure(
+                    $"Could not create a restore point: {restorePointResult.Message}");
+            }
+        }
+
         var auditEntries = await registryEditingService.ApplyChangesAsync(changes, cancellationToken);
         await registryAuditRepository.AddRangeAsync(auditEntries, cancellationToken);
 

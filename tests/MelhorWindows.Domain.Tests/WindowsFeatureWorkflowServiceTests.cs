@@ -19,7 +19,9 @@ public sealed class WindowsFeatureWorkflowServiceTests
             new AllowAllAuthorizationService(),
             registryEditingService,
             registryInspectionService,
-            registryAuditRepository);
+            registryAuditRepository,
+            new FakeProtectedStateStore(),
+            new FakeWindowsRestorePointService());
 
         var feature = WindowsFeatureCatalog.DefaultFeatures.First();
 
@@ -52,7 +54,9 @@ public sealed class WindowsFeatureWorkflowServiceTests
             new AllowAllAuthorizationService(),
             new FakeRegistryEditingService(),
             registryInspectionService,
-            new FakeRegistryAuditRepository());
+            new FakeRegistryAuditRepository(),
+            new FakeProtectedStateStore(),
+            new FakeWindowsRestorePointService());
 
         var states = await service.GetStatesAsync();
         var state = states.First(item => item.Id == feature.Id);
@@ -142,6 +146,44 @@ public sealed class WindowsFeatureWorkflowServiceTests
                 .ToArray();
 
             return Task.FromResult(entries);
+        }
+    }
+
+    private sealed class FakeProtectedStateStore : IProtectedStateStore
+    {
+        private readonly Dictionary<string, object?> _values = new(StringComparer.OrdinalIgnoreCase);
+
+        public Task SaveAsync<T>(string key, T value, CancellationToken cancellationToken = default)
+        {
+            _values[key] = value;
+            return Task.CompletedTask;
+        }
+
+        public Task<T?> LoadAsync<T>(string key, CancellationToken cancellationToken = default)
+        {
+            if (_values.TryGetValue(key, out var value) &&
+                value is T typedValue)
+            {
+                return Task.FromResult<T?>(typedValue);
+            }
+
+            return Task.FromResult<T?>(default);
+        }
+
+        public Task DeleteAsync(string key, CancellationToken cancellationToken = default)
+        {
+            _values.Remove(key);
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class FakeWindowsRestorePointService : IWindowsRestorePointService
+    {
+        public Task<OperationResult> CreateRestorePointAsync(
+            string description,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(OperationResult.Success(description));
         }
     }
 }

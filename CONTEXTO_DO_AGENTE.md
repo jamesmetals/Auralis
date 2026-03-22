@@ -1,12 +1,13 @@
 # CONTEXTO DO AGENTE - MelhorWindows
 
 ## Status atual
-- fase: app desktop compilando, testado e publicado localmente
-- proximo passo: implementar autenticacao/licenciamento remoto e crop visual por arrastar
+- fase: app desktop compilando e testado localmente, com dashboard expandido para o modulo JB GameBooster
+- proximo passo: aprofundar o GameBooster por game (comecando por Rust) e retomar autenticacao/licenciamento remoto
 
 ## Objetivo do produto
 - Aplicativo Windows para personalizar, facilitar e automatizar configuracoes e estilizacao do sistema.
 - Primeiro modulo: adicionar uma acao no menu de contexto de pastas para trocar o icone da pasta a partir de uma imagem escolhida pelo usuario.
+- Segundo modulo: oferecer um painel JB GameBooster dentro do dashboard para diagnostico inicial, otimizacoes gerais seguras e reversao controlada.
 - O fluxo deve permitir preview, crop ou ajuste quando a imagem nao for quadrada, conversao para `.ico` e salvamento do historico por usuario.
 
 ## Escopo inicial do primeiro modulo
@@ -21,12 +22,21 @@
 - restauracao do historico apos reinstalacao ou troca de maquina, se o usuario fizer login
 - painel inicial para habilitar e desabilitar features do Windows baseadas em Registry
 - trilha local de auditoria para mudancas sensiveis de Registry
+- menu do dashboard com entrada dedicada para o JB GameBooster
+- catalogo inicial de otimizacoes gerais para gaming com aplicacao por item ou em lote
+- opcao de criar ponto de restauracao antes de alteracoes de sistema
+- reversao da ultima sessao aplicada pelo JB GameBooster
+- configuracao de IA local no JB GameBooster via Ollama
+- analise local do snapshot do booster com modelo configuravel e recomendacoes em portugues
+- botao explicito para testar conexao com Ollama e sugerir `ollama pull` quando o modelo configurado estiver ausente
+- primeiro painel especifico de Rust com launch options sugeridos, comandos para `client.cfg` e analise local dedicada
 
 ## Stack recomendada
 - app desktop principal implementado: .NET 8 + WPF
 - integracao com Explorer: componente nativo para contexto de pasta + empacotamento MSIX ou sparse package
 - banco local: SQLite
 - servicos de imagem: biblioteca nativa para resize, crop e geracao de `.ico`
+- IA local atual: Ollama em `http://localhost:11434`, com modelo padrao `gemma3:4b`
 - backend remoto: API propria para autenticacao, licenciamento, sincronizacao e auditoria
 - alternativa se quiser UI web: Tauri + Rust, mantendo a integracao do Explorer em componente nativo separado
 
@@ -81,11 +91,15 @@
 - fluxo 2: usuario autenticado acessa historico proprio -> reaplica icones antigos
 - fluxo 3: admin gerencia usuarios, papeis, licencas e dispositivos
 - fluxo 4: admin ou papel autorizado habilita/desabilita feature de Windows -> app grava auditoria local da mudanca
+- fluxo 5: usuario abre o dashboard -> entra no JB GameBooster -> aplica recomendacoes gerais com restore point opcional e possibilidade de desfazer a ultima sessao
 
 ## Riscos e limitacoes
 - Integracao com o novo menu de contexto do Windows 11 exige abordagem nativa e, em cenarios modernos, package identity.
 - "Nao crackeavel" nao existe; o objetivo realista e elevar muito o custo da quebra e manter decisao critica de acesso no servidor.
 - Se o produto precisar operar offline por longos periodos, sera necessario desenhar uma politica de licenca offline com expiracao curta e revalidacao.
+- O JB GameBooster ainda esta na fase inicial e cobre apenas ajustes gerais e reversiveis via Registry; perfis por game, launch options e monitoramento continuo continuam em aberto.
+- A analise local depende do Ollama estar ativo e com pelo menos um modelo baixado; o app ja detecta indisponibilidade e modelos ausentes.
+- O modulo de Rust ainda esta em fase de recomendacao e analise; a automacao de escrita em `localconfig.vdf` e `client.cfg` ainda nao foi implementada.
 
 ## O que validar no scaffold inicial
 - abrir janela recebendo caminho de pasta como argumento

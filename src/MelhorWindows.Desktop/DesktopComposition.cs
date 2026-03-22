@@ -1,11 +1,13 @@
 using MelhorWindows.Application.Abstractions;
 using MelhorWindows.Application.Services;
+using MelhorWindows.Infrastructure.AI;
 using MelhorWindows.Infrastructure.Imaging;
 using MelhorWindows.Infrastructure.Security;
 using MelhorWindows.Infrastructure.Storage;
 using MelhorWindows.Infrastructure.Updates;
 using MelhorWindows.WindowsIntegration.Explorer;
 using MelhorWindows.WindowsIntegration.Registry;
+using MelhorWindows.WindowsIntegration.System;
 
 namespace MelhorWindows.Desktop;
 
@@ -24,6 +26,9 @@ internal static class DesktopComposition
         var appUpdateService = new GitHubAppUpdateService();
         var folderIconIntegrationService = new DesktopIniFolderIconIntegrationService();
         var registryInspectionService = new WindowsRegistryInspectionService();
+        var windowsRestorePointService = new PowerShellRestorePointService();
+        var localAiGameBoosterService = new OllamaLocalAiGameBoosterService();
+        var rustGameProfileService = new RustGameProfileService();
         var folderIconWorkflowService = new FolderIconWorkflowService(
             authorizationService,
             userContext,
@@ -37,7 +42,21 @@ internal static class DesktopComposition
             authorizationService,
             registryEditingService,
             registryInspectionService,
-            registryAuditRepository);
+            registryAuditRepository,
+            protectedStateStore,
+            windowsRestorePointService);
+        var gameBoosterWorkflowService = new GameBoosterWorkflowService(
+            authorizationService,
+            registryEditingService,
+            registryInspectionService,
+            registryAuditRepository,
+            protectedStateStore,
+            windowsRestorePointService);
+        var gameBoosterAiWorkflowService = new GameBoosterAiWorkflowService(
+            protectedStateStore,
+            localAiGameBoosterService,
+            gameBoosterWorkflowService,
+            rustGameProfileService);
 
         return new DesktopServices(
             appDataPaths,
@@ -52,7 +71,9 @@ internal static class DesktopComposition
             folderIconWorkflowService,
             explorerVerbRegistrationService,
             registryEditingService,
-            windowsFeatureWorkflowService);
+            windowsFeatureWorkflowService,
+            gameBoosterWorkflowService,
+            gameBoosterAiWorkflowService);
     }
 }
 
@@ -69,4 +90,6 @@ internal sealed record DesktopServices(
     FolderIconWorkflowService FolderIconWorkflowService,
     IExplorerVerbRegistrationService ExplorerVerbRegistrationService,
     IRegistryEditingService RegistryEditingService,
-    WindowsFeatureWorkflowService WindowsFeatureWorkflowService);
+    WindowsFeatureWorkflowService WindowsFeatureWorkflowService,
+    GameBoosterWorkflowService GameBoosterWorkflowService,
+    GameBoosterAiWorkflowService GameBoosterAiWorkflowService);

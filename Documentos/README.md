@@ -12,6 +12,13 @@ Aplicativo Windows focado em personalizacao, automacao e operacoes controladas d
 - servico generico para alteracoes de Registry com trilha de auditoria
 - catalogo inicial de features de Windows baseadas em Registry
 - painel desktop inicial para habilitar/desabilitar features e consultar auditoria local
+- dashboard com modulo JB GameBooster integrado ao menu lateral
+- catalogo inicial de otimizacoes gerais para gaming com aplicacao por item ou em lote
+- toggle opcional de ponto de restauracao antes de alteracoes de sistema
+- reversao da ultima sessao aplicada pelo JB GameBooster
+- analise local do JB GameBooster via Ollama, com endpoint e modelo configuraveis
+- teste explicito de conexao com Ollama, incluindo dica de `ollama pull` quando o modelo configurado nao estiver baixado
+- painel inicial de Rust com preset de launch options, comandos sugeridos de `client.cfg` e analise local dedicada
 - preview do resultado do icone antes de salvar, com corte manual por coordenadas
 - armazenamento protegido com DPAPI preparado para sessao e licenca local
 
@@ -22,6 +29,8 @@ Aplicativo Windows focado em personalizacao, automacao e operacoes controladas d
 - licenciamento e vinculo por dispositivo
 - crop visual por arrastar e ajuste fino mais amigavel
 - integracao empacotada para o menu moderno do Windows 11
+- tela dedicada por game no GameBooster (comecando por Rust)
+- diagnostico profundo, monitoramento em tempo real e automacao de launch options
 
 ## Arquitetura
 
@@ -137,6 +146,15 @@ Variavel util para desenvolvimento:
 ```powershell
 $env:AURALIS_ACTIVE_ROLES = "admin"
 ```
+
+Para usar a IA local no JB GameBooster:
+
+```powershell
+ollama serve
+ollama pull gemma3:4b
+```
+
+O dashboard assume por padrao o endpoint `http://localhost:11434` e o modelo `gemma3:4b`, mas ambos podem ser alterados na tela do modulo.
 
 ## Seguranca
 

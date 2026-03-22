@@ -694,6 +694,12 @@
                                 <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="Histórico" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="GameBoosterNavButton" Margin="0,8,0,0" Click="GameBoosterNavButton_Click" Style="{StaticResource NavButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Text="&#xE7FC;" />
+                                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="JB GameBooster" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="SettingsNavButton" Margin="0,8,0,0" Click="SettingsNavButton_Click" Style="{StaticResource NavButtonStyle}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Text="&#xE713;" />
@@ -742,6 +748,273 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <ScrollViewer x:Name="GameBoosterView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <Border Padding="18" Background="#071A31" CornerRadius="16">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Novo modulo" />
+                                        <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="22" FontWeight="Bold" Text="JB GameBooster" />
+                                        <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Base inicial do otimizador integrada ao dashboard atual. O fluxo rapido de icones continua separado e intacto." TextWrapping="Wrap" />
+                                        <WrapPanel Margin="0,14,0,0">
+                                            <Border Margin="0,0,10,10" Padding="12,10" Background="#0B2444" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Score atual" />
+                                                    <TextBlock x:Name="GameBoosterScoreTextBlock" Margin="0,6,0,0" FontFamily="Segoe UI Variable Display" FontSize="24" FontWeight="Bold" Text="0%" />
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Margin="0,0,10,10" Padding="12,10" Background="#0B2444" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Perfil sugerido" />
+                                                    <TextBlock x:Name="GameBoosterProfileTextBlock" Margin="0,6,0,0" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Modo normal" />
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Margin="0,0,10,10" Padding="12,10" Background="#0B2444" CornerRadius="14">
+                                                <StackPanel Width="220">
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Resumo" />
+                                                    <TextBlock x:Name="GameBoosterSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Text="Sem leitura ainda." TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </WrapPanel>
+                                        <WrapPanel Margin="0,10,0,0">
+                                            <Button x:Name="ApplyRecommendedGameBoosterButton" Click="ApplyRecommendedGameBoosterButton_Click" Content="Aplicar recomendadas" Style="{StaticResource PrimaryButtonStyle}" />
+                                            <Button x:Name="RevertGameBoosterSessionButton" Margin="10,0,0,0" Click="RevertGameBoosterSessionButton_Click" Content="Desfazer ultima sessao" />
+                                            <Button x:Name="RefreshGameBoosterButton" Margin="10,0,0,0" Click="RefreshGameBoosterButton_Click" Content="Atualizar leitura" />
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border x:Name="GameBoosterReadOnlyBorder" Margin="0,12,0,0" Padding="14" Background="#2E1C11" BorderBrush="#7E4D26" BorderThickness="1" CornerRadius="16" Visibility="Collapsed">
+                                    <TextBlock FontSize="12" Foreground="#F0C28D" Text="Seu perfil pode visualizar o JB GameBooster, mas os botoes de aplicacao ficam bloqueados sem permissao administrativa de registro." TextWrapping="Wrap" />
+                                </Border>
+
+                                <Border Margin="0,12,0,0" Padding="16" Background="#0B1A39" CornerRadius="16">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Seguranca" />
+                                        <CheckBox x:Name="GameBoosterRestorePointCheckBox" Margin="0,10,0,0" Checked="GameBoosterRestorePointCheckBox_Changed" Unchecked="GameBoosterRestorePointCheckBox_Changed" Content="Criar ponto de restauracao antes de aplicar alteracoes de sistema" />
+                                        <TextBlock x:Name="GameBoosterSafetyHintTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Essa preferencia vale para o JB GameBooster e para o painel administrativo do Windows." TextWrapping="Wrap" />
+                                        <TextBlock x:Name="GameBoosterLastSessionTextBlock" Margin="0,12,0,0" FontSize="12" Text="Nenhuma sessao registrada ainda." TextWrapping="Wrap" />
+                                        <TextBlock x:Name="GameBoosterRestorePointInfoTextBlock" Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Sem restore point recente." TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Margin="0,12,0,0" Padding="16" Background="#0B1A39" CornerRadius="16">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="IA local" />
+                                        <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Analise local com Ollama" />
+                                        <TextBlock x:Name="LocalAiStatusTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Aguardando leitura do Ollama local." TextWrapping="Wrap" />
+
+                                        <Grid Margin="0,14,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="12" />
+                                                <ColumnDefinition Width="240" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Endpoint local" />
+                                                <TextBox x:Name="LocalAiEndpointTextBox" Margin="0,8,0,0" Text="http://localhost:11434" />
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Modelo Ollama" />
+                                                <ComboBox x:Name="LocalAiModelComboBox" Margin="0,8,0,0" IsEditable="True" IsTextSearchEnabled="True" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <WrapPanel Margin="0,14,0,0">
+                                            <Button x:Name="TestLocalAiConnectionButton" Click="TestLocalAiConnectionButton_Click" Content="Testar conexao" />
+                                            <Button x:Name="SaveLocalAiSettingsButton" Margin="10,0,0,0" Click="SaveLocalAiSettingsButton_Click" Content="Salvar IA local" />
+                                            <Button x:Name="RunLocalAiAnalysisButton" Margin="10,0,0,0" Click="RunLocalAiAnalysisButton_Click" Content="Analisar com IA local" Style="{StaticResource PrimaryButtonStyle}" />
+                                        </WrapPanel>
+                                        <TextBlock x:Name="LocalAiCommandHintTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Se o modelo nao existir localmente, o app vai sugerir o comando `ollama pull`." TextWrapping="Wrap" />
+
+                                        <Border Margin="0,14,0,0" Padding="14" Background="#08162F" CornerRadius="14">
+                                            <StackPanel>
+                                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Leitura mais recente" />
+                                                <TextBlock x:Name="LocalAiAnalysisMetaTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma analise local salva ainda." TextWrapping="Wrap" />
+                                                <TextBlock x:Name="LocalAiAnalysisSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="Quando o Ollama estiver acessivel, a IA local vai resumir o estado atual do booster e sugerir a proxima melhor acao." TextWrapping="Wrap" />
+                                                <ItemsControl x:Name="LocalAiRecommendationItemsControl" Margin="0,12,0,0">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Margin="0,0,0,10" Padding="12" Background="#0D2346" CornerRadius="12">
+                                                                <StackPanel>
+                                                                    <WrapPanel>
+                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#173765" CornerRadius="10">
+                                                                            <TextBlock FontSize="10" Foreground="{StaticResource PrimaryBrush}" Text="{Binding Priority}" />
+                                                                        </Border>
+                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#30405E" CornerRadius="10">
+                                                                            <TextBlock FontSize="10" Foreground="White" Text="{Binding RelatedOptimizationText}" />
+                                                                        </Border>
+                                                                    </WrapPanel>
+                                                                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
+                                                                    <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Reason}" TextWrapping="Wrap" />
+                                                                    <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding SuggestedAction}" TextWrapping="Wrap" />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Margin="0,12,0,0" Padding="16" Background="#0B1A39" CornerRadius="16">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Perfis" />
+                                        <WrapPanel Margin="0,12,0,0">
+                                            <Border Width="160" Margin="0,0,10,10" Padding="12" Background="#0A2148" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="Performance maxima" />
+                                                    <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Reservado para fases futuras com automacao mais agressiva." TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Width="160" Margin="0,0,10,10" Padding="12" Background="#0A2148" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="Balanceado" />
+                                                    <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Estado inicial entregue agora: ajustes seguros e reversiveis." TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Width="160" Margin="0,0,10,10" Padding="12" Background="#0A2148" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="Custom" />
+                                                    <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Aplicacao por item direto na lista abaixo." TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Width="160" Margin="0,0,10,10" Padding="12" Background="#0A2148" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="Modo normal" />
+                                                    <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Desfaz a ultima sessao aplicada pelo modulo." TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Margin="0,12,0,0" Padding="16" Background="#0B1A39" CornerRadius="16">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Games" />
+                                        <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Rust" />
+                                        <TextBlock x:Name="RustModuleSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Carregando perfil local de Rust..." TextWrapping="Wrap" />
+
+                                        <WrapPanel Margin="0,12,0,0">
+                                            <Border Margin="0,0,10,10" Padding="12,10" Background="#0A2148" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="CPU" />
+                                                    <TextBlock x:Name="RustCpuTextBlock" Margin="0,6,0,0" Width="230" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Margin="0,0,10,10" Padding="12,10" Background="#0A2148" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Memoria" />
+                                                    <TextBlock x:Name="RustMemoryTextBlock" Margin="0,6,0,0" FontSize="16" FontWeight="Bold" />
+                                                    <TextBlock x:Name="RustPriorityHintTextBlock" Margin="0,6,0,0" Width="220" FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </WrapPanel>
+
+                                        <Grid Margin="0,10,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="12" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0" Padding="14" Background="#08162F" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Launch options sugeridos" />
+                                                    <TextBox x:Name="RustLaunchOptionsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="92" />
+                                                    <TextBlock x:Name="RustSteamPathTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Border Grid.Column="2" Padding="14" Background="#08162F" CornerRadius="14">
+                                                <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="client.cfg sugerido" />
+                                                    <TextBox x:Name="RustClientCommandsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="92" />
+                                                    <TextBlock x:Name="RustConfigPathTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+
+                                        <Border Margin="0,12,0,0" Padding="14" Background="#08162F" CornerRadius="14">
+                                            <StackPanel>
+                                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="IA local para Rust" />
+                                                <WrapPanel Margin="0,10,0,0">
+                                                    <Button x:Name="RunRustLocalAiAnalysisButton" Click="RunRustLocalAiAnalysisButton_Click" Content="Analisar Rust com IA local" Style="{StaticResource PrimaryButtonStyle}" />
+                                                </WrapPanel>
+                                                <TextBlock x:Name="RustAiAnalysisMetaTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma analise local de Rust salva ainda." TextWrapping="Wrap" />
+                                                <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="A IA local vai revisar o launch profile atual e sugerir refinamentos para Rust." TextWrapping="Wrap" />
+                                                <ItemsControl x:Name="RustAiRecommendationItemsControl" Margin="0,12,0,0">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Margin="0,0,0,10" Padding="12" Background="#0D2346" CornerRadius="12">
+                                                                <StackPanel>
+                                                                    <WrapPanel>
+                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#173765" CornerRadius="10">
+                                                                            <TextBlock FontSize="10" Foreground="{StaticResource PrimaryBrush}" Text="{Binding Priority}" />
+                                                                        </Border>
+                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#30405E" CornerRadius="10">
+                                                                            <TextBlock FontSize="10" Foreground="White" Text="{Binding RelatedOptimizationText}" />
+                                                                        </Border>
+                                                                    </WrapPanel>
+                                                                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
+                                                                    <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Reason}" TextWrapping="Wrap" />
+                                                                    <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding SuggestedAction}" TextWrapping="Wrap" />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Margin="0,12,0,0" Padding="16" Background="#0B1A39" CornerRadius="16">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Otimizacoes iniciais" />
+                                        <ItemsControl x:Name="GameBoosterOptimizationItemsControl" Margin="0,12,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,0,12" Padding="14" Background="#08162F" CornerRadius="14">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel>
+                                                                <WrapPanel>
+                                                                    <Border Margin="0,0,8,8" Padding="8,3" Background="#173765" CornerRadius="10">
+                                                                        <TextBlock FontSize="10" Foreground="{StaticResource PrimaryBrush}" Text="{Binding Category}" />
+                                                                    </Border>
+                                                                    <Border Margin="0,0,8,8" Padding="8,3" Background="{Binding StatusBrush}" CornerRadius="10">
+                                                                        <TextBlock FontSize="10" Foreground="White" Text="{Binding StatusText}" />
+                                                                    </Border>
+                                                                    <Border Margin="0,0,8,8" Padding="8,3" Background="#30405E" CornerRadius="10">
+                                                                        <TextBlock FontSize="10" Foreground="White" Text="{Binding ImpactText}" />
+                                                                    </Border>
+                                                                    <Border Margin="0,0,8,8" Padding="8,3" Background="#564127" CornerRadius="10">
+                                                                        <TextBlock FontSize="10" Foreground="White" Text="{Binding RiskText}" />
+                                                                    </Border>
+                                                                </WrapPanel>
+                                                                <TextBlock Margin="0,2,0,0" FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="{Binding Title}" />
+                                                                <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
+                                                                <TextBlock Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
+                                                                <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
+                                                                <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding RestartText}" TextWrapping="Wrap" />
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Top" Tag="{Binding Id}" Click="ApplyGameBoosterOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
                         </ScrollViewer>
 

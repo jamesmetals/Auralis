@@ -11,7 +11,8 @@ function New-Shortcut {
         [string]$ShortcutPath,
         [Parameter(Mandatory = $true)]
         [string]$TargetPath,
-        [string]$WorkingDirectory
+        [string]$WorkingDirectory,
+        [string]$Arguments
     )
 
     $shortcutDirectory = Split-Path -Parent $ShortcutPath
@@ -21,6 +22,7 @@ function New-Shortcut {
     $shortcut = $shell.CreateShortcut($ShortcutPath)
     $shortcut.TargetPath = $TargetPath
     $shortcut.WorkingDirectory = $WorkingDirectory
+    $shortcut.Arguments = $Arguments
     $shortcut.IconLocation = $TargetPath
     $shortcut.Save()
 }
@@ -131,11 +133,12 @@ try {
     $executablePath = Join-Path $InstallRoot "Auralis.exe"
     $desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "Auralis.lnk"
     $startMenuShortcut = Join-Path ([Environment]::GetFolderPath("Programs")) "Auralis\Auralis.lnk"
+    $dashboardArguments = "--open-dashboard"
 
     Register-FolderVerb -ExecutablePath $executablePath
     Register-UninstallEntry -InstallDirectory $InstallRoot -ExecutablePath $executablePath
-    New-Shortcut -ShortcutPath $desktopShortcut -TargetPath $executablePath -WorkingDirectory $InstallRoot
-    New-Shortcut -ShortcutPath $startMenuShortcut -TargetPath $executablePath -WorkingDirectory $InstallRoot
+    New-Shortcut -ShortcutPath $desktopShortcut -TargetPath $executablePath -WorkingDirectory $InstallRoot -Arguments $dashboardArguments
+    New-Shortcut -ShortcutPath $startMenuShortcut -TargetPath $executablePath -WorkingDirectory $InstallRoot -Arguments $dashboardArguments
     Refresh-Explorer
 
     Write-Output "Installed Auralis to $InstallRoot"

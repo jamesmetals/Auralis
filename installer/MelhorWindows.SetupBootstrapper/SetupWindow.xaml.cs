@@ -87,7 +87,7 @@ public partial class SetupWindow : Window
 
         if (File.Exists(exePath))
         {
-            Process.Start(new ProcessStartInfo(exePath) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(exePath, "--open-dashboard") { UseShellExecute = true });
         }
 
         Close();
@@ -247,12 +247,13 @@ public partial class SetupWindow : Window
             Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Auralis.lnk");
         var startMenu = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Auralis", "Auralis.lnk");
+        const string launchArguments = "--open-dashboard";
 
-        CreateShortcut(desktop, exePath, InstallRoot);
-        CreateShortcut(startMenu, exePath, InstallRoot);
+        CreateShortcut(desktop, exePath, InstallRoot, launchArguments);
+        CreateShortcut(startMenu, exePath, InstallRoot, launchArguments);
     }
 
-    private static void CreateShortcut(string shortcutPath, string targetPath, string workingDir)
+    private static void CreateShortcut(string shortcutPath, string targetPath, string workingDir, string? arguments = null)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(shortcutPath)!);
 
@@ -263,6 +264,7 @@ public partial class SetupWindow : Window
         dynamic shortcut = shell.CreateShortcut(shortcutPath);
         shortcut.TargetPath = targetPath;
         shortcut.WorkingDirectory = workingDir;
+        shortcut.Arguments = arguments ?? string.Empty;
         shortcut.IconLocation = targetPath;
         shortcut.Save();
     }

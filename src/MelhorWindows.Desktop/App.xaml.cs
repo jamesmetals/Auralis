@@ -10,6 +10,7 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        ShortcutMigration.EnsureDashboardShortcuts();
 
         SplashWindow? splashWindow = null;
 
