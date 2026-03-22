@@ -1,0 +1,307 @@
+<Window
+    x:Class="Auralis.Setup.SetupWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Auralis Setup"
+    Width="700" Height="440"
+    ResizeMode="NoResize"
+    WindowStyle="None"
+    AllowsTransparency="True"
+    Background="Transparent"
+    WindowStartupLocation="CenterScreen"
+    MouseDown="OnWindowMouseDown">
+
+    <Window.Resources>
+
+        <!-- Primary action button -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="MinWidth" Value="130"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#1F4FBE" Offset="0"/>
+                                    <GradientStop Color="#153599" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#2A60D6" Offset="0"/>
+                                            <GradientStop Color="#1A45B0" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.82"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.35"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Text link button -->
+        <Style x:Key="LinkButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#5A7099"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock x:Name="Tb"
+                                   Text="{TemplateBinding Content}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   FontSize="{TemplateBinding FontSize}"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Tb" Property="Foreground" Value="#8099BB"/>
+                                <Setter TargetName="Tb" Property="TextDecorations" Value="Underline"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Progress bar -->
+        <Style x:Key="SetupProgressBar" TargetType="ProgressBar">
+            <Setter Property="Height" Value="6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Border CornerRadius="3" Background="#0D1E40">
+                            <Border x:Name="PART_Track">
+                                <Border x:Name="PART_Indicator" CornerRadius="3" HorizontalAlignment="Left">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#1F4FBE" Offset="0"/>
+                                            <GradientStop Color="#4A90E2" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                            </Border>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <!-- Root grid: outer shadow + inner clipped content -->
+    <Grid>
+        <!-- Shadow layer (not clipped, so the shadow bleeds outside) -->
+        <Border CornerRadius="12" Margin="14">
+            <Border.Background>
+                <SolidColorBrush Color="#060E20"/>
+            </Border.Background>
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="0" Opacity="0.75"/>
+            </Border.Effect>
+        </Border>
+
+        <!-- Content layer (clipped to rounded corners) -->
+        <Border CornerRadius="12" Margin="14" ClipToBounds="True">
+            <Border.Background>
+                <SolidColorBrush Color="#060E20"/>
+            </Border.Background>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="248"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- ===== LEFT PANEL: BRANDING ===== -->
+                <Border Grid.Column="0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#040A16" Offset="0"/>
+                            <GradientStop Color="#050D1E" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+
+                    <StackPanel Margin="28,0,20,0" VerticalAlignment="Center">
+
+                        <!-- App icon badge -->
+                        <Border Width="58" Height="58" CornerRadius="14" Margin="0,0,0,18"
+                                HorizontalAlignment="Left">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#152B6E" Offset="0"/>
+                                    <GradientStop Color="#0C1A44" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Image Source="Assets/AppIcon.ico" Width="32" Height="32"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Text="Auralis" FontSize="22" FontWeight="Bold"
+                                   Foreground="White" Margin="0,0,0,3"/>
+                        <TextBlock Text="System Studio" FontSize="11" Foreground="#516A8A"
+                                   Margin="0,0,0,22"/>
+
+                        <TextBlock FontSize="12" Foreground="#607A95" TextWrapping="Wrap"
+                                   LineHeight="18" Margin="0,0,0,26">
+                            Personalização avançada<LineBreak/>do Windows sem complicação.
+                        </TextBlock>
+
+                        <!-- Feature chips -->
+                        <StackPanel>
+                            <Border CornerRadius="4" Padding="10,5" HorizontalAlignment="Left"
+                                    Background="#0B1B38" Margin="0,0,0,7">
+                                <TextBlock Text="Ícones personalizados" FontSize="11" Foreground="#4A7CC9"/>
+                            </Border>
+                            <Border CornerRadius="4" Padding="10,5" HorizontalAlignment="Left"
+                                    Background="#0B1B38" Margin="0,0,0,7">
+                                <TextBlock Text="Integração com Explorer" FontSize="11" Foreground="#4A7CC9"/>
+                            </Border>
+                            <Border CornerRadius="4" Padding="10,5" HorizontalAlignment="Left"
+                                    Background="#0B1B38">
+                                <TextBlock Text="Galeria de ícones" FontSize="11" Foreground="#4A7CC9"/>
+                            </Border>
+                        </StackPanel>
+
+                    </StackPanel>
+                </Border>
+
+                <!-- Separator -->
+                <Rectangle Grid.Column="0" Width="1" HorizontalAlignment="Right"
+                           Fill="#0D1E40" VerticalAlignment="Stretch"/>
+
+                <!-- ===== RIGHT PANEL: CONTENT ===== -->
+                <Grid Grid.Column="1">
+
+                    <!-- Custom close button -->
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="0,10,12,0" Width="28" Height="28"
+                            Cursor="Hand" Click="OnCloseClicked">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" CornerRadius="6" Background="Transparent">
+                                    <TextBlock Text="✕" FontSize="11" Foreground="#3E5570"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#111E38"/>
+                                        <Setter TargetName="Bd" Property="TextElement.Foreground" Value="#7090BB"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <!-- ── WELCOME PANEL ── -->
+                    <StackPanel x:Name="WelcomePanel" Margin="42,0,36,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="WelcomeTitleText"
+                                   FontSize="20" FontWeight="SemiBold" Foreground="White"
+                                   Margin="0,0,0,10"/>
+                        <TextBlock x:Name="WelcomeVersionText"
+                                   FontSize="12" Foreground="#7A93BB" Margin="0,0,0,4"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock x:Name="WelcomeLocationText"
+                                   FontSize="11" Foreground="#3A5070" Margin="0,0,0,32"
+                                   TextWrapping="Wrap"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="InstallButton"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Click="OnInstallClicked"/>
+                            <Button Content="Cancelar"
+                                    Style="{StaticResource LinkButton}"
+                                    Margin="18,0,0,0" VerticalAlignment="Center"
+                                    Click="OnCloseClicked"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- ── INSTALLING PANEL ── -->
+                    <StackPanel x:Name="InstallingPanel" Visibility="Collapsed"
+                                Margin="42,0,36,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="InstallingTitleText" Text="Instalando Auralis..."
+                                   FontSize="20" FontWeight="SemiBold" Foreground="White"
+                                   Margin="0,0,0,10"/>
+                        <TextBlock x:Name="InstallStatusText"
+                                   Text="Preparando..." FontSize="12" Foreground="#7A93BB"
+                                   Margin="0,0,0,22"/>
+                        <ProgressBar x:Name="InstallProgressBar"
+                                     Style="{StaticResource SetupProgressBar}"
+                                     Minimum="0" Maximum="100" Value="0"/>
+                        <TextBlock x:Name="InstallPercentText"
+                                   FontSize="11" Foreground="#3A5070" Margin="0,8,0,0"
+                                   HorizontalAlignment="Right"/>
+                    </StackPanel>
+
+                    <!-- ── COMPLETE PANEL ── -->
+                    <StackPanel x:Name="CompletePanel" Visibility="Collapsed"
+                                Margin="42,0,36,0" VerticalAlignment="Center">
+                        <Border Width="46" Height="46" CornerRadius="23" Margin="0,0,0,18"
+                                HorizontalAlignment="Left" Background="#0D2D14">
+                            <TextBlock Text="✓" FontSize="20" FontWeight="Bold"
+                                       Foreground="#3ED27A"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Instalado com sucesso!"
+                                   FontSize="20" FontWeight="SemiBold" Foreground="White"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock x:Name="CompleteVersionText"
+                                   FontSize="12" Foreground="#7A93BB" Margin="0,0,0,30"
+                                   TextWrapping="Wrap"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Abrir Auralis"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Click="OnLaunchClicked"/>
+                            <Button Content="Fechar"
+                                    Style="{StaticResource LinkButton}"
+                                    Margin="18,0,0,0" VerticalAlignment="Center"
+                                    Click="OnCloseClicked"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- ── ERROR PANEL ── -->
+                    <StackPanel x:Name="ErrorPanel" Visibility="Collapsed"
+                                Margin="42,0,36,0" VerticalAlignment="Center">
+                        <Border Width="46" Height="46" CornerRadius="23" Margin="0,0,0,18"
+                                HorizontalAlignment="Left" Background="#2D0E0E">
+                            <TextBlock Text="✕" FontSize="18" FontWeight="Bold"
+                                       Foreground="#E04040"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Falha na instalação"
+                                   FontSize="20" FontWeight="SemiBold" Foreground="White"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock x:Name="ErrorMessageText"
+                                   FontSize="11" Foreground="#8899BB" TextWrapping="Wrap"
+                                   MaxHeight="90" Margin="0,0,0,28"/>
+                        <Button Content="Fechar"
+                                Style="{StaticResource PrimaryButton}"
+                                HorizontalAlignment="Left"
+                                Click="OnCloseClicked"/>
+                    </StackPanel>
+
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

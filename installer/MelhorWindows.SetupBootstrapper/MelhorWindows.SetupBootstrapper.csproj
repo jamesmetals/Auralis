@@ -4,13 +4,13 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
+    <UseWpf>true</UseWpf>
     <AssemblyName>Auralis.Setup</AssemblyName>
     <Product>Auralis</Product>
     <ApplicationIcon>..\..\src\MelhorWindows.Desktop\Assets\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\src\MelhorWindows.Desktop\Assets\AppIcon.ico" Link="Assets\AppIcon.ico" />
+    <Resource Include="..\..\src\MelhorWindows.Desktop\Assets\AppIcon.ico" Link="Assets/AppIcon.ico" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Text;
 using MelhorWindows.Application.Abstractions;
 using MelhorWindows.Application.Models;
 using MelhorWindows.Application.Services;
@@ -46,19 +47,18 @@ public sealed class FolderIconWorkflowIntegrationTests
                     new CropSelection(40, 0, 180, 180)));
 
             var desktopIniPath = Path.Combine(folderPath, "desktop.ini");
-            var folderIconPath = Path.Combine(folderPath, "melhorwindows-folder-icon.ico");
+            var folderIconPath = Directory.GetFiles(folderPath, "auralis-folder-icon-*.ico").Single();
 
             Assert.True(result.Succeeded);
             Assert.True(File.Exists(desktopIniPath));
             Assert.True(File.Exists(folderIconPath));
             var desktopIniText = await File.ReadAllTextAsync(desktopIniPath);
-            Assert.Contains(@"IconResource=melhorwindows-folder-icon.ico,0", desktopIniText);
-            Assert.Contains(@"IconFile=melhorwindows-folder-icon.ico", desktopIniText);
+            Assert.Contains($"IconResource=.\\{Path.GetFileName(folderIconPath)},0", desktopIniText);
             Assert.True(new FileInfo(folderIconPath).Length > 0);
 
             var folderAttributes = File.GetAttributes(folderPath);
             Assert.True(folderAttributes.HasFlag(FileAttributes.ReadOnly));
-            Assert.False(folderAttributes.HasFlag(FileAttributes.System));
+            Assert.True(folderAttributes.HasFlag(FileAttributes.System));
 
             var desktopIniAttributes = File.GetAttributes(desktopIniPath);
             Assert.True(desktopIniAttributes.HasFlag(FileAttributes.Hidden));
@@ -66,9 +66,10 @@ public sealed class FolderIconWorkflowIntegrationTests
 
             var copiedRoot = Path.Combine(testRoot, "CopiedFolder");
             CopyDirectory(folderPath, copiedRoot);
-            Assert.True(File.Exists(Path.Combine(copiedRoot, "melhorwindows-folder-icon.ico")));
+            var copiedIconPath = Directory.GetFiles(copiedRoot, "auralis-folder-icon-*.ico").Single();
+            Assert.True(File.Exists(copiedIconPath));
             Assert.Contains(
-                @"IconResource=melhorwindows-folder-icon.ico,0",
+                $"IconResource=.\\{Path.GetFileName(copiedIconPath)},0",
                 await File.ReadAllTextAsync(Path.Combine(copiedRoot, "desktop.ini")));
         }
         finally
@@ -117,9 +118,91 @@ public sealed class FolderIconWorkflowIntegrationTests
                     new CropSelection(40, 0, 180, 180)));
 
             Assert.True(result.Succeeded);
+            var rewrittenIconPath = Directory.GetFiles(folderPath, "auralis-folder-icon-*.ico").Single();
+            Assert.False(File.Exists(existingIconPath));
             Assert.Contains(
-                @"IconResource=melhorwindows-folder-icon.ico,0",
+                $"IconResource=.\\{Path.GetFileName(rewrittenIconPath)},0",
                 await File.ReadAllTextAsync(existingDesktopIniPath));
+        }
+        finally
+        {
+            ResetAttributesRecursively(testRoot);
+            Directory.Delete(testRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task RemoveIconAsync_RemovesDesktopIniAndManagedIcons()
+    {
+        var testRoot = Path.Combine(Path.GetTempPath(), "MelhorWindows.Tests", Guid.NewGuid().ToString("N"));
+        var folderPath = Path.Combine(testRoot, "TargetFolder");
+
+        Directory.CreateDirectory(folderPath);
+
+        var desktopIniPath = Path.Combine(folderPath, "desktop.ini");
+        var managedIconPath = Path.Combine(folderPath, "auralis-folder-icon-demo.ico");
+        var legacyIconPath = Path.Combine(folderPath, "melhorwindows-folder-icon.ico");
+
+        await File.WriteAllTextAsync(
+            desktopIniPath,
+            "[.ShellClassInfo]\r\nIconFile=auralis-folder-icon-demo.ico\r\nIconIndex=0");
+        await File.WriteAllBytesAsync(managedIconPath, [1, 2, 3, 4, 5]);
+        await File.WriteAllBytesAsync(legacyIconPath, [6, 7, 8, 9, 0]);
+
+        File.SetAttributes(desktopIniPath, FileAttributes.Hidden | FileAttributes.System);
+        File.SetAttributes(managedIconPath, FileAttributes.Hidden | FileAttributes.System);
+        File.SetAttributes(legacyIconPath, FileAttributes.Hidden | FileAttributes.System);
+        File.SetAttributes(folderPath, File.GetAttributes(folderPath) | FileAttributes.ReadOnly | FileAttributes.System);
+
+        try
+        {
+            var service = new DesktopIniFolderIconIntegrationService();
+
+            await service.RemoveIconAsync(folderPath);
+
+            Assert.False(File.Exists(desktopIniPath));
+            Assert.False(File.Exists(managedIconPath));
+            Assert.False(File.Exists(legacyIconPath));
+
+            var folderAttributes = File.GetAttributes(folderPath);
+            Assert.False(folderAttributes.HasFlag(FileAttributes.ReadOnly));
+            Assert.False(folderAttributes.HasFlag(FileAttributes.System));
+        }
+        finally
+        {
+            ResetAttributesRecursively(testRoot);
+            Directory.Delete(testRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task RepairIconReferenceAsync_MigratesExternalIconReferenceIntoFolder()
+    {
+        var testRoot = Path.Combine(Path.GetTempPath(), "MelhorWindows.Tests", Guid.NewGuid().ToString("N"));
+        var folderPath = Path.Combine(testRoot, "TargetFolder");
+        var externalIconPath = Path.Combine(testRoot, "external-icon.ico");
+        var desktopIniPath = Path.Combine(folderPath, "desktop.ini");
+
+        Directory.CreateDirectory(folderPath);
+        await File.WriteAllBytesAsync(externalIconPath, [1, 2, 3, 4, 5, 6, 7, 8]);
+        await File.WriteAllTextAsync(
+            desktopIniPath,
+            $"[.ShellClassInfo]{Environment.NewLine}IconResource={externalIconPath},0",
+            Encoding.Unicode);
+
+        try
+        {
+            var service = new DesktopIniFolderIconIntegrationService();
+
+            var repaired = await service.RepairIconReferenceAsync(folderPath);
+
+            Assert.True(repaired);
+
+            var repairedIconPath = Directory.GetFiles(folderPath, "auralis-folder-icon-*.ico").Single();
+            var desktopIniText = await File.ReadAllTextAsync(desktopIniPath);
+
+            Assert.Contains($"IconResource=.\\{Path.GetFileName(repairedIconPath)},0", desktopIniText);
+            Assert.True(File.Exists(repairedIconPath));
         }
         finally
         {

@@ -12,7 +12,9 @@ namespace MelhorWindows.Infrastructure.Imaging;
 
 public sealed class SystemDrawingIconConversionService : IImageIconConversionService
 {
-    private static readonly int[] IconSizes = [16, 32, 48, 64, 128, 256];
+    // 32 = list/details view, 48 = medium icons, 256 = large/extra-large/thumbnail.
+    // Sizes 16, 64, 128 are not used by Explorer for folder icons.
+    private static readonly int[] IconSizes = [32, 48, 256];
 
     public async Task<PreparedIconAsset> PrepareIconAsync(
         PrepareIconRequest request,

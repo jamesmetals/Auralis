@@ -35,6 +35,7 @@ public partial class MainWindow : Window
     private CancellationTokenSource? _previewGenerationCts;
     private int _busyOperations;
     private AppUpdateInfo? _availableUpdate;
+    private bool _isInitialized;
 
     public MainWindow()
     {
@@ -47,31 +48,94 @@ public partial class MainWindow : Window
         LoadCurrentUser();
         LoadEditorDefaults();
         CloseDashboard();
-        Loaded += async (_, _) => await InitializeAsync();
     }
 
-    private async Task InitializeAsync()
+    public async Task InitializeAsync(Action<double, string, string?>? reportProgress = null)
     {
+        if (_isInitialized)
+        {
+            return;
+        }
+
+        _isInitialized = true;
+
         try
         {
+            ReportInitializationProgress(
+                reportProgress,
+                0.10,
+                "Preparando ambiente",
+                "Organizando os argumentos de abertura e a sessao local.");
             await HandleStartupCommandsAsync();
+
+            ReportInitializationProgress(
+                reportProgress,
+                0.24,
+                "Verificando pasta atual",
+                string.IsNullOrWhiteSpace(_selectedFolderPath)
+                    ? "Nenhuma pasta veio selecionada. O painel sera aberto pronto para escolha manual."
+                    : "Conferindo a pasta atual e corrigindo referencias antigas de icone.");
+            await RepairCurrentFolderIconIfNeededAsync(showSuccessMessage: true);
+
+            ReportInitializationProgress(
+                reportProgress,
+                0.42,
+                "Carregando biblioteca visual",
+                "Preparando a galeria rapida de icones e atalhos da interface.");
             LoadBuiltInIconLibrary();
             UpdateSettingsVisibility();
+
+            ReportInitializationProgress(
+                reportProgress,
+                0.60,
+                "Sincronizando historico",
+                "Recuperando os icones recentes prontos para reaplicar.");
             await LoadHistoryAsync();
+
+            ReportInitializationProgress(
+                reportProgress,
+                0.78,
+                "Verificando atualizacoes",
+                "Consultando o repositório para detectar uma versao mais nova do Auralis.");
             await CheckForUpdatesAsync(
                 showNoUpdateMessage: _launchOptions.CheckForUpdates,
                 showErrors: _launchOptions.CheckForUpdates);
 
             if (CanManageWindowsFeatures())
             {
+                ReportInitializationProgress(
+                    reportProgress,
+                    0.92,
+                    "Lendo recursos administrativos",
+                    "Carregando estados do Windows e auditoria do perfil com permissao elevada.");
                 await LoadFeatureStatesAsync();
                 await LoadAuditAsync();
+            }
+            else
+            {
+                ReportInitializationProgress(
+                    reportProgress,
+                    0.92,
+                    "Finalizando sessao",
+                    "Perfil padrao carregado com foco no fluxo rapido de troca de icones.");
             }
         }
         catch (Exception exception)
         {
             SetStatus(exception.Message, isError: true);
+            ReportInitializationProgress(
+                reportProgress,
+                1.00,
+                "Inicializacao concluida com aviso",
+                exception.Message);
+            return;
         }
+
+        ReportInitializationProgress(
+            reportProgress,
+            1.00,
+            "Tudo pronto",
+            "Abrindo o painel principal do Auralis.");
     }
 
     private void LoadLaunchContext()
@@ -233,7 +297,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ChooseFolderButton_Click(object sender, RoutedEventArgs e)
+    private async void ChooseFolderButton_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -255,7 +319,12 @@ public partial class MainWindow : Window
 
             _selectedFolderPath = dialog.SelectedPath;
             RefreshFolderPresentation();
-            SetStatus("Pasta alvo atualizada.", isError: false);
+            var repaired = await RepairCurrentFolderIconIfNeededAsync(showSuccessMessage: true);
+
+            if (!repaired)
+            {
+                SetStatus("Pasta alvo atualizada.", isError: false);
+            }
         }
         catch (Exception exception)
         {
@@ -332,30 +401,35 @@ public partial class MainWindow : Window
             return;
         }
 
+        string? successMessage = null;
+
         try
         {
-            BeginBusy();
-            SetStatus("Aplicando ícone...", isError: false);
+            BeginBusy("Aplicando icone e atualizando o Explorer...");
+            SetStatus("Aplicando icone e atualizando o Explorer...", isError: false);
 
             if (_selectedHistoryItem is not null)
             {
                 await _services.FolderIconIntegrationService.ApplyIconAsync(_selectedFolderPath, _selectedHistoryItem.Entry.StoredIconPath);
                 SetStatus("Ícone recente aplicado na pasta atual.", isError: false);
-                return;
+                successMessage = "Ícone aplicado com sucesso. Fechando...";
             }
-
-            var result = await _services.FolderIconWorkflowService.ExecuteAsync(
-                new ApplyFolderIconRequest(
-                    _selectedFolderPath,
-                    _selectedImagePath!,
-                    ResolveFitMode(),
-                    BuildCropSelection()));
-
-            SetStatus(result.Message, isError: !result.Succeeded);
-
-            if (result.Succeeded)
+            else
             {
-                await LoadHistoryAsync();
+                var result = await _services.FolderIconWorkflowService.ExecuteAsync(
+                    new ApplyFolderIconRequest(
+                        _selectedFolderPath,
+                        _selectedImagePath!,
+                        ResolveFitMode(),
+                        BuildCropSelection()));
+
+                SetStatus(result.Message, isError: !result.Succeeded);
+
+                if (result.Succeeded)
+                {
+                    await LoadHistoryAsync();
+                    successMessage = "Ícone aplicado com sucesso. Fechando...";
+                }
             }
         }
         catch (OperationCanceledException)
@@ -369,6 +443,56 @@ public partial class MainWindow : Window
         finally
         {
             EndBusy();
+        }
+
+        if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            await ShowSuccessAndCloseAsync(successMessage);
+        }
+    }
+
+    private async void RestoreDefaultButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_selectedFolderPath))
+        {
+            SetStatus("Selecione uma pasta antes de restaurar o icone padrao.", isError: true);
+            return;
+        }
+
+        var confirmation = System.Windows.MessageBox.Show(
+            "Isso removera o icone personalizado da pasta e apagara o desktop.ini gerado pelo Auralis. Deseja continuar?",
+            "Auralis",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (confirmation != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        string? successMessage = null;
+
+        try
+        {
+            BeginBusy("Restaurando a pasta ao padrao e atualizando o Explorer...");
+            SetStatus("Restaurando a pasta ao padrao e atualizando o Explorer...", isError: false);
+
+            await _services.FolderIconIntegrationService.RemoveIconAsync(_selectedFolderPath);
+            SetStatus("Pasta restaurada ao icone padrao.", isError: false);
+            successMessage = "Pasta restaurada ao icone padrao. Fechando...";
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+
+        if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            await ShowSuccessAndCloseAsync(successMessage);
         }
     }
 
@@ -386,8 +510,12 @@ public partial class MainWindow : Window
             return;
         }
 
+        string? successMessage = null;
+
         try
         {
+            BeginBusy("Aplicando icone do historico e atualizando o Explorer...");
+            SetStatus("Aplicando icone do historico e atualizando o Explorer...", isError: false);
             _services.AuthorizationService.EnsurePermission(DefaultPermissions.ApplyFolderIcons);
 
             await _services.FolderIconIntegrationService.ApplyIconAsync(_selectedFolderPath, historyItem.Entry.StoredIconPath);
@@ -409,10 +537,20 @@ public partial class MainWindow : Window
 
             await LoadHistoryAsync();
             SetStatus("Icone do historico aplicado na pasta atual.", isError: false);
+            successMessage = "Icone aplicado com sucesso. Fechando...";
         }
         catch (Exception exception)
         {
             SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+
+        if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            await ShowSuccessAndCloseAsync(successMessage);
         }
     }
 
@@ -463,9 +601,12 @@ public partial class MainWindow : Window
         SourcePreviewImage.Source = sourcePreview;
         SourcePreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
 
+        // Skip auto-preview on load: the source image is already shown in the drop zone.
+        // Preview (icon render) only happens on apply, avoiding a duplicate full conversion.
         if (refreshPreview)
         {
-            await UpdatePreviewAsync();
+            GeneratedPreviewImage.Source = null;
+            GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Visible;
         }
     }
 
@@ -482,7 +623,7 @@ public partial class MainWindow : Window
         _previewGenerationCts = new CancellationTokenSource();
         var cancellationToken = _previewGenerationCts.Token;
 
-        BeginBusy();
+        BeginBusy("Gerando previa...");
         try
         {
             SetStatus("Processando preview...", isError: false);
@@ -871,6 +1012,35 @@ public partial class MainWindow : Window
         });
     }
 
+    private async Task ShowSuccessAndCloseAsync(string message)
+    {
+        SetStatus(message, isError: false);
+        await CloseAfterSuccessAsync();
+    }
+
+    private async Task<bool> RepairCurrentFolderIconIfNeededAsync(bool showSuccessMessage)
+    {
+        if (string.IsNullOrWhiteSpace(_selectedFolderPath))
+        {
+            return false;
+        }
+
+        var repaired = await _services.FolderIconIntegrationService.RepairIconReferenceAsync(_selectedFolderPath);
+
+        if (repaired && showSuccessMessage)
+        {
+            SetStatus("O Auralis normalizou automaticamente o icone salvo nesta pasta para o formato local e estavel.", isError: false);
+        }
+
+        return repaired;
+    }
+
+    private async Task CloseAfterSuccessAsync()
+    {
+        await Task.Delay(TimeSpan.FromSeconds(1.15));
+        Close();
+    }
+
     private static string ResolveUserInitials(string userName)
     {
         var parts = userName
@@ -1213,9 +1383,19 @@ public partial class MainWindow : Window
         Settings
     }
 
-    private void BeginBusy()
+    private static void ReportInitializationProgress(
+        Action<double, string, string?>? reportProgress,
+        double progress,
+        string title,
+        string? detail)
+    {
+        reportProgress?.Invoke(progress, title, detail);
+    }
+
+    private void BeginBusy(string message = "Processando alteracao...")
     {
         _busyOperations++;
+        SetBusyMessage(message);
         ApplyBusyState();
     }
 
@@ -1228,8 +1408,15 @@ public partial class MainWindow : Window
     private void ApplyBusyState()
     {
         var enabled = _busyOperations == 0;
+        var isBusy = !enabled;
+
+        if (BusyOverlayRoot != null)
+        {
+            BusyOverlayRoot.Visibility = isBusy ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         if (ApplyIconButton != null) ApplyIconButton.IsEnabled = enabled;
+        if (RestoreDefaultButton != null) RestoreDefaultButton.IsEnabled = enabled;
         if (UpdatePreviewButton != null) UpdatePreviewButton.IsEnabled = enabled;
         if (ChooseImageButton != null) ChooseImageButton.IsEnabled = enabled;
         if (ReplaceImageButton != null) ReplaceImageButton.IsEnabled = enabled;
@@ -1241,5 +1428,13 @@ public partial class MainWindow : Window
         if (CropYTextBox != null) CropYTextBox.IsEnabled = enabled;
         if (CropWidthTextBox != null) CropWidthTextBox.IsEnabled = enabled;
         if (CropHeightTextBox != null) CropHeightTextBox.IsEnabled = enabled;
+    }
+
+    private void SetBusyMessage(string message)
+    {
+        if (BusyOverlayTextBlock != null)
+        {
+            BusyOverlayTextBlock.Text = message;
+        }
     }
 }

@@ -61,6 +61,17 @@ if (Test-Path $payloadZip) {
     $false)
 Copy-Item -Path (Join-Path $installerRoot "Install-MelhorWindows.ps1") -Destination (Join-Path $packageStage "Install-Auralis.ps1") -Force
 
+# Generate payload-version.txt so the bootstrapper UI can show version info
+$appExe = Join-Path $publishDirectory "Auralis.exe"
+$payloadVersion = "1.0.0"
+if (Test-Path $appExe) {
+    $versionInfo = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($appExe)
+    if (-not [string]::IsNullOrWhiteSpace($versionInfo.FileVersion)) {
+        $payloadVersion = $versionInfo.FileVersion
+    }
+}
+$payloadVersion | Out-File -FilePath (Join-Path $packageStage "payload-version.txt") -NoNewline -Encoding UTF8
+
 dotnet publish $bootstrapperProject `
     -c Release `
     -r win-x64 `
@@ -94,9 +105,13 @@ Copy-Item -Path $publishedBootstrapper -Destination $targetInstaller -Force
 Copy-Item -Path $payloadZip -Destination $targetPayload -Force
 Copy-Item -Path (Join-Path $installerRoot "Install-MelhorWindows.ps1") -Destination $targetInstallScript -Force
 
+$targetVersionFile = Join-Path $outputDirectory "payload-version.txt"
+$payloadVersion | Out-File -FilePath $targetVersionFile -NoNewline -Encoding UTF8
+
 Copy-Item -Path $targetInstaller -Destination $bundleDirectory -Force
 Copy-Item -Path $targetPayload -Destination $bundleDirectory -Force
 Copy-Item -Path $targetInstallScript -Destination $bundleDirectory -Force
+Copy-Item -Path $targetVersionFile -Destination $bundleDirectory -Force
 
 [System.IO.Compression.ZipFile]::CreateFromDirectory(
     $bundleDirectory,
