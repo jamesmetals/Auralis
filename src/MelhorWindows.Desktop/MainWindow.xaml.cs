@@ -151,6 +151,27 @@ public partial class MainWindow : Window
             1.00,
             "Tudo pronto",
             "Abrindo o painel principal do Auralis.");
+
+        if (_launchOptions.OpenDashboard)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _services.GameBoosterAiWorkflowService.AnalyzeRustAsync();
+                    await _services.GameBoosterAiWorkflowService.AnalyzeAsync();
+                    await Dispatcher.InvokeAsync(async () =>
+                    {
+                        if (!_isUpdatingGameBoosterUi)
+                        {
+                            await LoadRustPanelAsync();
+                            await LoadLocalAiPanelAsync();
+                        }
+                    });
+                }
+                catch { } // Silently fail background auto-start if Ollama is off
+            });
+        }
     }
 
     private void ApplyStartupSurface()

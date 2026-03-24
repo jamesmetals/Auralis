@@ -19,6 +19,8 @@ public sealed class PowerShellRestorePointService : IWindowsRestorePointService
 
         var script =
             $$"""
+            $ProgressPreference = 'SilentlyContinue'
+            $InformationPreference = 'SilentlyContinue'
             $ErrorActionPreference = 'Stop'
             $principal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 
