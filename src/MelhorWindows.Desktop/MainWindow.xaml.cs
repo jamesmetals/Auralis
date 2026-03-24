@@ -1,6 +1,8 @@
 using System.IO;
 using System.Globalization;
 using System.Diagnostics;
+using System.Text;
+using MelhorWindows.Desktop.Providers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -38,6 +40,9 @@ public partial class MainWindow : Window
     private bool _isInitialized;
     private bool _isUpdatingGameBoosterUi;
     private bool _canRevertGameBoosterSession;
+    private GameBoosterDashboardSnapshot? _latestGameBoosterSnapshot;
+    private GameBoosterAiPanelSnapshot? _latestLocalAiPanelSnapshot;
+    private RustGameBoosterPanelSnapshot? _latestRustPanelSnapshot;
 
     public MainWindow()
     {
@@ -156,7 +161,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        CloseDashboard();
+        ShowPage(AppPage.IconEditor);
     }
 
     private void LoadLaunchContext()
@@ -203,6 +208,8 @@ public partial class MainWindow : Window
 
     private void SettingsNavButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.Settings);
 
+    private void IconEditorNavButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.IconEditor);
+
     private void AccountButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.Home);
 
     private void DashboardCloseButton_Click(object sender, RoutedEventArgs e) => CloseDashboard();
@@ -222,12 +229,23 @@ public partial class MainWindow : Window
     private void ShowPage(AppPage page)
     {
         _activePage = page;
-        DashboardOverlayRoot.Visibility = Visibility.Visible;
+        IconEditorView.Visibility = page == AppPage.IconEditor ? Visibility.Visible : Visibility.Collapsed;
         HomeView.Visibility = page == AppPage.Home ? Visibility.Visible : Visibility.Collapsed;
         HistoryView.Visibility = page == AppPage.History ? Visibility.Visible : Visibility.Collapsed;
         GameBoosterView.Visibility = page == AppPage.GameBooster ? Visibility.Visible : Visibility.Collapsed;
         SettingsView.Visibility = page == AppPage.Settings ? Visibility.Visible : Visibility.Collapsed;
 
+        PageTitleTextBlock.Text = page switch
+        {
+            AppPage.IconEditor => "Trocar Ícone",
+            AppPage.Home => "Painel",
+            AppPage.History => "Histórico",
+            AppPage.GameBooster => "JB GameBooster",
+            AppPage.Settings => "Configurações",
+            _ => "Auralis"
+        };
+
+        IconEditorNavButton.Style = (Style)FindResource(page == AppPage.IconEditor ? "ActiveNavButtonStyle" : "NavButtonStyle");
         HomeNavButton.Style = (Style)FindResource(page == AppPage.Home ? "ActiveNavButtonStyle" : "NavButtonStyle");
         HistoryNavButton.Style = (Style)FindResource(page == AppPage.History ? "ActiveNavButtonStyle" : "NavButtonStyle");
         GameBoosterNavButton.Style = (Style)FindResource(page == AppPage.GameBooster ? "ActiveNavButtonStyle" : "NavButtonStyle");
@@ -236,8 +254,7 @@ public partial class MainWindow : Window
 
     private void CloseDashboard()
     {
-        DashboardOverlayRoot.Visibility = Visibility.Collapsed;
-        _activePage = AppPage.Home;
+        ShowPage(AppPage.IconEditor);
     }
 
     private void UpdateSettingsVisibility()
@@ -253,26 +270,7 @@ public partial class MainWindow : Window
 
     private void LoadBuiltInIconLibrary()
     {
-        _allBuiltInIcons =
-        [
-            new BuiltInIconItem("folder", "Folder", "\uE8B7", CreateBrush("#7A6CFF")),
-            new BuiltInIconItem("spark", "Spark", "\uE945", CreateBrush("#49A8FF")),
-            new BuiltInIconItem("rocket", "Rocket", "\uE7C3", CreateBrush("#FF7A4F")),
-            new BuiltInIconItem("database", "Database", "\uE9D2", CreateBrush("#33C5A5")),
-            new BuiltInIconItem("diamond", "Diamond", "\uECAD", CreateBrush("#E5A300")),
-            new BuiltInIconItem("star", "Star", "\uE734", CreateBrush("#7084FF")),
-            new BuiltInIconItem("heart", "Heart", "\uEB51", CreateBrush("#E84D7A")),
-            new BuiltInIconItem("gear", "Settings", "\uE713", CreateBrush("#5D89FF")),
-            new BuiltInIconItem("mail", "Mail", "\uE715", CreateBrush("#5A9DFF")),
-            new BuiltInIconItem("edit", "Edit", "\uE70F", CreateBrush("#31A2A2")),
-            new BuiltInIconItem("doc", "Document", "\uE130", CreateBrush("#5B7BD5")),
-            new BuiltInIconItem("calendar", "Calendar", "\uE787", CreateBrush("#876BFF")),
-            new BuiltInIconItem("bell", "Bell", "\uE7F4", CreateBrush("#497CFB")),
-            new BuiltInIconItem("person", "Person", "\uE77B", CreateBrush("#5B82D6")),
-            new BuiltInIconItem("image", "Image", "\uE91B", CreateBrush("#41BFA1")),
-            new BuiltInIconItem("lock", "Lock", "\uE72E", CreateBrush("#516C9A"))
-        ];
-
+        _allBuiltInIcons = Providers.IconLibraryProvider.GetBuiltInIcons();
         ApplyLibraryFilter();
     }
 
@@ -956,12 +954,14 @@ public partial class MainWindow : Window
     private async Task LoadGameBoosterAsync(bool includeLocalAi = true)
     {
         var snapshot = await _services.GameBoosterWorkflowService.GetDashboardSnapshotAsync();
+        _latestGameBoosterSnapshot = snapshot;
         var canManageChanges = CanManageWindowsFeatures();
 
         GameBoosterScoreTextBlock.Text = $"{snapshot.OptimizationScore}%";
         GameBoosterProfileTextBlock.Text = snapshot.ActiveProfileName;
         GameBoosterSummaryTextBlock.Text =
             $"{snapshot.OptimizedItemCount} de {snapshot.TotalItemCount} ajustes alinhados. O modulo atual ja consegue aplicar otimizacoes gerais com reversao da ultima sessao.";
+        UpdateGameBoosterTelemetry(snapshot);
         GameBoosterReadOnlyBorder.Visibility = canManageChanges ? Visibility.Collapsed : Visibility.Visible;
 
         _isUpdatingGameBoosterUi = true;
@@ -1017,23 +1017,22 @@ public partial class MainWindow : Window
     private async Task LoadLocalAiPanelAsync()
     {
         var panel = await _services.GameBoosterAiWorkflowService.GetPanelSnapshotAsync();
+        _latestLocalAiPanelSnapshot = panel;
         var availableModels = panel.Availability.AvailableModels.ToList();
-
-        if (!availableModels.Contains(panel.Settings.ModelName, StringComparer.OrdinalIgnoreCase))
-        {
-            availableModels.Insert(0, panel.Settings.ModelName);
-        }
+        var effectiveModel = ResolveEffectiveLocalAiModel(panel.Settings.ModelName, availableModels);
 
         LocalAiEndpointTextBox.Text = panel.Settings.EndpointUrl;
         LocalAiModelComboBox.ItemsSource = availableModels;
-        LocalAiModelComboBox.Text = panel.Settings.ModelName;
+        LocalAiModelComboBox.Text = effectiveModel;
 
         LocalAiStatusTextBlock.Text = panel.Availability.StatusMessage;
         LocalAiCommandHintTextBlock.Text = !panel.Availability.IsReachable
             ? "Sugestao: abra o app do Ollama ou rode `ollama serve`."
             : panel.Availability.ConfiguredModelAvailable
                 ? $"Modelo configurado pronto para uso local: {panel.Settings.ModelName}."
-                : $"Modelo ausente. Rode `{panel.Availability.SuggestedPullCommand}` ou selecione um dos modelos detectados.";
+                : availableModels.Count > 0
+                    ? $"Modelo configurado ausente. Selecionei `{effectiveModel}` porque ele ja esta disponivel no Ollama local."
+                    : $"Modelo ausente. Rode `{panel.Availability.SuggestedPullCommand}` ou selecione um dos modelos detectados.";
         LocalAiAnalysisMetaTextBlock.Text = panel.LastAnalysis is null
             ? "Nenhuma analise local salva ainda."
             : $"Ultima analise local em {panel.LastAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm} usando {panel.LastAnalysis.ModelName}.";
@@ -1056,6 +1055,7 @@ public partial class MainWindow : Window
     private async Task LoadRustPanelAsync()
     {
         var rustPanel = await _services.GameBoosterAiWorkflowService.GetRustPanelSnapshotAsync();
+        _latestRustPanelSnapshot = rustPanel;
         var profile = rustPanel.Profile;
 
         RustModuleSummaryTextBlock.Text = profile.Summary;
@@ -1092,6 +1092,284 @@ public partial class MainWindow : Window
             .ToArray() ?? Array.Empty<LocalAiRecommendationListItem>();
     }
 
+    private void UpdateGameBoosterTelemetry(GameBoosterDashboardSnapshot snapshot)
+    {
+        var telemetry = snapshot.Telemetry;
+
+        UpdateCircularGauge(OptimizationGaugeArc, telemetry.OptimizationGaugePercent);
+        OptimizationGaugeValueTextBlock.Text = $"{snapshot.OptimizationScore}%";
+        OptimizationGaugeHintTextBlock.Text = $"{snapshot.OptimizedItemCount} de {snapshot.TotalItemCount}";
+        OptimizationGaugeSummaryTextBlock.Text = telemetry.OptimizationSummary;
+
+        UpdateCircularGauge(FpsGaugeArc, telemetry.FpsGaugePercent);
+        FpsGaugeValueTextBlock.Text = $"{telemetry.EstimatedProjectedFps}";
+        FpsGaugeHintTextBlock.Text = $"+{telemetry.EstimatedFpsGain} FPS";
+        FpsGaugeSummaryTextBlock.Text = $"Atual {telemetry.EstimatedCurrentFps} | Meta {telemetry.EstimatedProjectedFps}";
+
+        UpdateCircularGauge(CpuGaugeArc, telemetry.CpuGaugePercent);
+        CpuGaugeValueTextBlock.Text = $"{telemetry.CurrentCpuUsagePercent:0.#}%";
+        CpuGaugeHintTextBlock.Text = $"apos {telemetry.EstimatedCpuUsageAfterPercent:0.#}%";
+        CpuGaugeSummaryTextBlock.Text = telemetry.CpuSummary;
+
+        UpdateCircularGauge(MemoryGaugeArc, telemetry.MemoryGaugePercent);
+        MemoryGaugeValueTextBlock.Text = $"{telemetry.CurrentMemoryLoadPercent}%";
+        MemoryGaugeHintTextBlock.Text = $"{telemetry.CurrentMemoryUsedGb:0.0} / {telemetry.TotalMemoryGb:0.0} GB";
+        MemoryGaugeSummaryTextBlock.Text = telemetry.MemorySummary;
+
+        GameBoosterTelemetryFootnoteTextBlock.Text =
+            $"Varredura local: {telemetry.CpuLabel} | {telemetry.WindowsVersion} | FPS e ganhos apos otimizar sao estimativas heuristicas.";
+    }
+
+    private static void UpdateCircularGauge(System.Windows.Shapes.Path gaugePath, double percent)
+    {
+        gaugePath.Data = BuildCircularGaugeGeometry(percent);
+    }
+
+    private static Geometry BuildCircularGaugeGeometry(double percent)
+    {
+        var normalizedPercent = Math.Clamp(percent, 0d, 100d);
+
+        if (normalizedPercent <= 0d)
+        {
+            return Geometry.Empty;
+        }
+
+        const double radius = 60d;
+        var center = new System.Windows.Point(65d, 65d);
+        var sweepAngle = Math.Max(0.1d, normalizedPercent / 100d * 359.99d);
+        var startPoint = PointOnCircle(center, radius, -90d);
+        var endPoint = PointOnCircle(center, radius, -90d + sweepAngle);
+
+        var figure = new PathFigure
+        {
+            StartPoint = startPoint,
+            IsClosed = false,
+            IsFilled = false
+        };
+
+        figure.Segments.Add(new ArcSegment
+        {
+            Point = endPoint,
+            Size = new System.Windows.Size(radius, radius),
+            SweepDirection = SweepDirection.Clockwise,
+            IsLargeArc = sweepAngle >= 180d
+        });
+
+        return new PathGeometry([figure]);
+    }
+
+    private static System.Windows.Point PointOnCircle(System.Windows.Point center, double radius, double angleInDegrees)
+    {
+        var angleInRadians = angleInDegrees * Math.PI / 180d;
+        return new System.Windows.Point(
+            center.X + radius * Math.Cos(angleInRadians),
+            center.Y + radius * Math.Sin(angleInRadians));
+    }
+
+    private void ShowGameBoosterReport(string title, string subtitle, string content)
+    {
+        GameBoosterReportTitleTextBlock.Text = title;
+        GameBoosterReportSubtitleTextBlock.Text = subtitle;
+        GameBoosterReportTextBox.Text = content;
+        GameBoosterReportBorder.Visibility = Visibility.Visible;
+    }
+
+    private static string BuildNoAiReportText()
+    {
+        return string.Join(
+            Environment.NewLine,
+            [
+                "Nenhum relatorio de IA local foi salvo ainda.",
+                string.Empty,
+                "Para gerar o relatorio:",
+                "1. Confirme que o Ollama local esta acessivel.",
+                "2. Escolha um modelo listado no painel.",
+                "3. Rode 'Analisar com IA local' no booster geral ou em Rust."
+            ]);
+    }
+
+    private string BuildAiReportText()
+    {
+        var builder = new StringBuilder();
+        var boosterAnalysis = _latestLocalAiPanelSnapshot?.LastAnalysis;
+        var rustAnalysis = _latestRustPanelSnapshot?.LastAnalysis;
+
+        if (boosterAnalysis is null && rustAnalysis is null)
+        {
+            return BuildNoAiReportText();
+        }
+
+        builder.AppendLine("RELATORIO DA IA LOCAL");
+        builder.AppendLine();
+
+        if (boosterAnalysis is not null)
+        {
+            builder.AppendLine("JB GAMEBOOSTER");
+            builder.AppendLine($"Gerado em: {boosterAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}");
+            builder.AppendLine($"Modelo: {boosterAnalysis.ModelName}");
+            builder.AppendLine($"Perfil recomendado: {boosterAnalysis.RecommendedProfile}");
+            builder.AppendLine($"Prontidao: {boosterAnalysis.ReadinessLevel}");
+            builder.AppendLine($"Resumo: {boosterAnalysis.ExecutiveSummary}");
+            builder.AppendLine();
+
+            AppendRecommendations(builder, boosterAnalysis.Recommendations);
+        }
+        else
+        {
+            builder.AppendLine("JB GAMEBOOSTER");
+            builder.AppendLine("Nenhuma leitura geral do booster foi salva ainda.");
+            builder.AppendLine();
+        }
+
+        if (rustAnalysis is not null)
+        {
+            builder.AppendLine("RUST");
+            builder.AppendLine($"Gerado em: {rustAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}");
+            builder.AppendLine($"Modelo: {rustAnalysis.ModelName}");
+            builder.AppendLine($"Resumo: {rustAnalysis.ExecutiveSummary}");
+            builder.AppendLine($"Launch options: {rustAnalysis.LaunchOptionsSummary}");
+            builder.AppendLine();
+
+            AppendRecommendations(builder, rustAnalysis.Recommendations);
+        }
+        else
+        {
+            builder.AppendLine("RUST");
+            builder.AppendLine("Nenhuma leitura local de Rust foi salva ainda.");
+        }
+
+        return builder.ToString().TrimEnd();
+    }
+
+    private string BuildComputerReportText()
+    {
+        if (_latestGameBoosterSnapshot is null)
+        {
+            return "A varredura local do JB GameBooster ainda nao foi carregada.";
+        }
+
+        var snapshot = _latestGameBoosterSnapshot;
+        var telemetry = snapshot.Telemetry;
+        var rustProfile = _latestRustPanelSnapshot?.Profile;
+        var pendingOptimizations = snapshot.Optimizations.Where(item => !item.IsOptimized).ToArray();
+        var alignedOptimizations = snapshot.Optimizations.Where(item => item.IsOptimized).ToArray();
+        var builder = new StringBuilder();
+
+        builder.AppendLine("RELATORIO DO COMPUTADOR");
+        builder.AppendLine();
+        builder.AppendLine("Resumo do sistema");
+        builder.AppendLine($"CPU: {telemetry.CpuLabel}");
+        builder.AppendLine($"Threads logicas: {telemetry.LogicalCoreCount}");
+        builder.AppendLine($"Windows: {telemetry.WindowsVersion}");
+        builder.AppendLine($"Memoria atual: {telemetry.CurrentMemoryUsedGb:0.0} / {telemetry.TotalMemoryGb:0.0} GB ({telemetry.CurrentMemoryLoadPercent}%)");
+        builder.AppendLine($"CPU atual: {telemetry.CurrentCpuUsagePercent:0.0}%");
+        builder.AppendLine();
+        builder.AppendLine("Estimativas do booster");
+        builder.AppendLine($"Otimizacao aplicada: {snapshot.OptimizationScore}% ({snapshot.OptimizedItemCount} de {snapshot.TotalItemCount})");
+        builder.AppendLine($"FPS estimado: atual {telemetry.EstimatedCurrentFps} | apos pendentes {telemetry.EstimatedProjectedFps} | ganho potencial +{telemetry.EstimatedFpsGain}");
+        builder.AppendLine($"CPU: atual {telemetry.CurrentCpuUsagePercent:0.0}% | apos pendentes {telemetry.EstimatedCpuUsageAfterPercent:0.0}% | alivio {telemetry.EstimatedCpuReliefPercent:0.0} ponto(s)");
+        builder.AppendLine($"Memoria: atual {telemetry.CurrentMemoryUsedGb:0.0} GB | apos pendentes {telemetry.EstimatedMemoryUsedAfterGb:0.0} GB | economia {telemetry.EstimatedMemorySavingsGb:0.0} GB");
+        builder.AppendLine();
+
+        if (snapshot.LastAppliedAtUtc is not null)
+        {
+            builder.AppendLine($"Ultima sessao aplicada: {snapshot.LastAppliedAtUtc.Value.ToLocalTime():dd/MM/yyyy HH:mm}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(snapshot.LastRestorePointDescription))
+        {
+            builder.AppendLine($"Restore point solicitado: {snapshot.LastRestorePointDescription}");
+        }
+
+        builder.AppendLine();
+        builder.AppendLine("Achados da varredura");
+
+        foreach (var highlight in telemetry.ScanHighlights)
+        {
+            builder.AppendLine($"- {highlight}");
+        }
+
+        if (rustProfile is not null)
+        {
+            builder.AppendLine();
+            builder.AppendLine("Achados do perfil Rust");
+            builder.AppendLine($"Resumo: {rustProfile.Summary}");
+            builder.AppendLine(rustProfile.ClientConfigDetected
+                ? $"client.cfg detectado em: {rustProfile.ClientConfigPath}"
+                : $"client.cfg esperado em: {rustProfile.ClientConfigPath}");
+            builder.AppendLine(rustProfile.SteamConfigDetected
+                ? $"Steam localconfig.vdf detectado em: {rustProfile.SteamLocalConfigPath}"
+                : "Steam localconfig.vdf nao detectado neste perfil.");
+            builder.AppendLine($"Launch options sugeridos: {rustProfile.LaunchOptions}");
+        }
+
+        builder.AppendLine();
+        builder.AppendLine("Otimizacoes pendentes");
+
+        if (pendingOptimizations.Length == 0)
+        {
+            builder.AppendLine("- Nenhuma otimizacao pendente.");
+        }
+        else
+        {
+            foreach (var optimization in pendingOptimizations)
+            {
+                builder.AppendLine(
+                    $"- {optimization.Title} [{optimization.Category}] | Impacto {optimization.ImpactLabel} | Risco {optimization.RiskLabel} | {optimization.CurrentLabel}");
+            }
+        }
+
+        builder.AppendLine();
+        builder.AppendLine("Otimizacoes ja alinhadas");
+
+        if (alignedOptimizations.Length == 0)
+        {
+            builder.AppendLine("- Nenhuma otimizacao aplicada ainda.");
+        }
+        else
+        {
+            foreach (var optimization in alignedOptimizations)
+            {
+                builder.AppendLine($"- {optimization.Title} [{optimization.Category}] | {optimization.CurrentLabel}");
+            }
+        }
+
+        builder.AppendLine();
+        builder.AppendLine("Observacao");
+        builder.AppendLine("CPU e memoria sao leituras locais do momento. FPS e ganhos apos aplicar pendentes sao estimativas heuristicas do modulo, nao benchmark real ingame.");
+
+        return builder.ToString().TrimEnd();
+    }
+
+    private static void AppendRecommendations(
+        StringBuilder builder,
+        IReadOnlyList<GameBoosterAiRecommendation> recommendations)
+    {
+        if (recommendations.Count == 0)
+        {
+            builder.AppendLine("Sem recomendacoes adicionais registradas.");
+            builder.AppendLine();
+            return;
+        }
+
+        builder.AppendLine("Recomendacoes");
+
+        for (var index = 0; index < recommendations.Count; index++)
+        {
+            var recommendation = recommendations[index];
+            builder.AppendLine($"{index + 1}. [{recommendation.Priority}] {recommendation.Title}");
+            builder.AppendLine($"   Motivo: {recommendation.Reason}");
+            builder.AppendLine($"   Acao: {recommendation.SuggestedAction}");
+
+            if (!string.IsNullOrWhiteSpace(recommendation.RelatedOptimizationId))
+            {
+                builder.AppendLine($"   Relacionado: {recommendation.RelatedOptimizationId}");
+            }
+
+            builder.AppendLine();
+        }
+    }
+
     private async void RefreshGameBoosterButton_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -1108,6 +1386,27 @@ public partial class MainWindow : Window
         {
             EndBusy();
         }
+    }
+
+    private void ShowAiReportButton_Click(object sender, RoutedEventArgs e)
+    {
+        ShowGameBoosterReport(
+            "Relatorio da IA",
+            "Compila a leitura geral do JB GameBooster e a analise dedicada de Rust.",
+            BuildAiReportText());
+    }
+
+    private void ShowComputerReportButton_Click(object sender, RoutedEventArgs e)
+    {
+        ShowGameBoosterReport(
+            "Relatorio do computador",
+            "Mostra a varredura local do PC, os ajustes detectados e as estimativas do booster.",
+            BuildComputerReportText());
+    }
+
+    private void CloseGameBoosterReportButton_Click(object sender, RoutedEventArgs e)
+    {
+        GameBoosterReportBorder.Visibility = Visibility.Collapsed;
     }
 
     private async void ApplyRecommendedGameBoosterButton_Click(object sender, RoutedEventArgs e)
@@ -1284,6 +1583,50 @@ public partial class MainWindow : Window
 
         return _services.GameBoosterAiWorkflowService.SaveSettingsAsync(
             new LocalAiConnectionSettings(endpoint, model));
+    }
+
+    private static string ResolveEffectiveLocalAiModel(string configuredModel, IReadOnlyList<string> availableModels)
+    {
+        if (availableModels.Contains(configuredModel, StringComparer.OrdinalIgnoreCase))
+        {
+            return configuredModel;
+        }
+
+        return SelectPreferredLocalAiModel(availableModels) ?? configuredModel;
+    }
+
+    private static string? SelectPreferredLocalAiModel(IReadOnlyList<string> availableModels)
+    {
+        if (availableModels.Count == 0)
+        {
+            return null;
+        }
+
+        string[] preferredModels =
+        [
+            "llama3.1-local:latest",
+            "llama3.2:latest",
+            "llama3:8b",
+            "gemma3:4b",
+            "gemma3:latest",
+            "deepseek-r1:8b",
+            "qwen2.5-coder:latest"
+        ];
+
+        foreach (var preferredModel in preferredModels)
+        {
+            var exactMatch = availableModels.FirstOrDefault(model =>
+                string.Equals(model, preferredModel, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(exactMatch))
+            {
+                return exactMatch;
+            }
+        }
+
+        return availableModels.FirstOrDefault(model =>
+                   !model.Contains("-cloud", StringComparison.OrdinalIgnoreCase)) ??
+               availableModels[0];
     }
 
     private async Task SetSelectedFeatureStateAsync(bool enabled)
@@ -1731,11 +2074,7 @@ public partial class MainWindow : Window
         string Subtitle,
         string AppliedText);
 
-    private sealed record BuiltInIconItem(
-        string Id,
-        string Label,
-        string Glyph,
-        System.Windows.Media.Brush TileBackgroundBrush);
+
 
     private sealed record RegistryAuditListItem(string DisplayText)
     {
@@ -1766,6 +2105,7 @@ public partial class MainWindow : Window
 
     private enum AppPage
     {
+        IconEditor,
         Home,
         History,
         GameBooster,
@@ -1812,6 +2152,9 @@ public partial class MainWindow : Window
         if (ApplyRecommendedGameBoosterButton != null) ApplyRecommendedGameBoosterButton.IsEnabled = enabled && CanManageWindowsFeatures();
         if (RevertGameBoosterSessionButton != null) RevertGameBoosterSessionButton.IsEnabled = enabled && _canRevertGameBoosterSession;
         if (RefreshGameBoosterButton != null) RefreshGameBoosterButton.IsEnabled = enabled;
+        if (ShowAiReportButton != null) ShowAiReportButton.IsEnabled = enabled;
+        if (ShowComputerReportButton != null) ShowComputerReportButton.IsEnabled = enabled;
+        if (CloseGameBoosterReportButton != null) CloseGameBoosterReportButton.IsEnabled = enabled;
         if (GameBoosterRestorePointCheckBox != null) GameBoosterRestorePointCheckBox.IsEnabled = enabled;
         if (TestLocalAiConnectionButton != null) TestLocalAiConnectionButton.IsEnabled = enabled;
         if (SaveLocalAiSettingsButton != null) SaveLocalAiSettingsButton.IsEnabled = enabled;

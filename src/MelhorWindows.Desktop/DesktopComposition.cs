@@ -27,6 +27,7 @@ internal static class DesktopComposition
         var folderIconIntegrationService = new DesktopIniFolderIconIntegrationService();
         var registryInspectionService = new WindowsRegistryInspectionService();
         var windowsRestorePointService = new PowerShellRestorePointService();
+        var computerDiagnosticsService = new WindowsComputerDiagnosticsService();
         var localAiGameBoosterService = new OllamaLocalAiGameBoosterService();
         var rustGameProfileService = new RustGameProfileService();
         var folderIconWorkflowService = new FolderIconWorkflowService(
@@ -51,7 +52,8 @@ internal static class DesktopComposition
             registryInspectionService,
             registryAuditRepository,
             protectedStateStore,
-            windowsRestorePointService);
+            windowsRestorePointService,
+            computerDiagnosticsService);
         var gameBoosterAiWorkflowService = new GameBoosterAiWorkflowService(
             protectedStateStore,
             localAiGameBoosterService,

@@ -1,0 +1,27 @@
+namespace MelhorWindows.Application.Models;
+
+public sealed record GameBoosterTelemetrySnapshot(
+    int OptimizationGaugePercent,
+    int FpsGaugePercent,
+    int CpuGaugePercent,
+    int MemoryGaugePercent,
+    int EstimatedCurrentFps,
+    int EstimatedProjectedFps,
+    int EstimatedFpsGain,
+    double CurrentCpuUsagePercent,
+    double EstimatedCpuUsageAfterPercent,
+    double EstimatedCpuReliefPercent,
+    double CurrentMemoryUsedGb,
+    double TotalMemoryGb,
+    double EstimatedMemoryUsedAfterGb,
+    double EstimatedMemorySavingsGb,
+    int CurrentMemoryLoadPercent,
+    int EstimatedMemoryLoadAfterPercent,
+    string CpuLabel,
+    int LogicalCoreCount,
+    string WindowsVersion,
+    string OptimizationSummary,
+    string FpsSummary,
+    string CpuSummary,
+    string MemorySummary,
+    IReadOnlyList<string> ScanHighlights);

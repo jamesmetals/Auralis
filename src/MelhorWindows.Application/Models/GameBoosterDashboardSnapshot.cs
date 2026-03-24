@@ -8,4 +8,5 @@ public sealed record GameBoosterDashboardSnapshot(
     OptimizationSafetySettings SafetySettings,
     DateTimeOffset? LastAppliedAtUtc,
     string? LastRestorePointDescription,
-    IReadOnlyList<GameBoosterOptimizationState> Optimizations);
+    IReadOnlyList<GameBoosterOptimizationState> Optimizations,
+    GameBoosterTelemetrySnapshot Telemetry);

@@ -14,7 +14,8 @@ public sealed class GameBoosterWorkflowService(
     IRegistryInspectionService registryInspectionService,
     IRegistryAuditRepository registryAuditRepository,
     IProtectedStateStore protectedStateStore,
-    IWindowsRestorePointService windowsRestorePointService)
+    IWindowsRestorePointService windowsRestorePointService,
+    IComputerDiagnosticsService computerDiagnosticsService)
 {
     private static readonly IReadOnlyList<BoosterDefinition> Catalog =
     [
@@ -113,6 +114,83 @@ public sealed class GameBoosterWorkflowService(
                     "Win32PrioritySeparation",
                     38,
                     RegistryValueKind.DWord)
+            ]),
+
+        // ── Novas otimizacoes baseadas em pesquisa tecnica (2024-2025) ──
+
+        new(
+            "jb-gamebooster.hags",
+            "Hardware Accelerated GPU Scheduling",
+            "GPU",
+            "Transfere o agendamento de frames da CPU para a GPU, reduzindo latencia de entrada em GPUs modernas (RTX 3000+, RX 6000+). Requer driver atualizado e reinicio.",
+            "HAGS ativo — GPU gerencia o proprio agendamento de frames.",
+            "HAGS inativo — CPU ainda gerencia o agendamento de frames da GPU.",
+            "alto",
+            "moderado",
+            RequiresRestart: true,
+            [
+                new RegistryChangeRequest(
+                    RegistryHive.LocalMachine,
+                    @"SYSTEM\CurrentControlSet\Control\GraphicsDrivers",
+                    "HwSchMode",
+                    2,
+                    RegistryValueKind.DWord)
+            ]),
+
+        new(
+            "jb-gamebooster.mmcss-games",
+            "Prioridade MMCSS para Jogos",
+            "CPU",
+            "Configura o agendador multimidia do Windows (MMCSS) para dar maxima prioridade de CPU e GPU a processos de jogo. Algumas instalacoes do Windows podem ter esses valores alterados por updates.",
+            "MMCSS configurado: GPU Priority 8, CPU Priority 6, Scheduling High.",
+            "MMCSS ainda nao esta com prioridade maxima para jogos.",
+            "medio",
+            "seguro",
+            RequiresRestart: false,
+            [
+                new RegistryChangeRequest(
+                    RegistryHive.LocalMachine,
+                    @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
+                    "GPU Priority",
+                    8,
+                    RegistryValueKind.DWord),
+                new RegistryChangeRequest(
+                    RegistryHive.LocalMachine,
+                    @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
+                    "Priority",
+                    6,
+                    RegistryValueKind.DWord),
+                new RegistryChangeRequest(
+                    RegistryHive.LocalMachine,
+                    @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
+                    "Scheduling Category",
+                    "High",
+                    RegistryValueKind.String),
+                new RegistryChangeRequest(
+                    RegistryHive.LocalMachine,
+                    @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
+                    "SFIO Priority",
+                    "High",
+                    RegistryValueKind.String)
+            ]),
+
+        new(
+            "jb-gamebooster.svchost-split",
+            "Consolidacao de Processos do Sistema",
+            "Memoria",
+            "Agrupa servicos do Windows em menos processos svchost, reduzindo context switches e consumo de RAM. Recomendado apenas em sistemas com 16 GB+ de RAM. Requer reinicio.",
+            "Threshold de split configurado para sistemas de alta memoria.",
+            "svchost ainda opera com isolamento padrao por servico.",
+            "baixo",
+            "moderado",
+            RequiresRestart: true,
+            [
+                new RegistryChangeRequest(
+                    RegistryHive.LocalMachine,
+                    @"SYSTEM\CurrentControlSet\Control",
+                    "SvcHostSplitThresholdInKB",
+                    16777216,
+                    RegistryValueKind.DWord)
             ])
     ];
 
@@ -135,6 +213,8 @@ public sealed class GameBoosterWorkflowService(
         var score = Catalog.Count == 0
             ? 0
             : (int)Math.Round((double)optimizedCount / Catalog.Count * 100, MidpointRounding.AwayFromZero);
+        var computerSnapshot = await computerDiagnosticsService.GetSnapshotAsync(cancellationToken);
+        var telemetry = BuildTelemetrySnapshot(states, score, computerSnapshot);
 
         return new GameBoosterDashboardSnapshot(
             BuildProfileName(optimizedCount),
@@ -144,7 +224,8 @@ public sealed class GameBoosterWorkflowService(
             safetySettings,
             lastSession?.AppliedAtUtc,
             lastSession?.RestorePointDescription,
-            states);
+            states,
+            telemetry);
     }
 
     public async Task<OptimizationSafetySettings> GetSafetySettingsAsync(CancellationToken cancellationToken = default)
@@ -409,10 +490,230 @@ public sealed class GameBoosterWorkflowService(
         return optimizedCount switch
         {
             <= 0 => "Modo normal",
-            >= 5 => "Performance maxima",
-            >= 3 => "Balanceado",
+            >= 7 => "Performance maxima",
+            >= 4 => "Balanceado",
             _ => "Custom"
         };
+    }
+
+    private static GameBoosterTelemetrySnapshot BuildTelemetrySnapshot(
+        IReadOnlyList<GameBoosterOptimizationState> states,
+        int optimizationScore,
+        ComputerDiagnosticsSnapshot computerSnapshot)
+    {
+        var appliedStates = states.Where(state => state.IsOptimized).ToArray();
+        var pendingStates = states.Where(state => !state.IsOptimized).ToArray();
+
+        var currentEstimatedFps = EstimateCurrentFps(appliedStates, computerSnapshot);
+        var projectedFpsGain = (int)Math.Round(
+            pendingStates.Sum(GetFpsGainWeight),
+            MidpointRounding.AwayFromZero);
+        var projectedEstimatedFps = Math.Clamp(currentEstimatedFps + projectedFpsGain, currentEstimatedFps, 240);
+
+        var cpuReliefPercent = Math.Round(
+            Math.Min(computerSnapshot.CpuUsagePercent - 2d, pendingStates.Sum(GetCpuReliefWeight)),
+            1,
+            MidpointRounding.AwayFromZero);
+        cpuReliefPercent = Math.Max(0, cpuReliefPercent);
+        var estimatedCpuAfterPercent = Math.Round(
+            Math.Max(2d, computerSnapshot.CpuUsagePercent - cpuReliefPercent),
+            1,
+            MidpointRounding.AwayFromZero);
+
+        var memorySavingsGb = Math.Round(
+            Math.Min(Math.Max(0, computerSnapshot.MemoryUsedGb - 1d), pendingStates.Sum(GetMemorySavingsWeight)),
+            1,
+            MidpointRounding.AwayFromZero);
+        memorySavingsGb = Math.Max(0, memorySavingsGb);
+        var estimatedMemoryUsedAfterGb = Math.Round(
+            Math.Max(0.8d, computerSnapshot.MemoryUsedGb - memorySavingsGb),
+            1,
+            MidpointRounding.AwayFromZero);
+        var estimatedMemoryLoadAfterPercent = computerSnapshot.MemoryTotalGb <= 0
+            ? 0
+            : (int)Math.Round(
+                Math.Clamp(estimatedMemoryUsedAfterGb / computerSnapshot.MemoryTotalGb * 100d, 0d, 100d),
+                MidpointRounding.AwayFromZero);
+
+        var restartPendingCount = pendingStates.Count(state => state.RequiresRestart);
+        var scanHighlights = new List<string>
+        {
+            $"CPU detectada: {computerSnapshot.CpuLabel} ({computerSnapshot.LogicalCoreCount} threads lógicas).",
+            $"Memoria em uso agora: {computerSnapshot.MemoryUsedGb:0.0} GB de {computerSnapshot.MemoryTotalGb:0.0} GB.",
+            $"Estado atual do booster: {appliedStates.Length} de {states.Count} ajustes alinhados.",
+            restartPendingCount == 0
+                ? "Nenhum ajuste pendente exige reinicio no momento."
+                : $"{restartPendingCount} ajuste(s) pendente(s) ainda devem pedir reinicio para entregar tudo."
+        };
+
+        return new GameBoosterTelemetrySnapshot(
+            optimizationScore,
+            NormalizeFpsForGauge(projectedEstimatedFps),
+            (int)Math.Round(Math.Clamp(computerSnapshot.CpuUsagePercent, 0d, 100d), MidpointRounding.AwayFromZero),
+            (int)Math.Round(Math.Clamp(computerSnapshot.MemoryLoadPercent, 0d, 100d), MidpointRounding.AwayFromZero),
+            currentEstimatedFps,
+            projectedEstimatedFps,
+            projectedEstimatedFps - currentEstimatedFps,
+            computerSnapshot.CpuUsagePercent,
+            estimatedCpuAfterPercent,
+            cpuReliefPercent,
+            computerSnapshot.MemoryUsedGb,
+            computerSnapshot.MemoryTotalGb,
+            estimatedMemoryUsedAfterGb,
+            memorySavingsGb,
+            (int)Math.Round(Math.Clamp(computerSnapshot.MemoryLoadPercent, 0d, 100d), MidpointRounding.AwayFromZero),
+            estimatedMemoryLoadAfterPercent,
+            computerSnapshot.CpuLabel,
+            computerSnapshot.LogicalCoreCount,
+            computerSnapshot.WindowsVersion,
+            $"{appliedStates.Length} de {states.Count} otimizacoes ja estao aplicadas neste perfil.",
+            projectedEstimatedFps == currentEstimatedFps
+                ? $"Sem ganho extra relevante estimado agora. Perfil atual: {currentEstimatedFps} FPS estimados."
+                : $"Estimativa heuristica: {currentEstimatedFps} FPS agora, com meta de {projectedEstimatedFps} FPS apos concluir os pendentes.",
+            cpuReliefPercent <= 0
+                ? $"Uso atual da CPU em torno de {computerSnapshot.CpuUsagePercent:0.0}%."
+                : $"Uso atual da CPU em torno de {computerSnapshot.CpuUsagePercent:0.0}%, com alivio estimado de {cpuReliefPercent:0.0} ponto(s).",
+            memorySavingsGb <= 0
+                ? $"RAM atual: {computerSnapshot.MemoryUsedGb:0.0} / {computerSnapshot.MemoryTotalGb:0.0} GB."
+                : $"RAM atual: {computerSnapshot.MemoryUsedGb:0.0} / {computerSnapshot.MemoryTotalGb:0.0} GB, com economia estimada de {memorySavingsGb:0.0} GB.",
+            scanHighlights);
+    }
+
+    private static int EstimateCurrentFps(
+        IReadOnlyList<GameBoosterOptimizationState> appliedStates,
+        ComputerDiagnosticsSnapshot computerSnapshot)
+    {
+        var baseFps = 72;
+        var cpuLabel = computerSnapshot.CpuLabel;
+
+        if (computerSnapshot.MemoryTotalGb >= 32)
+        {
+            baseFps += 14;
+        }
+        else if (computerSnapshot.MemoryTotalGb >= 16)
+        {
+            baseFps += 8;
+        }
+        else if (computerSnapshot.MemoryTotalGb >= 8)
+        {
+            baseFps += 3;
+        }
+
+        baseFps += computerSnapshot.LogicalCoreCount switch
+        {
+            >= 24 => 12,
+            >= 16 => 9,
+            >= 12 => 6,
+            >= 8 => 4,
+            _ => 0
+        };
+
+        if (cpuLabel.Contains("X3D", StringComparison.OrdinalIgnoreCase))
+        {
+            baseFps += 20;
+        }
+        else if (cpuLabel.Contains("Ryzen 9", StringComparison.OrdinalIgnoreCase) ||
+                 cpuLabel.Contains("i9", StringComparison.OrdinalIgnoreCase))
+        {
+            baseFps += 14;
+        }
+        else if (cpuLabel.Contains("Ryzen 7", StringComparison.OrdinalIgnoreCase) ||
+                 cpuLabel.Contains("i7", StringComparison.OrdinalIgnoreCase))
+        {
+            baseFps += 10;
+        }
+        else if (cpuLabel.Contains("Ryzen 5", StringComparison.OrdinalIgnoreCase) ||
+                 cpuLabel.Contains("i5", StringComparison.OrdinalIgnoreCase))
+        {
+            baseFps += 6;
+        }
+
+        var appliedGain = appliedStates.Sum(GetFpsGainWeight);
+        var loadPenalty = computerSnapshot.CpuUsagePercent * 0.35d +
+                          Math.Max(0d, computerSnapshot.MemoryLoadPercent - 62d) * 0.25d;
+
+        return Math.Clamp(
+            (int)Math.Round(baseFps + appliedGain - loadPenalty, MidpointRounding.AwayFromZero),
+            35,
+            240);
+    }
+
+    private static double GetFpsGainWeight(GameBoosterOptimizationState state)
+    {
+        var impactWeight = GetImpactWeight(state.ImpactLabel);
+        var categoryWeight = state.Category switch
+        {
+            "GPU" => 1.45,
+            "Captura" => 1.30,
+            "CPU" => 1.20,
+            "Sistema" => 1.05,
+            "Memoria" => 0.95,
+            "Rede" => 0.75,
+            _ => 1.00
+        };
+
+        return impactWeight * categoryWeight + (state.RequiresRestart ? 0.4 : 0d);
+    }
+
+    private static double GetCpuReliefWeight(GameBoosterOptimizationState state)
+    {
+        var impactWeight = state.ImpactLabel switch
+        {
+            "alto" => 4.2,
+            "medio" => 2.4,
+            "baixo" => 1.1,
+            _ => 1.5
+        };
+
+        var categoryWeight = state.Category switch
+        {
+            "CPU" => 1.20,
+            "Sistema" => 1.00,
+            "Captura" => 0.90,
+            "GPU" => 0.80,
+            "Memoria" => 0.45,
+            _ => 0.35
+        };
+
+        return impactWeight * categoryWeight;
+    }
+
+    private static double GetMemorySavingsWeight(GameBoosterOptimizationState state)
+    {
+        var impactWeight = state.ImpactLabel switch
+        {
+            "alto" => 0.35,
+            "medio" => 0.18,
+            "baixo" => 0.08,
+            _ => 0.12
+        };
+
+        var categoryWeight = state.Category switch
+        {
+            "Memoria" => 1.35,
+            "Captura" => 1.10,
+            "Sistema" => 0.70,
+            "CPU" => 0.45,
+            _ => 0.30
+        };
+
+        return impactWeight * categoryWeight;
+    }
+
+    private static double GetImpactWeight(string impactLabel)
+    {
+        return impactLabel switch
+        {
+            "alto" => 4.4,
+            "medio" => 2.6,
+            "baixo" => 1.2,
+            _ => 1.8
+        };
+    }
+
+    private static int NormalizeFpsForGauge(int fps)
+    {
+        return (int)Math.Round(Math.Clamp(fps / 240d * 100d, 0d, 100d), MidpointRounding.AwayFromZero);
     }
 
     private static bool RegistryValuesEqual(object? left, object? right)

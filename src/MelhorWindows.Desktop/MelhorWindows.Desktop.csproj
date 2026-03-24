@@ -10,6 +10,8 @@
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <AutoSyncInstalledAuralis Condition="'$(AutoSyncInstalledAuralis)' == ''">true</AutoSyncInstalledAuralis>
+    <SkipSyncInstalledAuralis Condition="'$(SkipSyncInstalledAuralis)' == ''">false</SkipSyncInstalledAuralis>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,4 +29,14 @@
     <Resource Include="Assets\AppIcon.ico" />
     <Resource Include="Assets\AppIcon.png" />
   </ItemGroup>
+
+  <Target Name="SyncInstalledAuralis"
+          AfterTargets="Build"
+          Condition="'$(AutoSyncInstalledAuralis)' == 'true'
+            and '$(SkipSyncInstalledAuralis)' != 'true'
+            and '$(DesignTimeBuild)' != 'true'
+            and Exists('$([System.Environment]::ExpandEnvironmentVariables(`%LOCALAPPDATA%\\Programs\\Auralis\\Auralis.exe`))')">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\..\installer\Sync-InstalledAuralis.ps1&quot; -ProjectPath &quot;$(MSBuildProjectFullPath)&quot; -Configuration &quot;$(Configuration)&quot; -InstallRoot &quot;$([System.Environment]::ExpandEnvironmentVariables(`%LOCALAPPDATA%\\Programs\\Auralis`))&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
 </Project>

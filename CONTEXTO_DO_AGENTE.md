@@ -2,6 +2,7 @@
 
 ## Status atual
 - fase: app desktop compilando e testado localmente, com dashboard expandido para o modulo JB GameBooster
+- build do projeto desktop sincroniza automaticamente a instalacao local existente em `%LOCALAPPDATA%\Programs\Auralis`
 - proximo passo: aprofundar o GameBooster por game (comecando por Rust) e retomar autenticacao/licenciamento remoto
 
 ## Objetivo do produto
@@ -112,3 +113,4 @@
 - listar e acionar features de Windows com verificacao de permissao
 - sincronizar historico por usuario autenticado
 - status atual: build release, testes e publish local executados com sucesso
+- status atual: build do desktop tambem atualiza automaticamente o Auralis instalado quando a pasta de instalacao ja existe

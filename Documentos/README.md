@@ -55,6 +55,14 @@ dotnet build MelhorWindows.sln -c Release
 dotnet test MelhorWindows.sln
 ```
 
+Quando o Auralis ja estiver instalado em `%LOCALAPPDATA%\Programs\Auralis`, o build do projeto desktop sincroniza automaticamente a instalacao local com a versao compilada mais recente. Isso fecha o ciclo de desenvolvimento sem precisar reinstalar manualmente a cada ajuste.
+
+Para desativar essa sincronizacao automatica em um build especifico:
+
+```powershell
+dotnet build src\MelhorWindows.Desktop\MelhorWindows.Desktop.csproj -c Release -p:AutoSyncInstalledAuralis=false
+```
+
 Validado neste ambiente:
 
 ```powershell
