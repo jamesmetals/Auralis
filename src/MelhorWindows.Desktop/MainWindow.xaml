@@ -1297,6 +1297,48 @@
 
                                             <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                 <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Otimizacoes automaticas do Rust" />
+                                                    <TextBlock x:Name="RustOptimizationStatusTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="O app pode aplicar ajustes em launch options do Steam e no client.cfg do Rust, um a um ou em lote." TextWrapping="Wrap" />
+                                                    <TextBlock x:Name="RustOptimizationLastAppliedTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma otimizacao automatica do Rust foi aplicada ainda." TextWrapping="Wrap" />
+                                                    <Grid Margin="0,12,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button x:Name="ApplyAllRustOptimizationsButton" Grid.Column="0" Margin="0,0,10,0" Click="ApplyAllRustOptimizationsButton_Click" Content="Aplicar recomendadas do Rust" Style="{StaticResource PrimaryButtonStyle}" />
+                                                        <Border Grid.Column="1" Padding="12,10" Background="#151F2B" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
+                                                            <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Cada item abaixo pode ser aplicado e desfeito individualmente. Itens de BIOS, pagefile e driver continuam como recomendacao manual." TextWrapping="Wrap" />
+                                                        </Border>
+                                                    </Grid>
+                                                    <ItemsControl x:Name="RustOptimizationItemsControl" Margin="0,12,0,0">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                                                                    <StackPanel>
+                                                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
+                                                                        <TextBlock Margin="0,5,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding Category}" />
+                                                                        <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding TargetText}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
+                                                                        <Grid Margin="0,10,0,0">
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="*" />
+                                                                                <ColumnDefinition Width="*" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <Button Grid.Column="0" Margin="0,0,10,0" Tag="{Binding Id}" Click="ApplyRustOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
+                                                                            <Button Grid.Column="1" Tag="{Binding Id}" Click="UndoRustOptimizationButton_Click" Content="{Binding UndoButtonText}" IsEnabled="{Binding CanUndo}" />
+                                                                        </Grid>
+                                                                    </StackPanel>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
+                                                <StackPanel>
                                                     <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Leitura consultiva para Rust" />
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>

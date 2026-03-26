@@ -9,7 +9,7 @@ public sealed class GameBoosterAiWorkflowService(
     IProtectedStateStore protectedStateStore,
     ILocalAiGameBoosterService localAiGameBoosterService,
     GameBoosterWorkflowService gameBoosterWorkflowService,
-    IRustGameProfileService rustGameProfileService)
+    RustGameOptimizationWorkflowService rustGameOptimizationWorkflowService)
 {
     public async Task<GameBoosterAiPanelSnapshot> GetPanelSnapshotAsync(CancellationToken cancellationToken = default)
     {
@@ -128,12 +128,16 @@ public sealed class GameBoosterAiWorkflowService(
 
     public async Task<RustGameBoosterPanelSnapshot> GetRustPanelSnapshotAsync(CancellationToken cancellationToken = default)
     {
-        var profile = await rustGameProfileService.GetSnapshotAsync(cancellationToken);
+        var rustCatalog = await rustGameOptimizationWorkflowService.GetSnapshotAsync(cancellationToken);
         var lastAnalysis = await protectedStateStore.LoadAsync<RustGameBoosterAiAnalysisSnapshot>(
             OptimizationStateKeys.LocalAiRustLastAnalysis,
             cancellationToken);
 
-        return new RustGameBoosterPanelSnapshot(profile, lastAnalysis);
+        return new RustGameBoosterPanelSnapshot(
+            rustCatalog.Profile,
+            rustCatalog.Optimizations,
+            rustCatalog.LastAppliedAtUtc,
+            lastAnalysis);
     }
 
     public async Task<OperationResult<RustGameBoosterPanelSnapshot>> AnalyzeRustAsync(CancellationToken cancellationToken = default)
@@ -152,11 +156,11 @@ public sealed class GameBoosterAiWorkflowService(
                 BuildModelUnavailableMessage(settings.ModelName, availability));
         }
 
-        var rustProfile = await rustGameProfileService.GetSnapshotAsync(cancellationToken);
+        var rustCatalog = await rustGameOptimizationWorkflowService.GetSnapshotAsync(cancellationToken);
         var boosterSnapshot = await gameBoosterWorkflowService.GetDashboardSnapshotAsync(cancellationToken);
         var analysis = await localAiGameBoosterService.AnalyzeRustProfileAsync(
             settings,
-            rustProfile,
+            rustCatalog.Profile,
             boosterSnapshot,
             cancellationToken);
 
@@ -165,9 +169,37 @@ public sealed class GameBoosterAiWorkflowService(
             analysis,
             cancellationToken);
 
+        var refreshedRustCatalog = await rustGameOptimizationWorkflowService.GetSnapshotAsync(cancellationToken);
         return OperationResult<RustGameBoosterPanelSnapshot>.Success(
-            new RustGameBoosterPanelSnapshot(rustProfile, analysis),
+            new RustGameBoosterPanelSnapshot(
+                refreshedRustCatalog.Profile,
+                refreshedRustCatalog.Optimizations,
+                refreshedRustCatalog.LastAppliedAtUtc,
+                analysis),
             "Leitura consultiva do Rust concluida. Nenhuma alteracao foi aplicada automaticamente.");
+    }
+
+    public async Task<OperationResult<RustGameBoosterPanelSnapshot>> ApplyRustOptimizationAsync(
+        string optimizationId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await rustGameOptimizationWorkflowService.ApplyOptimizationAsync(optimizationId, cancellationToken);
+        return await BuildRustOperationResultAsync(result, cancellationToken);
+    }
+
+    public async Task<OperationResult<RustGameBoosterPanelSnapshot>> ApplyAllRustOptimizationsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var result = await rustGameOptimizationWorkflowService.ApplyRecommendedAsync(cancellationToken);
+        return await BuildRustOperationResultAsync(result, cancellationToken);
+    }
+
+    public async Task<OperationResult<RustGameBoosterPanelSnapshot>> RevertRustOptimizationAsync(
+        string optimizationId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await rustGameOptimizationWorkflowService.RevertOptimizationAsync(optimizationId, cancellationToken);
+        return await BuildRustOperationResultAsync(result, cancellationToken);
     }
 
     private async Task<LocalAiConnectionSettings> LoadSettingsAsync(CancellationToken cancellationToken)
@@ -192,5 +224,27 @@ public sealed class GameBoosterAiWorkflowService(
         return string.IsNullOrWhiteSpace(availability.SuggestedPullCommand)
             ? $"O modelo configurado ({modelName}) nao esta disponivel para a chave atual do Gemini. Escolha um dos modelos listados."
             : $"O modelo configurado ({modelName}) nao esta disponivel. Rode `{availability.SuggestedPullCommand}` ou escolha um modelo listado.";
+    }
+
+    private async Task<OperationResult<RustGameBoosterPanelSnapshot>> BuildRustOperationResultAsync(
+        OperationResult<RustGameOptimizationCatalogSnapshot> result,
+        CancellationToken cancellationToken)
+    {
+        if (!result.Succeeded || result.Value is null)
+        {
+            return OperationResult<RustGameBoosterPanelSnapshot>.Failure(result.Message);
+        }
+
+        var lastAnalysis = await protectedStateStore.LoadAsync<RustGameBoosterAiAnalysisSnapshot>(
+            OptimizationStateKeys.LocalAiRustLastAnalysis,
+            cancellationToken);
+
+        return OperationResult<RustGameBoosterPanelSnapshot>.Success(
+            new RustGameBoosterPanelSnapshot(
+                result.Value.Profile,
+                result.Value.Optimizations,
+                result.Value.LastAppliedAtUtc,
+                lastAnalysis),
+            result.Message);
     }
 }

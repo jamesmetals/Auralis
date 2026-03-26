@@ -1120,6 +1120,27 @@ public partial class MainWindow : Window
             rustPanel.LastAnalysis?.ExecutiveSummary,
             "A leitura avalia argumentos de inicializacao, memoria e folga do sistema para o Rust.");
         RustAiSummaryTextBlock.Text = $"{rustSummary} Esta secao apenas recomenda proximos passos; ela nao aplica mudancas no jogo ou no Windows automaticamente.";
+        var appliedRustOptimizations = rustPanel.Optimizations.Count(item => item.IsApplied);
+        var pendingRustOptimizations = rustPanel.Optimizations.Count(item => item.CanApply);
+        RustOptimizationStatusTextBlock.Text = $"{appliedRustOptimizations} ajuste(s) automatico(s) do Rust ja estao alinhados. {pendingRustOptimizations} ainda podem ser aplicados agora.";
+        RustOptimizationLastAppliedTextBlock.Text = rustPanel.LastAppliedAtUtc is null
+            ? "Nenhuma otimizacao automatica do Rust foi aplicada ainda."
+            : $"Ultima aplicacao automatica de Rust em {rustPanel.LastAppliedAtUtc.Value.ToLocalTime():dd/MM/yyyy HH:mm}.";
+        ApplyAllRustOptimizationsButton.IsEnabled = pendingRustOptimizations > 0;
+        RustOptimizationItemsControl.ItemsSource = rustPanel.Optimizations
+            .Select(item => new RustOptimizationListItem(
+                item.Id,
+                item.Title,
+                item.Category,
+                item.Description,
+                item.TargetText,
+                item.CurrentText,
+                item.RecommendedText,
+                item.CanApply,
+                item.CanUndo,
+                item.ApplyButtonText,
+                item.UndoButtonText))
+            .ToArray();
 
         RustAiRecommendationItemsControl.ItemsSource = rustPanel.LastAnalysis?.Recommendations
             .Select(item => new LocalAiRecommendationListItem(
@@ -1342,6 +1363,28 @@ public partial class MainWindow : Window
                 : "Steam localconfig.vdf nao detectado neste perfil.");
             builder.AppendLine($"Launch options sugeridos: {rustProfile.LaunchOptions}");
             builder.AppendLine("Status do painel Rust: leitura consultiva, sem aplicacao automatica no jogo.");
+
+            if (_latestRustPanelSnapshot is not null)
+            {
+                var appliedRustOptimizations = _latestRustPanelSnapshot.Optimizations.Where(item => item.IsApplied).ToArray();
+                builder.AppendLine();
+                builder.AppendLine("Otimizacoes automaticas do Rust");
+                builder.AppendLine(_latestRustPanelSnapshot.LastAppliedAtUtc is null
+                    ? "Nenhuma otimizacao automatica aplicada ainda."
+                    : $"Ultima aplicacao automatica: {_latestRustPanelSnapshot.LastAppliedAtUtc.Value.ToLocalTime():dd/MM/yyyy HH:mm}");
+
+                if (appliedRustOptimizations.Length == 0)
+                {
+                    builder.AppendLine("- Nenhum item automatico alinhado ainda.");
+                }
+                else
+                {
+                    foreach (var optimization in appliedRustOptimizations)
+                    {
+                        builder.AppendLine($"- {optimization.Title} | {optimization.CurrentText}");
+                    }
+                }
+            }
         }
 
         builder.AppendLine();
@@ -1688,6 +1731,94 @@ public partial class MainWindow : Window
                     exception.Message,
                     "Nao foi possivel concluir o diagnostico de Rust."),
                 isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private async void ApplyAllRustOptimizationsButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            BeginBusy("Aplicando otimizacoes automaticas do Rust...");
+            var result = await _services.GameBoosterAiWorkflowService.ApplyAllRustOptimizationsAsync();
+            SetStatus(
+                NormalizeAiUserMessage(
+                    result.Message,
+                    result.Succeeded
+                        ? "Otimizacoes automaticas do Rust aplicadas."
+                        : "Nao foi possivel aplicar as otimizacoes automaticas do Rust."),
+                isError: !result.Succeeded);
+
+            await LoadRustPanelAsync();
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private async void ApplyRustOptimizationButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string optimizationId })
+        {
+            return;
+        }
+
+        try
+        {
+            BeginBusy("Aplicando ajuste individual do Rust...");
+            var result = await _services.GameBoosterAiWorkflowService.ApplyRustOptimizationAsync(optimizationId);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    result.Message,
+                    result.Succeeded
+                        ? "Ajuste do Rust aplicado."
+                        : "Nao foi possivel aplicar o ajuste do Rust."),
+                isError: !result.Succeeded);
+
+            await LoadRustPanelAsync();
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private async void UndoRustOptimizationButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string optimizationId })
+        {
+            return;
+        }
+
+        try
+        {
+            BeginBusy("Desfazendo ajuste do Rust...");
+            var result = await _services.GameBoosterAiWorkflowService.RevertRustOptimizationAsync(optimizationId);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    result.Message,
+                    result.Succeeded
+                        ? "Ajuste do Rust desfeito."
+                        : "Nao foi possivel desfazer o ajuste do Rust."),
+                isError: !result.Succeeded);
+
+            await LoadRustPanelAsync();
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
         }
         finally
         {
@@ -2275,6 +2406,19 @@ public partial class MainWindow : Window
         string Reason,
         string SuggestedAction,
         string RelatedOptimizationText);
+
+    private sealed record RustOptimizationListItem(
+        string Id,
+        string Title,
+        string Category,
+        string Description,
+        string TargetText,
+        string CurrentText,
+        string RecommendedText,
+        bool CanApply,
+        bool CanUndo,
+        string ApplyButtonText,
+        string UndoButtonText);
 
     private enum AppPage
     {

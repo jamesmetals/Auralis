@@ -30,6 +30,9 @@ internal static class DesktopComposition
         var computerDiagnosticsService = new WindowsComputerDiagnosticsService();
         var localAiGameBoosterService = new GoogleGeminiLocalAiGameBoosterService();
         var rustGameProfileService = new RustGameProfileService();
+        var rustGameOptimizationWorkflowService = new RustGameOptimizationWorkflowService(
+            protectedStateStore,
+            rustGameProfileService);
         var folderIconWorkflowService = new FolderIconWorkflowService(
             authorizationService,
             userContext,
@@ -58,7 +61,7 @@ internal static class DesktopComposition
             protectedStateStore,
             localAiGameBoosterService,
             gameBoosterWorkflowService,
-            rustGameProfileService);
+            rustGameOptimizationWorkflowService);
 
         return new DesktopServices(
             appDataPaths,

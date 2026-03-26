@@ -7,4 +7,5 @@ public static class OptimizationStateKeys
     public const string LocalAiSettings = "jb-gamebooster.local-ai-settings";
     public const string LocalAiLastAnalysis = "jb-gamebooster.local-ai-last-analysis";
     public const string LocalAiRustLastAnalysis = "jb-gamebooster.local-ai-rust-last-analysis";
+    public const string RustOptimizationState = "jb-gamebooster.rust-optimization-state";
 }
