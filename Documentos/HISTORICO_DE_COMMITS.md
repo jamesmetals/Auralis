@@ -2,6 +2,11 @@
 
 Registro resumido dos commits atuais do projeto, com foco no que foi alterado em cada etapa.
 
+## 354ab89 · 2026-03-26 · feat: refactor desktop UI with Pico-inspired design
+- refez o design system do desktop com tipografia Figtree, acento laranja, superfícies arredondadas, sombras suaves e fundo em camadas inspirado na referencia Pico.
+- reorganizou estilos de botoes, campos, navegacao lateral, cards, overlays e telas do GameBooster sem alterar a logica de negocio.
+- limpou mensagens e estados remanescentes da fase Ollama para o fluxo atual com Google Gemini.
+
 ## 5df9da6 · 2026-03-26 · feat: migrate JB GameBooster AI flow to Gemini
 - trocou o provedor de IA do JB GameBooster para Google Gemini.
 - adicionou `GoogleGeminiLocalAiGameBoosterService` e ajustou diagnostico, workflow, configuracao e UI para o novo fluxo.
