@@ -2,6 +2,11 @@
 
 Registro resumido dos commits atuais do projeto, com foco no que foi alterado em cada etapa.
 
+## 154865e - 2026-03-26 - fix: clarify Rust analysis is advisory only
+- deixou explicito no painel do Rust que a leitura da IA e apenas consultiva e nao aplica alteracoes automaticamente no jogo, Steam ou Windows.
+- ajustou o texto do botao, do resumo, dos cards e do relatorio para diferenciar melhor "proximo passo sugerido" de "acao ja aplicada".
+- alinhou a mensagem de sucesso do fluxo de Rust para remover a ambiguidade entre diagnostico e aplicacao real.
+
 ## 745f142 - 2026-03-26 - feat: add research-driven Rust optimization knowledge
 - adicionou uma base persistida de conhecimento para Rust em JSON, com regras classificadas por confianca, tipo de ajuste e condicoes por CPU, RAM, GPU/vendor e carga de memoria.
 - integrou essa base ao prompt da IA para que as recomendacoes do Rust deixem de ser genericas e passem a respeitar o hardware detectado no snapshot atual.
