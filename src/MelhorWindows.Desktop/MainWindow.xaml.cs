@@ -1102,7 +1102,7 @@ public partial class MainWindow : Window
         RustMemoryTextBlock.Text = $"{profile.TotalRamGb} GB detectados ({profile.MemoryTierLabel})";
         RustPriorityHintTextBlock.Text = profile.AvoidHighPriorityFlag
             ? "CPU com perfil X3D detectado: o preset evita `-high` por padrao."
-            : "Sem restricao especial para `-high` no preset inicial.";
+            : "Preset conservador: `-high` nao entra por padrao e deve ser testado com cautela.";
         RustLaunchOptionsTextBox.Text = profile.LaunchOptions;
         RustClientCommandsTextBox.Text = string.Join(Environment.NewLine, profile.RecommendedClientCommands);
         RustSteamPathTextBlock.Text = profile.SteamConfigDetected

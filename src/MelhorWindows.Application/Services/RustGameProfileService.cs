@@ -16,7 +16,7 @@ public sealed class RustGameProfileService : IRustGameProfileService
         var cpuLabel = ReadCpuLabel();
         var totalRamGb = DetectTotalRamGb();
         var avoidHighPriority = cpuLabel.Contains("X3D", StringComparison.OrdinalIgnoreCase);
-        var launchOptions = BuildLaunchOptions(totalRamGb, avoidHighPriority);
+        var launchOptions = BuildLaunchOptions();
         var gcBufferCommand = totalRamGb >= 32 ? "gc.buffer 4096" : totalRamGb >= 16 ? "gc.buffer 2048" : "gc.buffer 1024";
         var clientConfigPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -74,27 +74,13 @@ public sealed class RustGameProfileService : IRustGameProfileService
         return gigabytes;
     }
 
-    private static string BuildLaunchOptions(int totalRamGb, bool avoidHighPriority)
+    private static string BuildLaunchOptions()
     {
-        var maxMem = totalRamGb switch
-        {
-            >= 32 => 24576,
-            >= 16 => 12288,
-            _ => 6144
-        };
-
         var options = new List<string>
         {
-            $"-maxMem={maxMem}",
-            "-malloc=system",
             "-nolog",
             "-no-browser"
         };
-
-        if (!avoidHighPriority)
-        {
-            options.Insert(0, "-high");
-        }
 
         return string.Join(" ", options);
     }
@@ -167,7 +153,7 @@ public sealed class RustGameProfileService : IRustGameProfileService
 
         var priorityNote = avoidHighPriority
             ? "CPU com perfil X3D detectado; evitar `-high` por padrao."
-            : "Pode usar `-high` no launch options se o restante do sistema estiver estavel.";
+            : "Preset inicial conservador: `-high` fica fora por padrao e so deve entrar como teste pontual.";
 
         var fileNote = clientConfigDetected || steamConfigDetected
             ? "Arquivos locais do Rust/Steam foram encontrados para a proxima fase de automacao."

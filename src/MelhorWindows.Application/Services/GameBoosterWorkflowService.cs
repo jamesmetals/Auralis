@@ -604,6 +604,7 @@ public sealed class GameBoosterWorkflowService(
         var scanHighlights = new List<string>
         {
             $"CPU detectada: {computerSnapshot.CpuLabel} ({computerSnapshot.LogicalCoreCount} threads lógicas).",
+            $"GPU detectada: {computerSnapshot.GpuLabel}.",
             $"Memoria em uso agora: {computerSnapshot.MemoryUsedGb:0.0} GB de {computerSnapshot.MemoryTotalGb:0.0} GB.",
             $"Estado atual do booster: {appliedStates.Length} de {states.Count} ajustes alinhados.",
             restartPendingCount == 0
@@ -628,6 +629,7 @@ public sealed class GameBoosterWorkflowService(
             memorySavingsGb,
             (int)Math.Round(Math.Clamp(computerSnapshot.MemoryLoadPercent, 0d, 100d), MidpointRounding.AwayFromZero),
             estimatedMemoryLoadAfterPercent,
+            computerSnapshot.GpuLabel,
             computerSnapshot.CpuLabel,
             computerSnapshot.LogicalCoreCount,
             computerSnapshot.WindowsVersion,

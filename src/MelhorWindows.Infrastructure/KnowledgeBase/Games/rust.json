@@ -1,0 +1,210 @@
+{
+  "gameKey": "rust",
+  "gameTitle": "Rust",
+  "researchDate": "2026-03-26",
+  "researchSummary": "A pesquisa consolidada aponta que Rust continua muito sensivel a CPU, cache, RAM, pagefile e frametime em servidores cheios. Ajustes de driver, launch options e Windows ajudam, mas o ganho real depende de sintomas concretos e do nivel do hardware.",
+  "sources": [
+    {
+      "label": "Facepunch Support - GPU Skinning Test",
+      "url": "https://support.facepunchstudios.com/hc/en-us/articles/23006747642525-GPU-Skinning-Test",
+      "evidenceLevel": "Oficial"
+    },
+    {
+      "label": "Facepunch Support - Managing your Virtual Memory/Pagefile",
+      "url": "https://support.facepunchstudios.com/hc/en-us/articles/29737736165149-Managing-your-Virtual-Memory-Pagefile",
+      "evidenceLevel": "Oficial"
+    },
+    {
+      "label": "Facepunch Support - Verify Rust Files",
+      "url": "https://support.facepunchstudios.com/hc/en-us/articles/360008398478",
+      "evidenceLevel": "Oficial"
+    },
+    {
+      "label": "Facepunch Support - Failed to initialize ReShade",
+      "url": "https://support.facepunchstudios.com/hc/en-us/articles/24444483513373-Failed-to-initialize-Reshade",
+      "evidenceLevel": "Oficial"
+    },
+    {
+      "label": "Steam Community Guide - [2026] RUST FPS+",
+      "url": "https://steamcommunity.com/sharedfiles/filedetails/?id=3081809156",
+      "evidenceLevel": "Comunidade"
+    },
+    {
+      "label": "Reddit r/playrust - FPS issues",
+      "url": "https://www.reddit.com/r/playrust/comments/1kyoavk/fps_issues/",
+      "evidenceLevel": "Comunidade"
+    },
+    {
+      "label": "Reddit r/playrust - Stuttering issue on medium-end PC, no solution",
+      "url": "https://www.reddit.com/r/playrust/comments/17ocpl2/stuttering_issue_on_mediumend_pc_no_solution/",
+      "evidenceLevel": "Comunidade"
+    }
+  ],
+  "corePrinciples": [
+    "Rust costuma ser limitado por CPU, cache e RAM muito antes de esgotar a GPU em servidores lotados.",
+    "32 GB de RAM melhoram a folga e os 1% lows; 16 GB ainda roda, mas stutter e pagefile ficam bem mais relevantes.",
+    "XMP/EXPO ou memoria rodando na frequencia correta aparece repetidamente como fator importante para consistencia de frametime.",
+    "GPU Skinning e ajustes de driver devem ser tratados como teste orientado a sintoma, nao como ganho garantido para todo PC.",
+    "Launch options antigas, empilhadas sem criterio, aparecem muito em guias da comunidade e frequentemente entregam placebo ou risco."
+  ],
+  "mythsToAvoid": [
+    "Nao vender 'tudo no low' como receita universal; em Rust isso pode manter ou piorar gargalo de CPU.",
+    "Nao recomendar -high como padrao cego, especialmente em CPUs X3D ou quando o sistema ja esta estavel.",
+    "Nao tratar tweaks de registro, ISLC, ReShade ou otimizacoes milagrosas de video como obrigatorios.",
+    "Nao assumir que o problema e sempre GPU; em Rust, single-core, cache, RAM e servidor costumam pesar muito."
+  ],
+  "recommendationRules": [
+    {
+      "id": "rust-pagefile-managed",
+      "priority": "Alta",
+      "ruleType": "windows-memory",
+      "title": "Pagefile gerenciado pelo Windows em SSD/NVMe",
+      "recommendation": "Se o PC estiver com 16 GB ou menos, validar arquivo de paginacao automatico e espaco livre no disco para reduzir travadas longas e falhas ao carregar assets.",
+      "reason": "A Facepunch documenta pagefile como ponto recorrente e a comunidade associa stutter e quedas de frametime a memoria pressionada.",
+      "applicability": "Priorizar em maquinas com 16 GB ou menos, especialmente quando o jogo trava mais em bases, servidores cheios ou apos muito tempo de sessao.",
+      "confidence": "Alta",
+      "conditions": {
+        "maxRamGb": 16
+      }
+    },
+    {
+      "id": "rust-background-load",
+      "priority": "Alta",
+      "ruleType": "windows-background",
+      "title": "Reduzir overlays, gravadores e processos pesados em segundo plano",
+      "recommendation": "Cortar navegador aberto, overlays, gravacao, apps RGB e qualquer processo grande antes de avaliar novas configs do Rust.",
+      "reason": "Comunidade e diagnosticos recorrentes mostram que Rust sofre muito com memoria apertada e frametime instavel quando o Windows ja entra pressionado.",
+      "applicability": "Subir esta regra quando a memoria do Windows estiver alta ou quando houver muitos processos residuais no snapshot.",
+      "confidence": "Alta",
+      "conditions": {
+        "minMemoryLoadPercent": 60
+      }
+    },
+    {
+      "id": "rust-gpu-skinning-test",
+      "priority": "Media",
+      "ruleType": "experimental",
+      "title": "Testar branch GPU Skinning quando houver queda forte ao segurar armas ou microstutter estranho",
+      "recommendation": "Apresentar GPU Skinning como teste reversivel quando o hardware e forte para Rust, mas o jogo continua com frametime ruim ou FPS cai ao equipar itens/armas.",
+      "reason": "A Facepunch mantem orientacao oficial para testar essa branch em casos especificos e a comunidade reporta melhoria em parte das maquinas.",
+      "applicability": "Vale como experimento controlado quando o jogo esta anormalmente ruim para o hardware ou quando o sintoma bate com quedas ao segurar armas.",
+      "confidence": "Media",
+      "conditions": null
+    },
+    {
+      "id": "rust-nvidia-driver-profile",
+      "priority": "Media",
+      "ruleType": "driver",
+      "title": "Ajustar o painel da NVIDIA com foco em estabilidade, nao em exotismo",
+      "recommendation": "Se a GPU for NVIDIA, considerar revisar power management, limitar overlays e evitar perfis agressivos demais antes de usar hacks de inspector.",
+      "reason": "Guias de comunidade frequentemente passam pelo painel/driver, mas os ganhos mais consistentes aparecem quando se evita conflito de energia, overlay e filtros extras.",
+      "applicability": "So usar quando o hardware atual for NVIDIA e o usuario realmente estiver jogando Rust nessa maquina.",
+      "confidence": "Media",
+      "conditions": {
+        "gpuVendorsAny": [
+          "nvidia"
+        ]
+      }
+    },
+    {
+      "id": "rust-amd-driver-profile",
+      "priority": "Media",
+      "ruleType": "driver",
+      "title": "Limpar recursos pesados do AMD Adrenalin antes de culpar o jogo",
+      "recommendation": "Se a GPU for AMD, revisar Anti-Lag, Radeon Boost, overlay, gravacao e filtros pesados caso estejam piorando consistencia em vez de ajudar.",
+      "reason": "Em drivers AMD, features de overlay/captura e tuning automatico podem atrapalhar frametime dependendo da combinacao de jogo e sistema.",
+      "applicability": "So sugerir quando a GPU detectada for AMD/Radeon.",
+      "confidence": "Media",
+      "conditions": {
+        "gpuVendorsAny": [
+          "amd"
+        ]
+      }
+    },
+    {
+      "id": "rust-xmp-expo",
+      "priority": "Alta",
+      "ruleType": "bios-memory",
+      "title": "Validar XMP/EXPO e frequencia real da memoria",
+      "recommendation": "Se houver suspeita de desempenho abaixo do esperado para o hardware, confirmar no BIOS e no Windows se a RAM esta de fato rodando no perfil correto.",
+      "reason": "Nos relatos recorrentes, Rust responde bem a largura de banda e latencia de memoria; RAM fora do perfil certo derruba consistencia sem o usuario perceber.",
+      "applicability": "Vale para praticamente qualquer PC gamer, mas ganha prioridade quando o hardware teorico deveria render mais.",
+      "confidence": "Alta",
+      "conditions": null
+    },
+    {
+      "id": "rust-avoid-old-launch-options",
+      "priority": "Alta",
+      "ruleType": "launch-options",
+      "title": "Evitar empilhar launch options antigas ou placebo",
+      "recommendation": "Partir de launch options curtas e justificar cada flag; so manter parametros antigos se houver motivo observavel e reversivel.",
+      "reason": "Guias de comunidade frequentemente reciclam flags antigas e contraditorias; isso gera ruido, dificulta diagnostico e pode mascarar o problema real.",
+      "applicability": "Sempre relevante quando a lista de launch options comeca a crescer sem metodologia clara.",
+      "confidence": "Alta",
+      "conditions": null
+    },
+    {
+      "id": "rust-low-is-not-always-best",
+      "priority": "Media",
+      "ruleType": "graphics-balance",
+      "title": "Nao assumir que tudo no low e o melhor preset",
+      "recommendation": "Em PCs que sofrem mais com CPU do que com GPU, considerar preset equilibrado em vez de zerar tudo; isso evita piorar gargalo de CPU e pode estabilizar frametime.",
+      "reason": "A comunidade repete que Rust nem sempre melhora quando todos os sliders vao ao minimo, especialmente em rigs CPU-bound.",
+      "applicability": "Entrar em cena quando a GPU tem folga, mas a experiencia segue ruim por limitacao de CPU, cache ou servidor.",
+      "confidence": "Media",
+      "conditions": null
+    },
+    {
+      "id": "rust-avoid-high-on-x3d",
+      "priority": "Media",
+      "ruleType": "launch-options",
+      "title": "Evitar prioridade alta como regra fixa em CPUs X3D",
+      "recommendation": "Se a CPU for X3D, tratar -high ou prioridades agressivas como excecao testada, nao como configuracao padrao.",
+      "reason": "CPUs X3D ja entregam muito desempenho em Rust pelo cache; forcacao de prioridade raramente e o grande diferencial e pode complicar estabilidade.",
+      "applicability": "Somente para processadores com perfil X3D detectado.",
+      "confidence": "Media",
+      "conditions": {
+        "cpuContainsAny": [
+          "X3D"
+        ]
+      }
+    },
+    {
+      "id": "rust-upgrade-path-x3d",
+      "priority": "Baixa",
+      "ruleType": "upgrade-path",
+      "title": "Tratar CPU X3D como caminho de upgrade, nao como tweak imediato",
+      "recommendation": "Se o usuario ja esgotou ajustes seguros e quer mais consistencia em servidores cheios, registrar X3D como rota de upgrade futuro em vez de prometer milagre de software.",
+      "reason": "Guias e relatos da comunidade reforcam que o salto mais claro em Rust vem de CPU/cache fortes, nao de colecao infinita de tweaks.",
+      "applicability": "Faz sentido quando o usuario nao tem CPU X3D e procura ganhos alem das otimizacoes reversiveis.",
+      "confidence": "Media",
+      "conditions": {
+        "cpuExcludesAny": [
+          "X3D"
+        ]
+      }
+    },
+    {
+      "id": "rust-verify-files-after-update",
+      "priority": "Baixa",
+      "ruleType": "diagnostic",
+      "title": "Verificar integridade dos arquivos quando o problema apareceu apos update",
+      "recommendation": "Se a regressao de FPS ou travamento comecou apos update, patch ou crash, usar verificacao de integridade antes de mergulhar em tweaks mais profundos.",
+      "reason": "A Facepunch mantem essa acao como suporte oficial para inconsistencias de arquivos e erros incomuns.",
+      "applicability": "Nao e ajuste permanente; e um passo de triagem quando o sintoma surgiu do nada depois de atualizacao.",
+      "confidence": "Alta",
+      "conditions": null
+    },
+    {
+      "id": "rust-avoid-reshade",
+      "priority": "Baixa",
+      "ruleType": "compatibility",
+      "title": "Evitar ReShade e camadas visuais nao suportadas",
+      "recommendation": "Nao sugerir ReShade, filtros externos ou gambiarras visuais como forma de ganhar FPS; se houver falha de inicializacao, remover isso da conta.",
+      "reason": "A Facepunch documenta ReShade como nao suportado e isso adiciona ruido de compatibilidade ao diagnostico.",
+      "applicability": "Importante quando o usuario reporta erro apos mods visuais, injectors ou overlays mais invasivos.",
+      "confidence": "Alta",
+      "conditions": null
+    }
+  ]
+}

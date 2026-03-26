@@ -17,6 +17,7 @@ public sealed record GameBoosterTelemetrySnapshot(
     double EstimatedMemorySavingsGb,
     int CurrentMemoryLoadPercent,
     int EstimatedMemoryLoadAfterPercent,
+    string GpuLabel,
     string CpuLabel,
     int LogicalCoreCount,
     string WindowsVersion,

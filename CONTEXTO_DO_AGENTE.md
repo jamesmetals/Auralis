@@ -1,9 +1,9 @@
 # CONTEXTO DO AGENTE - MelhorWindows
 
 ## Status atual
-- fase: app desktop compilando e testado localmente, com dashboard expandido para o modulo JB GameBooster e identidade visual refatorada
+- fase: app desktop compilando e testado localmente, com dashboard expandido para o modulo JB GameBooster, identidade visual refatorada e base pesquisada inicial de Rust ligada ao prompt da IA
 - build do projeto desktop sincroniza automaticamente a instalacao local existente em `%LOCALAPPDATA%\Programs\Auralis`
-- proximo passo: aprofundar o GameBooster por game (comecando por Rust), reduzir textos legados da fase Ollama e retomar autenticacao/licenciamento remoto
+- proximo passo: ampliar a base pesquisada por game alem de Rust, revisar heuristicas antigas de launch options e retomar autenticacao/licenciamento remoto
 
 ## Objetivo do produto
 - Aplicativo Windows para personalizar, facilitar e automatizar configuracoes e estilizacao do sistema.
@@ -49,6 +49,7 @@
   - camada 2: servicos de negocio
   - camada 3: integracao com Windows
   - camada 4: backend de identidade, licenca e sincronizacao
+- perfis por game devem combinar heuristica local + base pesquisada persistida + triagem por hardware antes de recomendar ajustes ao usuario.
 - UI atual: manter a estrutura do desktop e a logica de negocio, mas seguir uma linguagem visual inspirada na referencia Pico com Figtree, superfícies arredondadas, contraste alto, acento laranja e fundo com camadas sutis.
 
 ## RBAC aprovado
@@ -102,6 +103,7 @@
 - O JB GameBooster ainda esta na fase inicial e cobre apenas ajustes gerais e reversiveis via Registry; perfis por game, launch options e monitoramento continuo continuam em aberto.
 - A analise local depende do Ollama estar ativo e com pelo menos um modelo baixado; o app ja detecta indisponibilidade e modelos ausentes.
 - O modulo de Rust ainda esta em fase de recomendacao e analise; a automacao de escrita em `localconfig.vdf` e `client.cfg` ainda nao foi implementada.
+- A pesquisa de YouTube/comentarios ainda entra com limitacao de acesso automatizado; por isso a consolidacao atual pesa mais oficial + Steam + Reddit e trata o sinal de video como complemento, nao como verdade absoluta.
 
 ## O que validar no scaffold inicial
 - abrir janela recebendo caminho de pasta como argumento

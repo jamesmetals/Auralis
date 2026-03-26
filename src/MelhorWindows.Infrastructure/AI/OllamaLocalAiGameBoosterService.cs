@@ -343,17 +343,24 @@ public sealed class OllamaLocalAiGameBoosterService : ILocalAiGameBoosterService
     {
         var serializedRustProfile = JsonSerializer.Serialize(rustProfile, SerializerOptions);
         var serializedBooster = JsonSerializer.Serialize(boosterSnapshot, SerializerOptions);
+        var knowledgeContext = GameOptimizationPromptContextBuilder.BuildRustKnowledgeContext(rustProfile, boosterSnapshot);
 
         return
             """
-            Analise o perfil local de Rust e o estado geral do JB GameBooster.
+            Analise o perfil local de Rust e o estado geral do JB GameBooster usando a base pesquisada persistida.
 
             Regras:
             - Responda estritamente no JSON pedido pelo schema.
             - Nao invente paths, GPU, monitor ou benchmark.
-            - Use o launch options ja calculado como ponto de partida e refine apenas com cautela.
-            - Se detectar RAM baixa ou CPU X3D, destaque isso.
+            - Use o launch options ja calculado como ponto de partida, mas critique e reduza flags antigas se a base pesquisada apontar risco/placebo.
+            - Sugira somente ajustes compativeis com CPU, RAM, GPU e vendor detectados.
+            - Diferencie ajuste imediato, teste reversivel e upgrade futuro.
+            - Se detectar RAM baixa, memoria pressionada, CPU X3D ou conflito de vendor, destaque isso.
             - Mantenha no maximo 4 recomendacoes.
+
+            Base pesquisada persistida:
+            """ + Environment.NewLine + knowledgeContext + Environment.NewLine + Environment.NewLine +
+            """
 
             Perfil Rust:
             """ + Environment.NewLine + serializedRustProfile + Environment.NewLine + Environment.NewLine +

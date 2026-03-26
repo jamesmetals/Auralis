@@ -101,18 +101,7 @@ public sealed class GoogleGeminiLocalAiGameBoosterService : ILocalAiGameBoosterS
     public async Task<RustGameBoosterAiAnalysisSnapshot> AnalyzeRustProfileAsync(LocalAiConnectionSettings settings, RustGameProfileSnapshot rustProfile, GameBoosterDashboardSnapshot boosterSnapshot, CancellationToken cancellationToken = default)
     {
         var apiKey = ExtractApiKey(settings);
-        var prompt = $"Voce e um especialista em RUST e Windows. Avalie:\n" +
-                     $"Args: {rustProfile.LaunchOptions}\nGC Buffer: {rustProfile.GcBufferCommand}\n" +
-                     $"RAM: {rustProfile.TotalRamGb}GB\n" +
-                     $"CPU Alvo: {rustProfile.CpuLabel}\n" +
-                     $"Responda EXATAMENTE neste JSON puro:\n" +
-                     "{\n" +
-                     "  \"Summary\": \"Resumo da performance no Rust.\",\n" +
-                     "  \"LaunchOptionsSummary\": \"O que achou dos argumentos.\",\n" +
-                     "  \"Recommendations\": [\n" +
-                     "    { \"Priority\": \"Alta\", \"Title\": \"Diminuir qualidade\", \"Reason\": \"RAM baixa\", \"SuggestedAction\": \"Mudar config\", \"RelatedOptimizationId\": null }\n" +
-                     "  ]\n" +
-                     "}";
+        var prompt = BuildRustAnalysisPrompt(rustProfile, boosterSnapshot);
 
         var responseJson = await CallGeminiAsync(settings, prompt, cancellationToken);
         if (string.IsNullOrWhiteSpace(responseJson))
@@ -164,6 +153,52 @@ public sealed class GoogleGeminiLocalAiGameBoosterService : ILocalAiGameBoosterS
 
         var response = await CallGeminiAsync(settings, prompt, cancellationToken);
         return string.IsNullOrWhiteSpace(response) ? "Erro ao contatar API Google Gemini." : response;
+    }
+
+    private static string BuildRustAnalysisPrompt(
+        RustGameProfileSnapshot rustProfile,
+        GameBoosterDashboardSnapshot boosterSnapshot)
+    {
+        var telemetry = boosterSnapshot.Telemetry;
+        var recommendedCommands = string.Join(", ", rustProfile.RecommendedClientCommands);
+        var optionalCommands = string.Join(", ", rustProfile.OptionalClientCommands);
+        var knowledgeContext = GameOptimizationPromptContextBuilder.BuildRustKnowledgeContext(rustProfile, boosterSnapshot);
+
+        return
+            "Voce e um analista senior de Rust e Windows focado em FPS real, frametime e estabilidade.\n" +
+            "Use a base pesquisada abaixo como referencia, mas so recomende o que for compativel com o hardware detectado.\n" +
+            "Regras obrigatorias:\n" +
+            "- Nao invente benchmark, GPU, monitor, resolucao ou sintomas que nao apareceram.\n" +
+            "- Nao cite modelo de IA, fontes ou API na resposta final.\n" +
+            "- Diferencie ajuste imediato, teste reversivel e upgrade futuro dentro do texto das recomendacoes.\n" +
+            "- Evite placebo, launch options antigas sem contexto e mudancas que contradigam a base pesquisada.\n" +
+            "- Se uma dica for experimental, deixe isso claro.\n" +
+            "- Mantenha no maximo 4 recomendacoes.\n\n" +
+            knowledgeContext + "\n\n" +
+            "Perfil local de Rust:\n" +
+            $"CPU alvo: {rustProfile.CpuLabel}\n" +
+            $"RAM total: {rustProfile.TotalRamGb} GB ({rustProfile.MemoryTierLabel})\n" +
+            $"Launch options atuais: {rustProfile.LaunchOptions}\n" +
+            $"GC buffer atual: {rustProfile.GcBufferCommand}\n" +
+            $"Comandos recomendados hoje: {recommendedCommands}\n" +
+            $"Comandos opcionais hoje: {optionalCommands}\n" +
+            $"Resumo do perfil local: {rustProfile.Summary}\n\n" +
+            "Snapshot geral do booster:\n" +
+            $"GPU detectada: {telemetry.GpuLabel}\n" +
+            $"CPU detectada: {telemetry.CpuLabel}\n" +
+            $"Threads logicas: {telemetry.LogicalCoreCount}\n" +
+            $"Windows: {telemetry.WindowsVersion}\n" +
+            $"Uso de CPU agora: {telemetry.CurrentCpuUsagePercent:0.0}%\n" +
+            $"RAM atual: {telemetry.CurrentMemoryUsedGb:0.0} / {telemetry.TotalMemoryGb:0.0} GB ({telemetry.CurrentMemoryLoadPercent}%)\n" +
+            $"Resumo do booster: {telemetry.OptimizationSummary}\n\n" +
+            "Responda EXATAMENTE neste JSON puro:\n" +
+            "{\n" +
+            "  \"Summary\": \"Resumo executivo da situacao do Rust neste PC.\",\n" +
+            "  \"LaunchOptionsSummary\": \"Leitura critica das launch options atuais.\",\n" +
+            "  \"Recommendations\": [\n" +
+            "    { \"Priority\": \"Alta\", \"Title\": \"Titulo curto\", \"Reason\": \"Motivo especifico para este hardware\", \"SuggestedAction\": \"Acao objetiva e segura\", \"RelatedOptimizationId\": null }\n" +
+            "  ]\n" +
+            "}";
     }
 
     private static string ExtractApiKey(LocalAiConnectionSettings settings)
