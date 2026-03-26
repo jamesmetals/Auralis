@@ -47,6 +47,7 @@ public partial class MainWindow : Window
     private RustGameBoosterPanelSnapshot? _latestRustPanelSnapshot;
     private string? _selectedSpecificGameId;
     private bool _isRustExtremeFocusActive;
+    private bool _isExtremeFocusBalloonExpanded;
     private string? _rustExplorerRestoreScriptPath;
     private ExtremeFocusWindowSnapshot? _extremeFocusWindowSnapshot;
 
@@ -1971,9 +1972,18 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ExtremeFocusBalloon_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        SetExtremeFocusBalloonExpanded(true);
+    }
+
+    private void ExtremeFocusBalloon_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        SetExtremeFocusBalloonExpanded(false);
+    }
+
     private void EnterRustExtremeFocusMode(RustExtremeFocusActivationResult result)
     {
-        var workArea = SystemParameters.WorkArea;
         var restoreBounds = WindowState == WindowState.Normal
             ? new Rect(Left, Top, Width, Height)
             : RestoreBounds;
@@ -2004,14 +2014,9 @@ public partial class MainWindow : Window
         WindowState = WindowState.Normal;
         ResizeMode = System.Windows.ResizeMode.NoResize;
         Topmost = true;
-        MinWidth = 420;
-        MinHeight = 260;
         MaxWidth = 420;
         MaxHeight = 320;
-        Width = 420;
-        Height = 300;
-        Left = workArea.Right - Width - 24;
-        Top = workArea.Bottom - Height - 24;
+        SetExtremeFocusBalloonExpanded(false);
     }
 
     private void ExitRustExtremeFocusMode(bool restoreExplorer)
@@ -2027,11 +2032,49 @@ public partial class MainWindow : Window
         }
 
         ExtremeFocusOverlayRoot.Visibility = Visibility.Collapsed;
+        ExtremeFocusExpandedContent.Visibility = Visibility.Collapsed;
         MainShellBorder.Visibility = Visibility.Visible;
         RustExtremeFocusConfirmationPanel.Visibility = Visibility.Collapsed;
         RestoreWindowFromExtremeFocus();
+        _isExtremeFocusBalloonExpanded = false;
         _isRustExtremeFocusActive = false;
         _rustExplorerRestoreScriptPath = null;
+    }
+
+    private void SetExtremeFocusBalloonExpanded(bool expanded)
+    {
+        if (!_isRustExtremeFocusActive)
+        {
+            ExtremeFocusExpandedContent.Visibility = Visibility.Collapsed;
+            _isExtremeFocusBalloonExpanded = false;
+            return;
+        }
+
+        _isExtremeFocusBalloonExpanded = expanded;
+        ExtremeFocusExpandedContent.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+
+        if (expanded)
+        {
+            MinWidth = 360;
+            MinHeight = 238;
+            Width = 360;
+            Height = 238;
+            PositionExtremeFocusWindow(Width, Height);
+            return;
+        }
+
+        MinWidth = 128;
+        MinHeight = 54;
+        Width = 128;
+        Height = 54;
+        PositionExtremeFocusWindow(Width, Height);
+    }
+
+    private void PositionExtremeFocusWindow(double width, double height)
+    {
+        var workArea = SystemParameters.WorkArea;
+        Left = workArea.Right - width - 18;
+        Top = workArea.Top + 18;
     }
 
     private void RestoreWindowFromExtremeFocus()
