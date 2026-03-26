@@ -1429,15 +1429,15 @@ public partial class MainWindow : Window
     private void ShowAiReportButton_Click(object sender, RoutedEventArgs e)
     {
         ShowGameBoosterReport(
-            "Relatorio da IA",
-            "Compila a leitura geral do JB GameBooster e a analise dedicada de Rust.",
+            "Diagnostico inteligente",
+            "Reune a leitura geral do sistema e a leitura dedicada do Rust em um unico resumo.",
             BuildAiReportText());
     }
 
     private void ShowComputerReportButton_Click(object sender, RoutedEventArgs e)
     {
         ShowGameBoosterReport(
-            "Relatorio do computador",
+            "Relatorio do sistema",
             "Mostra a varredura local do PC, os ajustes detectados e as estimativas do booster.",
             BuildComputerReportText());
     }
@@ -1579,7 +1579,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            BeginBusy("IA analisando o PC...");
+            BeginBusy("Montando diagnostico do sistema...");
             await SaveLocalAiSettingsFromFormAsync();
 
             // Passo 1: IA analisa e salva o diagnóstico (sem aplicar ainda)
@@ -1663,7 +1663,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            BeginBusy("Executando analise do perfil de Rust...");
+            BeginBusy("Montando leitura dedicada do Rust...");
             await SaveLocalAiSettingsFromFormAsync();
 
             var result = await _services.GameBoosterAiWorkflowService.AnalyzeRustAsync();

@@ -1068,11 +1068,11 @@
                                                 <Button x:Name="ApplyRecommendedGameBoosterButton" Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" Click="ApplyRecommendedGameBoosterButton_Click" Content="Aplicar recomendadas" Style="{StaticResource PrimaryButtonStyle}" />
                                                 <Button x:Name="RevertGameBoosterSessionButton" Grid.Row="0" Grid.Column="1" Margin="0,0,10,10" Click="RevertGameBoosterSessionButton_Click" Content="Desfazer ultima sessao" />
                                                 <Button x:Name="RefreshGameBoosterButton" Grid.Row="0" Grid.Column="2" Margin="0,0,0,10" Click="RefreshGameBoosterButton_Click" Content="Atualizar leitura" />
-                                                <Button x:Name="ShowAiReportButton" Grid.Row="1" Grid.Column="0" Margin="0,0,10,0" Click="ShowAiReportButton_Click" Content="Exibir relatorio da IA" />
-                                                <Button x:Name="ShowComputerReportButton" Grid.Row="1" Grid.Column="1" Margin="0,0,10,0" Click="ShowComputerReportButton_Click" Content="Teste de hardware offline" />
+                                                <Button x:Name="ShowAiReportButton" Grid.Row="1" Grid.Column="0" Margin="0,0,10,0" Click="ShowAiReportButton_Click" Content="Exibir diagnostico salvo" />
+                                                <Button x:Name="ShowComputerReportButton" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,0" Click="ShowComputerReportButton_Click" Content="Exibir relatorio do sistema" />
                                             </Grid>
 
-                                            <!-- Caixa do Relatorio de IA (Dashboard) -->
+                                            <!-- Caixa de relatorios do dashboard -->
                                             <Border x:Name="GameBoosterReportBorder" Margin="0,14,0,0" Padding="16" Background="{StaticResource DeepPanelBrush}" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" CornerRadius="24" Visibility="Collapsed">
                                                 <StackPanel>
                                                     <Grid>
@@ -1081,7 +1081,7 @@
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
                                                         <StackPanel>
-                                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Analise Tecnico / Relatorio" />
+                                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Leituras e relatorios" />
                                                             <TextBlock x:Name="GameBoosterReportTitleTextBlock" Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Sem relatorio aberto" />
                                                             <TextBlock x:Name="GameBoosterReportSubtitleTextBlock" Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Use os botoes acima para abrir o relatorio detalhado do sistema ou da analise inteligente." TextWrapping="Wrap" />
                                                         </StackPanel>
@@ -1157,15 +1157,15 @@
                                 </StackPanel>
                             </ScrollViewer>
 
-                            <!-- Tab 3: Especialista IA / Games -->
+                            <!-- Tab 3: Diagnostico e jogos -->
                             <ScrollViewer Grid.Row="1" x:Name="GbContentAi" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
                                     
-                                    <!-- Servidor IA -->
+                                    <!-- Diagnostico inteligente -->
                                     <Border Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                         <StackPanel>
-                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Diagnostico inteligente" />
-                                            <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Leitura guiada de hardware e sistema" />
+                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Assistente de desempenho" />
+                                            <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Leitura guiada do sistema" />
                                             <TextBlock x:Name="LocalAiStatusTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="O modulo inteligente revisa gargalos do PC e sugere a melhor sequencia de otimizacao para esta maquina." TextWrapping="Wrap" />
                                             <Grid Margin="0,14,0,0" Visibility="Collapsed">
                                                 <Grid.ColumnDefinitions>
@@ -1194,7 +1194,7 @@
                                                 <Button x:Name="TestLocalAiConnectionButton" Grid.Column="1" Margin="0,0,10,0" Click="TestLocalAiConnectionButton_Click" Content="Atualizar disponibilidade" Visibility="Collapsed" />
                                                 <Button x:Name="SaveLocalAiSettingsButton" Grid.Column="2" Click="SaveLocalAiSettingsButton_Click" Content="Salvar configuracao" Visibility="Collapsed" />
                                             </Grid>
-                                            <TextBlock x:Name="LocalAiCommandHintTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="A analise combina a leitura atual do sistema com o catalogo do booster para sugerir os proximos passos." TextWrapping="Wrap" />
+                                            <TextBlock x:Name="LocalAiCommandHintTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="A leitura cruza o estado atual do PC com o catalogo do booster para priorizar os ajustes com maior retorno." TextWrapping="Wrap" />
 
                                             <Border Margin="0,14,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                 <StackPanel>
@@ -1247,11 +1247,11 @@
                                         </StackPanel>
                                     </Border>
 
-                                    <!-- Integracao Especifica Rust -->
+                                    <!-- Integracao especifica de Rust -->
                                     <Border Margin="0,12,0,0" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                         <StackPanel>
-                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Target em Jogo: Rust" />
-                                            <TextBlock x:Name="RustModuleSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Modulo beta testando pre-load para motor da Facepunch." TextWrapping="Wrap" />
+                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Perfil em foco" />
+                                            <TextBlock x:Name="RustModuleSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Leitura dedicada para launch options, memoria e estabilidade do Rust." TextWrapping="Wrap" />
                                             <Grid Margin="0,12,0,0">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
@@ -1259,15 +1259,15 @@
                                                 </Grid.ColumnDefinitions>
                                                 <Border Grid.Column="0" Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
                                                     <StackPanel>
-                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="CPU Alvo" />
-                                                        <TextBlock x:Name="RustCpuTextBlock" Margin="0,6,0,0" Width="230" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Processador detectado" />
+                                                        <TextBlock x:Name="RustCpuTextBlock" Margin="0,6,0,0" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
                                                 <Border Grid.Column="1" Margin="0,0,0,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
                                                     <StackPanel>
-                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Memoria Estimada" />
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Memoria detectada" />
                                                         <TextBlock x:Name="RustMemoryTextBlock" Margin="0,6,0,0" FontSize="16" FontWeight="Bold" />
-                                                        <TextBlock x:Name="RustPriorityHintTextBlock" Margin="0,6,0,0" Width="220" FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                                                        <TextBlock x:Name="RustPriorityHintTextBlock" Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
                                             </Grid>
@@ -1281,14 +1281,14 @@
                                                 </Grid.ColumnDefinitions>
                                                 <Border Grid.Column="0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                     <StackPanel>
-                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Launch options Steam" />
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Argumentos de inicializacao" />
                                                         <TextBox x:Name="RustLaunchOptionsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="45" Background="Transparent" BorderThickness="0" Foreground="{StaticResource MutedBrush}"/>
                                                         <TextBlock x:Name="RustSteamPathTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
                                                 <Border Grid.Column="2" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                     <StackPanel>
-                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="client.cfg Injetado" />
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Comandos recomendados" />
                                                         <TextBox x:Name="RustClientCommandsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="45" Background="Transparent" BorderThickness="0" Foreground="{StaticResource MutedBrush}"/>
                                                         <TextBlock x:Name="RustConfigPathTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
                                                     </StackPanel>
@@ -1304,7 +1304,7 @@
                                                             <ColumnDefinition Width="1.9*" />
                                                         </Grid.ColumnDefinitions>
                                                         <Button x:Name="LocalAiCheckAvailabilityButton" Grid.Column="0" Margin="0,0,10,0" Click="TestLocalAiConnectionButton_Click" Content="Atualizar disponibilidade" Visibility="Collapsed" />
-                                                        <Button x:Name="RunRustLocalAiAnalysisButton" Grid.Column="0" Grid.ColumnSpan="2" Click="RunRustLocalAiAnalysisButton_Click" Content="Analisar perfil do Rust" Style="{StaticResource PrimaryButtonStyle}" />
+                                                        <Button x:Name="RunRustLocalAiAnalysisButton" Grid.Column="0" Grid.ColumnSpan="2" Click="RunRustLocalAiAnalysisButton_Click" Content="Gerar leitura dedicada do Rust" Style="{StaticResource PrimaryButtonStyle}" />
                                                     </Grid>
                                                     <TextBlock x:Name="RustAiAnalysisMetaTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma analise salva ainda." TextWrapping="Wrap" />
                                                     <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="O diagnostico avalia argumentos de inicializacao, memoria e folga do sistema para o Rust." TextWrapping="Wrap" />
