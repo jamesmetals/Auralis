@@ -1,7 +1,7 @@
 # CONTEXTO DO AGENTE - MelhorWindows
 
 ## Status atual
-- fase: app desktop compilando e testado localmente, com dashboard expandido para o modulo JB GameBooster, identidade visual refatorada e base pesquisada inicial de Rust ligada ao prompt da IA
+- fase: app desktop compilando e testado localmente, com dashboard expandido para o modulo JB GameBooster, identidade visual refatorada, aba de jogos especificos criada e painel dedicado do Rust com automacoes reversiveis e FOCO EXTREMO
 - build do projeto desktop sincroniza automaticamente a instalacao local existente em `%LOCALAPPDATA%\Programs\Auralis`
 - proximo passo: ampliar a base pesquisada por game alem de Rust, revisar heuristicas antigas de launch options e retomar autenticacao/licenciamento remoto
 
@@ -27,17 +27,16 @@
 - catalogo inicial de otimizacoes gerais para gaming com aplicacao por item ou em lote
 - opcao de criar ponto de restauracao antes de alteracoes de sistema
 - reversao da ultima sessao aplicada pelo JB GameBooster
-- configuracao de IA local no JB GameBooster via Ollama
-- analise local do snapshot do booster com modelo configuravel e recomendacoes em portugues
-- botao explicito para testar conexao com Ollama e sugerir `ollama pull` quando o modelo configurado estiver ausente
-- primeiro painel especifico de Rust com launch options sugeridos, comandos para `client.cfg` e analise local dedicada
+- diagnostico inteligente do snapshot do booster com provider encapsulado e recomendacoes em portugues sem expor detalhes tecnicos ao usuario final
+- primeiro painel especifico de Rust separado em aba de jogos especificos, com launch options sugeridos, comandos para `client.cfg`, automacoes reversiveis e leitura dedicada baseada em pesquisa
+- modo FOCO EXTREMO para Rust com popup reduzido, encerramento agressivo de apps nao essenciais, preservacao do Discord e script de restauracao do Explorer
 
 ## Stack recomendada
 - app desktop principal implementado: .NET 8 + WPF
 - integracao com Explorer: componente nativo para contexto de pasta + empacotamento MSIX ou sparse package
 - banco local: SQLite
 - servicos de imagem: biblioteca nativa para resize, crop e geracao de `.ico`
-- IA local atual: Ollama em `http://localhost:11434`, com modelo padrao `gemma3:4b`
+- diagnostico inteligente atual: provider encapsulado na camada de IA, com modelo/configuracao escondidos da UI e mensagens orientadas a produto
 - backend remoto: API propria para autenticacao, licenciamento, sincronizacao e auditoria
 - alternativa se quiser UI web: Tauri + Rust, mantendo a integracao do Explorer em componente nativo separado
 
@@ -100,9 +99,9 @@
 - Integracao com o novo menu de contexto do Windows 11 exige abordagem nativa e, em cenarios modernos, package identity.
 - "Nao crackeavel" nao existe; o objetivo realista e elevar muito o custo da quebra e manter decisao critica de acesso no servidor.
 - Se o produto precisar operar offline por longos periodos, sera necessario desenhar uma politica de licenca offline com expiracao curta e revalidacao.
-- O JB GameBooster ainda esta na fase inicial e cobre apenas ajustes gerais e reversiveis via Registry; perfis por game, launch options e monitoramento continuo continuam em aberto.
-- A analise local depende do Ollama estar ativo e com pelo menos um modelo baixado; o app ja detecta indisponibilidade e modelos ausentes.
-- O modulo de Rust ainda esta em fase de recomendacao e analise; a automacao de escrita em `localconfig.vdf` e `client.cfg` ainda nao foi implementada.
+- O JB GameBooster ja cobre ajustes gerais reversiveis via Registry e um primeiro fluxo dedicado para Rust; novos jogos ainda precisam de pesquisa, modelagem e automacoes proprias.
+- O diagnostico inteligente depende da disponibilidade do provider configurado; a UI atual nao expoe detalhes tecnicos e trata indisponibilidade com linguagem de produto.
+- O modulo de Rust ja aplica e desfaz ajustes em `localconfig.vdf` e `client.cfg`, mas ainda precisa evoluir para cobrir mais configuracoes de jogo, driver e cenarios por hardware.
 - A pesquisa de YouTube/comentarios ainda entra com limitacao de acesso automatizado; por isso a consolidacao atual pesa mais oficial + Steam + Reddit e trata o sinal de video como complemento, nao como verdade absoluta.
 
 ## O que validar no scaffold inicial

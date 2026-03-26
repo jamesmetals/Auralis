@@ -2,6 +2,16 @@
 
 Registro resumido dos commits atuais do projeto, com foco no que foi alterado em cada etapa.
 
+## b50f95d - 2026-03-26 - feat: add dedicated game profiles and extreme rust focus
+- separou as otimizações por jogo em uma nova aba de jogos específicos, com card visual do Rust, timestamp da última automação e abertura do painel dedicado só após seleção do card.
+- moveu o painel completo do Rust para essa área dedicada, mantendo launch options, comandos, leitura da IA e automações reversíveis fora da aba principal de diagnóstico.
+- adicionou o modo FOCO EXTREMO do Rust com confirmação explícita, fechamento agressivo de processos não essenciais, preservação do Discord, encerramento do Explorer, popup reduzido do Auralis e script para restaurar o Explorer.
+
+## 39e50bc - 2026-03-26 - feat: add reversible Rust automation actions
+- adicionou aplicação e desfazer por item para ajustes automáticos do Rust, incluindo launch options do Steam e comandos do `client.cfg`.
+- criou um fluxo persistido de snapshot para permitir reversão segura e aplicação em lote das recomendações automáticas do Rust.
+- integrou o novo catálogo reversível ao painel do Rust e ao workflow principal do GameBooster.
+
 ## 154865e - 2026-03-26 - fix: clarify Rust analysis is advisory only
 - deixou explicito no painel do Rust que a leitura da IA e apenas consultiva e nao aplica alteracoes automaticamente no jogo, Steam ou Windows.
 - ajustou o texto do botao, do resumo, dos cards e do relatorio para diferenciar melhor "proximo passo sugerido" de "acao ja aplicada".
