@@ -1,9 +1,9 @@
 # CONTEXTO DO AGENTE - MelhorWindows
 
 ## Status atual
-- fase: app desktop compilando e testado localmente, com dashboard expandido para o modulo JB GameBooster
+- fase: app desktop compilando e testado localmente, com dashboard expandido para o modulo JB GameBooster e identidade visual refatorada
 - build do projeto desktop sincroniza automaticamente a instalacao local existente em `%LOCALAPPDATA%\Programs\Auralis`
-- proximo passo: aprofundar o GameBooster por game (comecando por Rust) e retomar autenticacao/licenciamento remoto
+- proximo passo: aprofundar o GameBooster por game (comecando por Rust), reduzir textos legados da fase Ollama e retomar autenticacao/licenciamento remoto
 
 ## Objetivo do produto
 - Aplicativo Windows para personalizar, facilitar e automatizar configuracoes e estilizacao do sistema.
@@ -49,6 +49,7 @@
   - camada 2: servicos de negocio
   - camada 3: integracao com Windows
   - camada 4: backend de identidade, licenca e sincronizacao
+- UI atual: manter a estrutura do desktop e a logica de negocio, mas seguir uma linguagem visual inspirada na referencia Pico com Figtree, superfícies arredondadas, contraste alto, acento laranja e fundo com camadas sutis.
 
 ## RBAC aprovado
 - modelo: RBAC obrigatorio para todo sistema multiusuario

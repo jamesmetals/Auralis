@@ -19,35 +19,61 @@
     WindowStyle="None">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="BgBrush" Color="#050505" />
-        <SolidColorBrush x:Key="PanelBrush" Color="#0f0f0f" />
-        <SolidColorBrush x:Key="PanelAltBrush" Color="#141414" />
-        <SolidColorBrush x:Key="DeepPanelBrush" Color="#0a0a0a" />
-        <SolidColorBrush x:Key="WellBrush" Color="#000000" />
-        <SolidColorBrush x:Key="TextBrush" Color="#EFEFEF" />
-        <SolidColorBrush x:Key="MutedBrush" Color="#AAAAAA" />
-        <SolidColorBrush x:Key="SoftBrush" Color="#888888" />
-        <SolidColorBrush x:Key="BorderBrushSoft" Color="#444444" />
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#39FF14" />
-        <SolidColorBrush x:Key="PrimaryFgBrush" Color="#000000" />
+        <SolidColorBrush x:Key="WindowBackdropBrush" Color="#04060C" />
+        <SolidColorBrush x:Key="BgBrush" Color="#091018" />
+        <SolidColorBrush x:Key="PanelBrush" Color="#0E161F" />
+        <SolidColorBrush x:Key="PanelAltBrush" Color="#121C27" />
+        <SolidColorBrush x:Key="DeepPanelBrush" Color="#0A1118" />
+        <SolidColorBrush x:Key="WellBrush" Color="#090E14" />
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#121A24" />
+        <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="#16202C" />
+        <SolidColorBrush x:Key="SurfaceStrongBrush" Color="#192432" />
+        <SolidColorBrush x:Key="InputBrush" Color="#0D141D" />
+        <SolidColorBrush x:Key="SidebarBrush" Color="#0E161F" />
+        <SolidColorBrush x:Key="SidebarActiveBrush" Color="#171F2A" />
+        <SolidColorBrush x:Key="TextBrush" Color="#F7F7F9" />
+        <SolidColorBrush x:Key="MutedBrush" Color="#98A0AE" />
+        <SolidColorBrush x:Key="SoftBrush" Color="#70798A" />
+        <SolidColorBrush x:Key="BorderBrushSoft" Color="#26303D" />
+        <SolidColorBrush x:Key="DividerBrush" Color="#1E2834" />
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#FD6004" />
+        <SolidColorBrush x:Key="PrimarySoftBrush" Color="#FFB17C" />
+        <SolidColorBrush x:Key="PrimaryFgBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#AEE929" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#5ED9A6" />
+        <SolidColorBrush x:Key="InfoBrush" Color="#74B9FF" />
         <LinearGradientBrush x:Key="ShellBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Offset="0" Color="#080808" />
-            <GradientStop Offset="1" Color="#060606" />
+            <GradientStop Offset="0" Color="#0A1118" />
+            <GradientStop Offset="1" Color="#0C141C" />
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="PrimaryButtonBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Offset="0" Color="#39FF14" />
-            <GradientStop Offset="1" Color="#30D810" />
+            <GradientStop Offset="0" Color="#FF7A2F" />
+            <GradientStop Offset="1" Color="#FD6004" />
         </LinearGradientBrush>
-        <DropShadowEffect x:Key="ShellShadow" BlurRadius="12" Color="#000000" Opacity="0.60" ShadowDepth="2" RenderingBias="Performance" />
+        <LinearGradientBrush x:Key="PrimaryButtonHoverBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0" Color="#FF8A49" />
+            <GradientStop Offset="1" Color="#FF6B17" />
+        </LinearGradientBrush>
+        <RadialGradientBrush x:Key="AmbientOrbBrush" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+            <GradientStop Offset="0" Color="#35FD6004" />
+            <GradientStop Offset="0.7" Color="#10FD6004" />
+            <GradientStop Offset="1" Color="#00FD6004" />
+        </RadialGradientBrush>
+        <RadialGradientBrush x:Key="AmbientOrbAltBrush" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+            <GradientStop Offset="0" Color="#22AEE929" />
+            <GradientStop Offset="0.7" Color="#08AEE929" />
+            <GradientStop Offset="1" Color="#00AEE929" />
+        </RadialGradientBrush>
+        <DropShadowEffect x:Key="ShellShadow" BlurRadius="36" Color="#000000" Opacity="0.42" ShadowDepth="6" RenderingBias="Performance" />
 
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            <Setter Property="FontFamily" Value="Segoe UI Variable Text" />
+            <Setter Property="FontFamily" Value="Figtree" />
         </Style>
         <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
-            <Setter Property="FontFamily" Value="Segoe UI Variable Display" />
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{StaticResource PrimarySoftBrush}" />
+            <Setter Property="FontFamily" Value="Figtree" />
+            <Setter Property="FontSize" Value="11" />
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
         <Style TargetType="Button">
@@ -56,11 +82,11 @@
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="FontFamily" Value="Segoe UI Variable Text" />
+            <Setter Property="FontFamily" Value="Figtree" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Height" Value="36" />
-            <Setter Property="MinWidth" Value="100" />
-            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="MinWidth" Value="104" />
+            <Setter Property="Padding" Value="16,0" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -69,18 +95,20 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="0">
+                            CornerRadius="18"
+                            SnapsToDevicePixels="True">
                             <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Chrome" Property="Background" Value="#222222" />
+                                <Setter TargetName="Chrome" Property="Background" Value="{StaticResource SurfaceElevatedBrush}" />
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource PrimarySoftBrush}" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Chrome" Property="Opacity" Value="0.92" />
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.90" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Chrome" Property="Opacity" Value="0.55" />
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.45" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -90,47 +118,129 @@
         <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Foreground" Value="{StaticResource PrimaryFgBrush}" />
             <Setter Property="Background" Value="{StaticResource PrimaryButtonBrush}" />
-            <Setter Property="BorderBrush" Value="#39FF14" />
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="MinWidth" Value="128" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="18"
+                            SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{StaticResource PrimaryButtonHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.92" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="GhostButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="MinWidth" Value="0" />
         </Style>
         <Style x:Key="RoundIconButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Width" Value="36" />
-            <Setter Property="Height" Value="36" />
-            <Setter Property="MinWidth" Value="36" />
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="MinWidth" Value="40" />
             <Setter Property="Padding" Value="0" />
-            <Setter Property="Background" Value="#111111" />
-            <Setter Property="BorderBrush" Value="#3a3a3a" />
+            <Setter Property="Background" Value="{StaticResource SurfaceElevatedBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}" />
         </Style>
         <Style x:Key="NavButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="MinWidth" Value="0" />
-            <Setter Property="Height" Value="40" />
+            <Setter Property="Height" Value="44" />
             <Setter Property="Width" Value="196" />
-            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Padding" Value="14,0" />
         </Style>
         <Style x:Key="ActiveNavButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
-            <Setter Property="Background" Value="#1c1c1c" />
-            <Setter Property="BorderBrush" Value="#444444" />
+            <Setter Property="Background" Value="{StaticResource SidebarActiveBrush}" />
+            <Setter Property="BorderBrush" Value="#3A475A" />
+        </Style>
+        <Style x:Key="TabButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="Height" Value="40" />
         </Style>
         <Style TargetType="TextBox">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            <Setter Property="Background" Value="#121212" />
+            <Setter Property="Background" Value="{StaticResource InputBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="FontFamily" Value="Figtree" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border
+                            x:Name="TextBoxBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="16"
+                            SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="TextBoxBorder" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsReadOnly" Value="True">
+                                <Setter TargetName="TextBoxBorder" Property="Background" Value="{StaticResource DeepPanelBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="TextBoxBorder" Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style TargetType="ComboBox">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            <Setter Property="Background" Value="#121212" />
+            <Setter Property="Background" Value="{StaticResource InputBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="8,4" />
+            <Setter Property="FontFamily" Value="Figtree" />
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="FontFamily" Value="Figtree" />
+        </Style>
+        <Style TargetType="ProgressBar">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="Background" Value="{StaticResource SurfaceStrongBrush}" />
+        </Style>
+        <Style TargetType="ListView">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        </Style>
+        <Style TargetType="ListViewItem">
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         </Style>
 
         <!-- History tiles: 68×68 -->
@@ -141,12 +251,12 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Tile" Width="68" Height="68" Background="#0e0e0e" BorderBrush="#2b2b2b" BorderThickness="1" CornerRadius="0">
+                        <Border x:Name="Tile" Width="68" Height="68" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="20">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Tile" Property="Background" Value="#1a1a1a" />
+                                <Setter TargetName="Tile" Property="Background" Value="{StaticResource SurfaceElevatedBrush}" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="Tile" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
@@ -165,12 +275,12 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Tile" Width="46" Height="46" Background="#0d0d0d" BorderBrush="#282828" BorderThickness="1" CornerRadius="0">
+                        <Border x:Name="Tile" Width="46" Height="46" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Tile" Property="Background" Value="#1b1b1b" />
+                                <Setter TargetName="Tile" Property="Background" Value="{StaticResource SurfaceElevatedBrush}" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="Tile" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
@@ -182,15 +292,20 @@
         </Style>
     </Window.Resources>
 
-    <Grid Background="Transparent">
+    <Grid Background="{StaticResource WindowBackdropBrush}">
+        <Canvas IsHitTestVisible="False">
+            <Ellipse Width="420" Height="420" Fill="{StaticResource AmbientOrbBrush}" Canvas.Left="-120" Canvas.Top="-120" />
+            <Ellipse Width="300" Height="300" Fill="{StaticResource AmbientOrbAltBrush}" Canvas.Left="860" Canvas.Top="12" />
+            <Ellipse Width="240" Height="240" Fill="{StaticResource AmbientOrbBrush}" Canvas.Left="940" Canvas.Top="520" />
+        </Canvas>
 
         <!-- ═══════════════════ MAIN SHELL ═══════════════════ -->
         <Border
-            Margin="20"
+            Margin="24"
             Background="{StaticResource ShellBrush}"
-            BorderBrush="#2a2a2a"
+            BorderBrush="{StaticResource DividerBrush}"
             BorderThickness="1"
-            CornerRadius="0"
+            CornerRadius="30"
             Effect="{StaticResource ShellShadow}">
 
             <Grid>
@@ -204,10 +319,10 @@
                      ══════════════════════════════════════════ -->
                 <Border
                     Grid.Column="0"
-                    Background="#030303"
-                    BorderBrush="#333333"
+                    Background="{StaticResource SidebarBrush}"
+                    BorderBrush="{StaticResource DividerBrush}"
                     BorderThickness="0,0,1,0"
-                    CornerRadius="0">
+                    CornerRadius="30,0,0,30">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -218,29 +333,29 @@
                         <!-- Row 0: Logo area -->
                         <Border
                             Grid.Row="0"
-                            Padding="22,20,22,14"
-                            BorderBrush="#333333"
+                            Padding="24,24,24,18"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="0,0,0,1">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Border
-                                        Width="32" Height="32"
-                                        CornerRadius="0"
+                                        Width="40" Height="40"
+                                        CornerRadius="20"
                                         Background="{StaticResource PrimaryButtonBrush}">
                                         <TextBlock
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
-                                            FontFamily="Segoe UI Variable Display"
+                                            FontFamily="Figtree"
                                             FontSize="16"
                                             FontWeight="Bold"
                                             Foreground="{StaticResource PrimaryFgBrush}"
                                             Text="A" />
                                     </Border>
                                     <TextBlock
-                                        Margin="10,0,0,0"
+                                        Margin="12,0,0,0"
                                         VerticalAlignment="Center"
-                                        FontFamily="Segoe UI Variable Display"
-                                        FontSize="17"
+                                        FontFamily="Figtree"
+                                        FontSize="19"
                                         FontWeight="Bold"
                                         Text="Auralis" />
                                 </StackPanel>
@@ -273,7 +388,7 @@
                                 </StackPanel>
                             </Button>
 
-                            <Separator Margin="4,10,4,10" Background="#333333" />
+                            <Separator Margin="4,14,4,14" Background="{StaticResource DividerBrush}" />
 
                             <Button
                                 x:Name="HomeNavButton"
@@ -302,14 +417,14 @@
                         <!-- Row 2: User info -->
                         <Border
                             Grid.Row="2"
-                            Padding="14,12"
-                            BorderBrush="#333333"
+                            Padding="18,16"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="0,1,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <Border
-                                    Width="36" Height="36"
-                                    Background="#112754"
-                                    CornerRadius="0">
+                                    Width="40" Height="40"
+                                    Background="{StaticResource SurfaceStrongBrush}"
+                                    CornerRadius="20">
                                     <TextBlock
                                         x:Name="UserInitialsTextBlock"
                                         HorizontalAlignment="Center"
@@ -341,11 +456,11 @@
                     <!-- ── Row 0: Title bar ── -->
                     <Border
                         Grid.Row="0"
-                        Padding="18,0,14,0"
-                        Background="#151515"
-                        BorderBrush="#2a2a2a"
+                        Padding="24,0,20,0"
+                        Background="Transparent"
+                        BorderBrush="{StaticResource DividerBrush}"
                         BorderThickness="0,0,0,1"
-                        CornerRadius="0"
+                        CornerRadius="0,30,0,0"
                         MouseLeftButtonDown="WindowHeader_MouseLeftButtonDown">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -356,8 +471,8 @@
                             <TextBlock
                                 x:Name="PageTitleTextBlock"
                                 VerticalAlignment="Center"
-                                FontFamily="Segoe UI Variable Display"
-                                FontSize="16"
+                                FontFamily="Figtree"
+                                FontSize="18"
                                 FontWeight="Bold"
                                 Text="Trocar Ícone" />
 
@@ -387,22 +502,22 @@
                     <StackPanel Grid.Row="1" Margin="16,10,16,0">
                         <Border
                             x:Name="StatusBorder"
-                            Padding="12,9"
-                            Background="#102A22"
-                            BorderBrush="#2A5946"
+                            Padding="14,10"
+                            Background="#153126"
+                            BorderBrush="#2E6352"
                             BorderThickness="1"
-                            CornerRadius="0"
+                            CornerRadius="18"
                             Visibility="Collapsed">
                             <TextBlock x:Name="StatusTextBlock" FontSize="12" Foreground="#A5F4CB" TextWrapping="Wrap" />
                         </Border>
                         <Border
                             x:Name="UpdateNoticeBorder"
                             Margin="0,8,0,0"
-                            Padding="12,9"
-                            Background="#12254C"
-                            BorderBrush="#444444"
+                            Padding="14,10"
+                            Background="#101E31"
+                            BorderBrush="#294666"
                             BorderThickness="1"
-                            CornerRadius="0"
+                            CornerRadius="18"
                             Visibility="Collapsed">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -435,7 +550,7 @@
                             </Grid.RowDefinitions>
 
                             <!-- ── Row 0: Folder bar ── -->
-                            <Border Grid.Row="0" Padding="14,0" Background="{StaticResource PanelBrush}" CornerRadius="0">
+                            <Border Grid.Row="0" Padding="16,0" Background="{StaticResource PanelBrush}" CornerRadius="22">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -456,7 +571,7 @@
                                         <TextBlock
                                             x:Name="CurrentFolderNameTextBlock"
                                             MaxWidth="320"
-                                            FontFamily="Segoe UI Variable Display"
+                                            FontFamily="Figtree"
                                             FontSize="13"
                                             FontWeight="SemiBold"
                                             TextTrimming="CharacterEllipsis" />
@@ -491,13 +606,13 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!-- Drop zone -->
-                                <Border Grid.Column="0" Padding="10" Background="{StaticResource PanelBrush}" CornerRadius="0">
+                                <Border Grid.Column="0" Padding="12" Background="{StaticResource PanelBrush}" CornerRadius="26">
                                     <Grid
                                         AllowDrop="True"
                                         DragOver="UploadDropZone_DragOver"
                                         Drop="UploadDropZone_Drop">
-                                        <Border Background="{StaticResource WellBrush}" CornerRadius="0" />
-                                        <Rectangle Margin="1" RadiusX="13" RadiusY="13" Stroke="#404040" StrokeThickness="1.2" StrokeDashArray="6 6" />
+                                        <Border Background="{StaticResource WellBrush}" CornerRadius="20" />
+                                        <Rectangle Margin="1" RadiusX="20" RadiusY="20" Stroke="{StaticResource BorderBrushSoft}" StrokeThickness="1.2" StrokeDashArray="6 6" />
 
                                         <Image
                                             x:Name="SourcePreviewImage"
@@ -515,10 +630,10 @@
                                             Style="{StaticResource GhostButtonStyle}">
                                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <Border
-                                                    Width="40" Height="40"
+                                                    Width="52" Height="52"
                                                     HorizontalAlignment="Center"
                                                     Background="{StaticResource PrimaryButtonBrush}"
-                                                    CornerRadius="0">
+                                                    CornerRadius="26">
                                                     <TextBlock
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
@@ -546,7 +661,7 @@
                                 </Border>
 
                                 <!-- Actions panel -->
-                                <Border Grid.Column="1" Margin="10,0,0,0" Padding="10" Background="{StaticResource PanelBrush}" CornerRadius="0">
+                                <Border Grid.Column="1" Margin="12,0,0,0" Padding="12" Background="{StaticResource PanelBrush}" CornerRadius="26">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="*" />
@@ -555,7 +670,7 @@
                                             <RowDefinition Height="30" />
                                         </Grid.RowDefinitions>
 
-                                        <Border x:Name="SelectionSummaryCard" Grid.Row="0" Background="#070707" CornerRadius="0" Visibility="Collapsed">
+                                        <Border x:Name="SelectionSummaryCard" Grid.Row="0" Background="{StaticResource WellBrush}" CornerRadius="20" Visibility="Collapsed">
                                             <Grid>
                                                 <Image x:Name="GeneratedPreviewImage" Margin="10" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
                                                 <TextBlock
@@ -598,7 +713,7 @@
                             </Grid>
 
                             <!-- ── Row 3: Compact info row (fit mode) ── -->
-                            <Border Grid.Row="3" Margin="0,8,0,0" Padding="12,7" Background="{StaticResource PanelBrush}" CornerRadius="0">
+                            <Border Grid.Row="3" Margin="0,10,0,0" Padding="14,10" Background="{StaticResource PanelBrush}" CornerRadius="22">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -643,7 +758,7 @@
                                 Margin="0,8,0,0"
                                 Padding="12,10"
                                 Background="{StaticResource PanelBrush}"
-                                CornerRadius="0"
+                                CornerRadius="22"
                                 Visibility="Collapsed">
                                 <StackPanel>
                                     <Grid>
@@ -671,7 +786,7 @@
                                         Margin="0,10,0,0"
                                         Padding="10"
                                         Background="{StaticResource DeepPanelBrush}"
-                                        CornerRadius="0"
+                                        CornerRadius="18"
                                         Visibility="Collapsed">
                                         <WrapPanel>
                                             <StackPanel Margin="0,0,10,0"><TextBlock FontSize="11" Foreground="{StaticResource MutedBrush}" Text="X" /><TextBox x:Name="CropXTextBox" Width="72" Margin="0,4,0,0" FontSize="11" LostFocus="CropField_LostFocus" /></StackPanel>
@@ -705,7 +820,7 @@
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Width="48" Height="48">
-                                                <Border Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#131313" CornerRadius="0">
+                                                <Border Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{StaticResource SurfaceBrush}" CornerRadius="14">
                                                     <Image Source="{Binding PreviewImage}" Stretch="Uniform" />
                                                 </Border>
                                             </Grid>
@@ -717,7 +832,7 @@
                                     Margin="0,6,0,0"
                                     Padding="12,8"
                                     Background="{StaticResource PanelBrush}"
-                                    CornerRadius="0"
+                                    CornerRadius="18"
                                     Visibility="Collapsed">
                                     <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Os ícones aplicados aparecerão aqui para reutilização rápida." />
                                 </Border>
@@ -762,7 +877,7 @@
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Width="34" Height="34">
-                                                <Border Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{Binding TileBackgroundBrush}" CornerRadius="0">
+                                                <Border Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{Binding TileBackgroundBrush}" CornerRadius="10">
                                                     <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" Text="{Binding Glyph}" />
                                                 </Border>
                                             </Grid>
@@ -778,14 +893,14 @@
                              ───────────────────────────────────── -->
                         <ScrollViewer x:Name="HomeView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <Border Padding="16" Background="#0d0d0d" CornerRadius="0">
+                                <Border Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                     <StackPanel>
                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Dashboard do projeto" />
-                                        <TextBlock x:Name="RolesTextBlock" Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" />
+                                        <TextBlock x:Name="RolesTextBlock" Margin="0,8,0,0" FontFamily="Figtree" FontSize="18" FontWeight="Bold" />
                                         <TextBlock x:Name="SettingsSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Border>
-                                <Border Margin="0,12,0,0" Padding="16" Background="#0d0d0d" CornerRadius="0">
+                                <Border Margin="0,12,0,0" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                     <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Use o menu lateral para navegar entre os módulos. O Trocar Ícone é o ponto central do Auralis." TextWrapping="Wrap" />
                                 </Border>
                             </StackPanel>
@@ -805,9 +920,9 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Width="160" Margin="0,0,12,12" Padding="14" Background="#0d0d0d" CornerRadius="0">
+                                            <Border Width="160" Margin="0,0,12,12" Padding="16" Background="{StaticResource PanelBrush}" CornerRadius="22">
                                                 <StackPanel>
-                                                    <Border Height="96" Background="#09162E" CornerRadius="0">
+                                                    <Border Height="96" Background="{StaticResource DeepPanelBrush}" CornerRadius="16">
                                                         <Image Source="{Binding PreviewImage}" Margin="14" Stretch="Uniform" />
                                                     </Border>
                                                     <TextBlock Margin="0,10,0,0" FontSize="13" FontWeight="SemiBold" Text="{Binding Title}" />
@@ -831,25 +946,25 @@
                             </Grid.RowDefinitions>
                             
                             <!-- Tab Navigation -->
-                            <Border Grid.Row="0" Margin="0,0,0,16" Padding="4" Background="#0A182E" CornerRadius="0" HorizontalAlignment="Left">
+                            <Border Grid.Row="0" Margin="0,0,0,16" Padding="4" Background="{StaticResource DeepPanelBrush}" CornerRadius="22" HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal">
                                     <Button x:Name="GbTabDashboardBtn" Content="Dashboard" Click="GbTab_Click" Style="{StaticResource PrimaryButtonStyle}" Margin="0"/>
-                                    <Button x:Name="GbTabSystemBtn" Content="Sistema e Otimizacao" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Background="Transparent" Foreground="White" BorderThickness="0"/>
-                                    <Button x:Name="GbTabAiBtn" Content="Especialista IA" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Background="Transparent" Foreground="White" BorderThickness="0"/>
+                                    <Button x:Name="GbTabSystemBtn" Content="Sistema e Otimizacao" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Style="{StaticResource TabButtonStyle}" />
+                                    <Button x:Name="GbTabAiBtn" Content="Especialista IA" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Style="{StaticResource TabButtonStyle}" />
                                 </StackPanel>
                             </Border>
 
                             <!-- Tab 1: Dashboard -->
                             <ScrollViewer Grid.Row="1" x:Name="GbContentDashboard" VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
-                                    <Border Padding="18" Background="#071A31" CornerRadius="0">
+                                    <Border Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="28">
                                         <StackPanel>
                                             <TextBlock Style="{StaticResource SectionTitleStyle}" Text="JB GameBooster" />
                                             <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="22" FontWeight="Bold" Text="Visao Geral do Sistema" />
                                             <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Base inicial do otimizador integrada ao dashboard atual. Navegue pelas sub-abas acima para recursos profundos." TextWrapping="Wrap" />
                                             
                                             <WrapPanel Margin="0,14,0,0">
-                                                <Border Width="220" Margin="0,0,12,12" Padding="14" Background="#0B2444" CornerRadius="0">
+                                                <Border Width="220" Margin="0,0,12,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Otimizacao aplicada" />
                                                         <Grid Width="130" Height="130" Margin="0,12,0,0" HorizontalAlignment="Center">
@@ -863,7 +978,7 @@
                                                         <TextBlock x:Name="OptimizationGaugeSummaryTextBlock" Margin="0,12,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Sem leitura ainda." TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Width="220" Margin="0,0,12,12" Padding="14" Background="#0B2444" CornerRadius="0">
+                                                <Border Width="220" Margin="0,0,12,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="FPS estimado" />
                                                         <Grid Width="130" Height="130" Margin="0,12,0,0" HorizontalAlignment="Center">
@@ -877,7 +992,7 @@
                                                         <TextBlock x:Name="FpsGaugeSummaryTextBlock" Margin="0,12,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Atual 0 | Meta 0" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Width="220" Margin="0,0,12,12" Padding="14" Background="#0B2444" CornerRadius="0">
+                                                <Border Width="220" Margin="0,0,12,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="CPU" />
                                                         <Grid Width="130" Height="130" Margin="0,12,0,0" HorizontalAlignment="Center">
@@ -891,7 +1006,7 @@
                                                         <TextBlock x:Name="CpuGaugeSummaryTextBlock" Margin="0,12,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Sem leitura ainda." TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Width="220" Margin="0,0,12,12" Padding="14" Background="#0B2444" CornerRadius="0">
+                                                <Border Width="220" Margin="0,0,12,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Memoria" />
                                                         <Grid Width="130" Height="130" Margin="0,12,0,0" HorizontalAlignment="Center">
@@ -908,19 +1023,19 @@
                                             </WrapPanel>
 
                                             <WrapPanel Margin="0,2,0,0">
-                                                <Border Margin="0,0,10,10" Padding="12,10" Background="#0B2444" CornerRadius="0">
+                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Score atual" />
                                                         <TextBlock x:Name="GameBoosterScoreTextBlock" Margin="0,6,0,0" FontFamily="Segoe UI Variable Display" FontSize="24" FontWeight="Bold" Text="0%" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Margin="0,0,10,10" Padding="12,10" Background="#0B2444" CornerRadius="0">
+                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Perfil sugerido" />
                                                         <TextBlock x:Name="GameBoosterProfileTextBlock" Margin="0,6,0,0" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Modo normal" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Margin="0,0,10,10" Padding="12,10" Background="#0B2444" CornerRadius="0">
+                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
                                                     <StackPanel Width="260">
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Resumo" />
                                                         <TextBlock x:Name="GameBoosterSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Text="Sem leitura ainda." TextWrapping="Wrap" />
@@ -938,7 +1053,7 @@
                                             </WrapPanel>
 
                                             <!-- Caixa do Relatorio de IA (Dashboard) -->
-                                            <Border x:Name="GameBoosterReportBorder" Margin="0,14,0,0" Padding="14" Background="#040F21" BorderBrush="#173765" BorderThickness="1" CornerRadius="0" Visibility="Collapsed">
+                                            <Border x:Name="GameBoosterReportBorder" Margin="0,14,0,0" Padding="16" Background="{StaticResource DeepPanelBrush}" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" CornerRadius="24" Visibility="Collapsed">
                                                 <StackPanel>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
@@ -952,13 +1067,13 @@
                                                         </StackPanel>
                                                         <Button x:Name="CloseGameBoosterReportButton" Grid.Column="1" Margin="12,0,0,0" Click="CloseGameBoosterReportButton_Click" Content="Fechar relatorio" />
                                                     </Grid>
-                                                    <TextBox x:Name="GameBoosterReportTextBox" Margin="0,12,0,0" MinHeight="240" Background="#0A182E" BorderThickness="0" Foreground="White" FontFamily="Consolas" FontSize="12" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
+                                                    <TextBox x:Name="GameBoosterReportTextBox" Margin="0,12,0,0" MinHeight="240" Background="{StaticResource SurfaceStrongBrush}" BorderThickness="0" Foreground="{StaticResource TextBrush}" FontFamily="Consolas" FontSize="12" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>
                                     </Border>
                                     
-                                    <Border x:Name="GameBoosterReadOnlyBorder" Margin="0,12,0,0" Padding="14" Background="#2E1C11" BorderBrush="#7E4D26" BorderThickness="1" CornerRadius="0" Visibility="Collapsed">
+                                    <Border x:Name="GameBoosterReadOnlyBorder" Margin="0,12,0,0" Padding="16" Background="#2E1C11" BorderBrush="#7E4D26" BorderThickness="1" CornerRadius="20" Visibility="Collapsed">
                                         <TextBlock FontSize="12" Foreground="#F0C28D" Text="Seu perfil pode visualizar o JB GameBooster, mas os botoes de aplicacao ficam bloqueados sem permissao administrativa de registro." TextWrapping="Wrap" />
                                     </Border>
                                 </StackPanel>
@@ -967,7 +1082,7 @@
                             <!-- Tab 2: Sistema e Otimizacao -->
                             <ScrollViewer Grid.Row="1" x:Name="GbContentSystem" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
-                                    <Border Padding="16" Background="#0d0d0d" CornerRadius="0">
+                                    <Border Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                         <StackPanel>
                                             <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Seguranca do Sistema" />
                                             <CheckBox x:Name="GameBoosterRestorePointCheckBox" Margin="0,10,0,0" Checked="GameBoosterRestorePointCheckBox_Changed" Unchecked="GameBoosterRestorePointCheckBox_Changed" Content="Criar ponto de restauracao antes de aplicar alteracoes de sistema" />
@@ -978,13 +1093,13 @@
                                     </Border>
 
                                     <!-- Tweaks Inviduais -->
-                                    <Border Margin="0,12,0,0" Padding="16" Background="#0d0d0d" CornerRadius="0">
+                                    <Border Margin="0,12,0,0" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                         <StackPanel>
                                             <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Tweaks Operacionais (Toggles Manuais)" />
                                             <ItemsControl x:Name="GameBoosterOptimizationItemsControl" Margin="0,12,0,0">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Margin="0,0,0,12" Padding="14" Background="#1D1D1D" BorderBrush="#333333" BorderThickness="1" CornerRadius="0">
+                                                                <Border Margin="0,0,0,12" Padding="16" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="20">
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="*" />
@@ -992,24 +1107,24 @@
                                                                 </Grid.ColumnDefinitions>
                                                                 <StackPanel>
                                                                     <WrapPanel>
-                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#1C3879" CornerRadius="0">
+                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#233B66" CornerRadius="12">
                                                                             <TextBlock FontSize="10" Foreground="#E0EFFF" Text="{Binding Category}" />
                                                                         </Border>
                                                                         <Border Margin="0,0,8,8" Padding="8,3" Background="{Binding StatusBrush}" CornerRadius="0">
                                                                             <TextBlock FontSize="10" Foreground="White" FontWeight="Bold" Text="{Binding StatusText}" />
                                                                         </Border>
-                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#3A3A3A" CornerRadius="0">
+                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#2A3441" CornerRadius="12">
                                                                             <TextBlock FontSize="10" Foreground="#EEEEEE" Text="{Binding ImpactText}" />
                                                                         </Border>
-                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#542B2B" CornerRadius="0">
+                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#4C2B24" CornerRadius="12">
                                                                             <TextBlock FontSize="10" Foreground="#F5D0D0" Text="{Binding RiskText}" />
                                                                         </Border>
                                                                     </WrapPanel>
-                                                                    <TextBlock Margin="0,2,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Text="{Binding Title}" />
-                                                                    <TextBlock Margin="0,6,0,0" FontSize="13" Foreground="#CCCCCC" Text="{Binding Description}" TextWrapping="Wrap" />
-                                                                    <TextBlock Margin="0,10,0,0" FontSize="12" Foreground="#A8A8A8" Text="{Binding CurrentText}" TextWrapping="Wrap" />
+                                                                    <TextBlock Margin="0,2,0,0" FontFamily="Figtree" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="{Binding Title}" />
+                                                                    <TextBlock Margin="0,6,0,0" FontSize="13" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
+                                                                    <TextBlock Margin="0,10,0,0" FontSize="12" Foreground="{StaticResource SoftBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
                                                                     <TextBlock Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
-                                                                    <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="#888888" Text="{Binding RestartText}" TextWrapping="Wrap" />
+                                                                    <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding RestartText}" TextWrapping="Wrap" />
                                                                 </StackPanel>
                                                                 <Button Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center" Tag="{Binding Id}" Click="ApplyGameBoosterOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
                                                             </Grid>
@@ -1027,7 +1142,7 @@
                                 <StackPanel>
                                     
                                     <!-- Servidor IA -->
-                                    <Border Padding="16" Background="#0d0d0d" CornerRadius="0">
+                                    <Border Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                         <StackPanel>
                                             <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Analista de Hardware e Performance (Cloud AI)" />
                                             <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Google Gemini API" />
@@ -1050,13 +1165,13 @@
                                                 </StackPanel>
                                             </Grid>
                                             <WrapPanel Margin="0,14,0,0">
-                                                <Button x:Name="AnalyzeAndApplyButton" Click="AnalyzeAndApplyButton_Click" Content="⚡ Analisar e Otimizar Agora" Style="{StaticResource PrimaryButtonStyle}" />
+                                                <Button x:Name="AnalyzeAndApplyButton" Click="AnalyzeAndApplyButton_Click" Content="Analisar e Otimizar Agora" Style="{StaticResource PrimaryButtonStyle}" />
                                                 <Button x:Name="TestLocalAiConnectionButton" Margin="10,0,0,0" Click="TestLocalAiConnectionButton_Click" Content="Testar Key" />
                                                 <Button x:Name="SaveLocalAiSettingsButton" Margin="10,0,0,0" Click="SaveLocalAiSettingsButton_Click" Content="Salvar" />
                                             </WrapPanel>
                                             <TextBlock x:Name="LocalAiCommandHintTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Cole a chave da API do Google AI Studio no campo acima. O Gemini analisara o PC e aplicara as otimizacoes automaticamente." TextWrapping="Wrap" />
 
-                                            <Border Margin="0,14,0,0" Padding="14" Background="#121212" CornerRadius="0">
+                                            <Border Margin="0,14,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                 <StackPanel>
                                                     <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Painel do Analista" />
                                                     <TextBlock x:Name="LocalAiAnalysisMetaTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma analise salva ainda." TextWrapping="Wrap" />
@@ -1064,7 +1179,7 @@
                                                     <ItemsControl x:Name="LocalAiRecommendationItemsControl" Margin="0,12,0,0">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Border Margin="0,0,0,10" Padding="12" Background="#1A1A1A" BorderBrush="#444444" BorderThickness="1" CornerRadius="0">
+                                                                <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
                                                                     <StackPanel>
                                                                         <TextBlock FontFamily="Segoe UI Variable Display" FontSize="13" FontWeight="Bold" Text="{Binding Title}" />
                                                                         <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Reason}" TextWrapping="Wrap" />
@@ -1078,16 +1193,16 @@
                                             </Border>
 
                                             <!-- Painel de Confirmação (visível após análise, antes de aplicar) -->
-                                            <Border x:Name="ConfirmationPanel" Margin="0,14,0,0" Padding="16" Background="#0d1a0d" BorderBrush="#39FF14" BorderThickness="1" CornerRadius="0" Visibility="Collapsed">
+                                            <Border x:Name="ConfirmationPanel" Margin="0,14,0,0" Padding="18" Background="#152117" BorderBrush="{StaticResource SecondaryAccentBrush}" BorderThickness="1" CornerRadius="22" Visibility="Collapsed">
                                                 <StackPanel>
-                                                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Foreground="#39FF14" Text="⚡ Otimizações detectadas — confirme para aplicar" />
+                                                    <TextBlock FontFamily="Figtree" FontSize="14" FontWeight="Bold" Foreground="{StaticResource SecondaryAccentBrush}" Text="Otimizacoes detectadas - confirme para aplicar" />
                                                     <TextBlock x:Name="ConfirmationSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" />
                                                     <ItemsControl x:Name="ConfirmationItemsControl" Margin="0,12,0,0">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Border Margin="0,0,0,8" Padding="12,10" Background="#161f16" BorderBrush="#2a3d2a" BorderThickness="1" CornerRadius="0">
+                                                                <Border Margin="0,0,0,8" Padding="14,12" Background="#1A241B" BorderBrush="#314A35" BorderThickness="1" CornerRadius="18">
                                                                     <StackPanel>
-                                                                        <TextBlock FontWeight="Bold" FontSize="13" Text="{Binding Title}" Foreground="#EFEFEF" />
+                                                                        <TextBlock FontWeight="Bold" FontSize="13" Text="{Binding Title}" Foreground="{StaticResource TextBrush}" />
                                                                         <TextBlock Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
                                                                     </StackPanel>
                                                                 </Border>
@@ -1095,8 +1210,8 @@
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
                                                     <WrapPanel Margin="0,14,0,0">
-                                                        <Button x:Name="ConfirmApplyButton" Click="ConfirmApplyButton_Click" Content="✔ Confirmar e Aplicar" Style="{StaticResource PrimaryButtonStyle}" />
-                                                        <Button x:Name="CancelApplyButton" Margin="10,0,0,0" Click="CancelApplyButton_Click" Content="✖ Cancelar" />
+                                                        <Button x:Name="ConfirmApplyButton" Click="ConfirmApplyButton_Click" Content="Confirmar e Aplicar" Style="{StaticResource PrimaryButtonStyle}" />
+                                                        <Button x:Name="CancelApplyButton" Margin="10,0,0,0" Click="CancelApplyButton_Click" Content="Cancelar" />
                                                     </WrapPanel>
                                                 </StackPanel>
                                             </Border>
@@ -1104,18 +1219,18 @@
                                     </Border>
 
                                     <!-- Integracao Especifica Rust -->
-                                    <Border Margin="0,12,0,0" Padding="16" Background="#0d0d0d" CornerRadius="0">
+                                    <Border Margin="0,12,0,0" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                         <StackPanel>
                                             <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Target em Jogo: Rust" />
                                             <TextBlock x:Name="RustModuleSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Modulo beta testando pre-load para motor da Facepunch." TextWrapping="Wrap" />
                                             <WrapPanel Margin="0,12,0,0">
-                                                <Border Margin="0,0,10,10" Padding="12,10" Background="#121212" CornerRadius="0" BorderThickness="1" BorderBrush="#262626">
+                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="CPU Alvo" />
                                                         <TextBlock x:Name="RustCpuTextBlock" Margin="0,6,0,0" Width="230" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Margin="0,0,10,10" Padding="12,10" Background="#121212" CornerRadius="0" BorderThickness="1" BorderBrush="#262626">
+                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Memoria Estimada" />
                                                         <TextBlock x:Name="RustMemoryTextBlock" Margin="0,6,0,0" FontSize="16" FontWeight="Bold" />
@@ -1131,14 +1246,14 @@
                                                     <ColumnDefinition Width="12" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <Border Grid.Column="0" Padding="14" Background="#121212" CornerRadius="0">
+                                                <Border Grid.Column="0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Launch options Steam" />
                                                         <TextBox x:Name="RustLaunchOptionsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="45" Background="Transparent" BorderThickness="0" Foreground="{StaticResource MutedBrush}"/>
                                                         <TextBlock x:Name="RustSteamPathTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Grid.Column="2" Padding="14" Background="#121212" CornerRadius="0">
+                                                <Border Grid.Column="2" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="client.cfg Injetado" />
                                                         <TextBox x:Name="RustClientCommandsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="45" Background="Transparent" BorderThickness="0" Foreground="{StaticResource MutedBrush}"/>
@@ -1147,7 +1262,7 @@
                                                 </Border>
                                             </Grid>
 
-                                            <Border Margin="0,12,0,0" Padding="14" Background="#121212" CornerRadius="0">
+                                            <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                 <StackPanel>
                                                     <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Sintese Dedicada para Rust" />
                                                     <WrapPanel>
@@ -1160,7 +1275,7 @@
                                                         <!-- Similar to above IA output template -->
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Border Margin="0,0,0,10" Padding="12" Background="#1A1A1A" BorderBrush="#333333" BorderThickness="1" CornerRadius="0">
+                                                                <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
                                                                     <StackPanel>
                                                                         <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
                                                                         <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Reason}" TextWrapping="Wrap" />
@@ -1183,7 +1298,7 @@
                              ───────────────────────────────────── -->
                         <ScrollViewer x:Name="SettingsView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <Border x:Name="IntegrationSettingsCard" Margin="0,0,0,14" Padding="16" Background="#0d0d0d" CornerRadius="0" Visibility="Collapsed">
+                                <Border x:Name="IntegrationSettingsCard" Margin="0,0,0,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
                                     <StackPanel>
                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Explorer" />
                                         <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Integração com clique direito" />
@@ -1195,7 +1310,7 @@
                                         </WrapPanel>
                                     </StackPanel>
                                 </Border>
-                                <Border x:Name="AdminFeatureSettingsCard" Margin="0,0,0,14" Padding="16" Background="#0d0d0d" CornerRadius="0" Visibility="Collapsed">
+                                <Border x:Name="AdminFeatureSettingsCard" Margin="0,0,0,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
                                     <StackPanel>
                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Admin" />
                                         <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Recursos do Windows" />
@@ -1213,7 +1328,7 @@
                                         </ListView>
                                     </StackPanel>
                                 </Border>
-                                <Border x:Name="AdminAuditSettingsCard" Margin="0,0,0,14" Padding="16" Background="#0d0d0d" CornerRadius="0" Visibility="Collapsed">
+                                <Border x:Name="AdminAuditSettingsCard" Margin="0,0,0,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
                                     <StackPanel>
                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Auditoria" />
                                         <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Histórico administrativo" />
@@ -1227,7 +1342,7 @@
                                         </ListView>
                                     </StackPanel>
                                 </Border>
-                                <Border x:Name="UserSettingsInfoCard" Padding="16" Background="#0d0d0d" CornerRadius="0" Visibility="Collapsed">
+                                <Border x:Name="UserSettingsInfoCard" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
                                     <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Este perfil verá apenas recursos relevantes." TextWrapping="Wrap" />
                                 </Border>
                             </StackPanel>
@@ -1245,18 +1360,18 @@
 
         <!-- ═══════════════════ BUSY OVERLAY ═══════════════════ -->
         <Grid x:Name="BusyOverlayRoot" Visibility="Collapsed">
-            <Border Background="#9F040A17" />
+            <Border Background="#A0040A17" />
             <Border
                 Width="300"
                 Padding="22"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Background="#0C1B3D"
-                BorderBrush="#284C8D"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource DividerBrush}"
                 BorderThickness="1"
-                CornerRadius="0">
+                CornerRadius="24">
                 <StackPanel>
-                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Processando..." />
+                    <TextBlock FontFamily="Figtree" FontSize="18" FontWeight="Bold" Text="Processando..." />
                     <TextBlock x:Name="BusyOverlayTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Aplicando ícone e atualizando o Explorer..." TextWrapping="Wrap" />
                     <ProgressBar Margin="0,14,0,0" Height="4" IsIndeterminate="True" />
                 </StackPanel>

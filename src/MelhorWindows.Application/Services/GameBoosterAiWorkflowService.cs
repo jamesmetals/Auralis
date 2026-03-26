@@ -55,7 +55,7 @@ public sealed class GameBoosterAiWorkflowService(
         if (!availability.ConfiguredModelAvailable)
         {
             return OperationResult<GameBoosterAiPanelSnapshot>.Failure(
-                $"O modelo configurado ({settings.ModelName}) nao apareceu no Ollama local. Rode `{availability.SuggestedPullCommand}` ou escolha um modelo listado.");
+                BuildModelUnavailableMessage(settings.ModelName, availability));
         }
 
         var dashboard = await gameBoosterWorkflowService.GetDashboardSnapshotAsync(cancellationToken);
@@ -67,7 +67,7 @@ public sealed class GameBoosterAiWorkflowService(
             cancellationToken);
 
         var panel = new GameBoosterAiPanelSnapshot(settings, availability, analysis);
-        return OperationResult<GameBoosterAiPanelSnapshot>.Success(panel, "Analise local concluida pelo JB GameBooster.");
+        return OperationResult<GameBoosterAiPanelSnapshot>.Success(panel, "Analise concluida pelo JB GameBooster.");
     }
 
     /// <summary>
@@ -118,12 +118,12 @@ public sealed class GameBoosterAiWorkflowService(
         if (!panel.Availability.ConfiguredModelAvailable)
         {
             return OperationResult<GameBoosterAiPanelSnapshot>.Failure(
-                $"Conexao local ok, mas o modelo {panel.Settings.ModelName} ainda nao foi encontrado. Rode `{panel.Availability.SuggestedPullCommand}`.");
+                BuildModelUnavailableMessage(panel.Settings.ModelName, panel.Availability));
         }
 
         return OperationResult<GameBoosterAiPanelSnapshot>.Success(
             panel,
-            $"Conexao local confirmada com Ollama e modelo {panel.Settings.ModelName} pronto para uso.");
+            $"Conexao confirmada com Google Gemini e modelo {panel.Settings.ModelName} pronto para uso.");
     }
 
     public async Task<RustGameBoosterPanelSnapshot> GetRustPanelSnapshotAsync(CancellationToken cancellationToken = default)
@@ -149,7 +149,7 @@ public sealed class GameBoosterAiWorkflowService(
         if (!availability.ConfiguredModelAvailable)
         {
             return OperationResult<RustGameBoosterPanelSnapshot>.Failure(
-                $"O modelo configurado ({settings.ModelName}) nao apareceu no Ollama local. Rode `{availability.SuggestedPullCommand}` ou escolha um modelo listado.");
+                BuildModelUnavailableMessage(settings.ModelName, availability));
         }
 
         var rustProfile = await rustGameProfileService.GetSnapshotAsync(cancellationToken);
@@ -167,7 +167,7 @@ public sealed class GameBoosterAiWorkflowService(
 
         return OperationResult<RustGameBoosterPanelSnapshot>.Success(
             new RustGameBoosterPanelSnapshot(rustProfile, analysis),
-            "Analise local do perfil de Rust concluida.");
+            "Analise do perfil de Rust concluida.");
     }
 
     private async Task<LocalAiConnectionSettings> LoadSettingsAsync(CancellationToken cancellationToken)
@@ -183,5 +183,14 @@ public sealed class GameBoosterAiWorkflowService(
         return await protectedStateStore.LoadAsync<GameBoosterAiAnalysisSnapshot>(
             OptimizationStateKeys.LocalAiLastAnalysis,
             cancellationToken);
+    }
+
+    private static string BuildModelUnavailableMessage(
+        string modelName,
+        LocalAiAvailabilitySnapshot availability)
+    {
+        return string.IsNullOrWhiteSpace(availability.SuggestedPullCommand)
+            ? $"O modelo configurado ({modelName}) nao esta disponivel para a chave atual do Gemini. Escolha um dos modelos listados."
+            : $"O modelo configurado ({modelName}) nao esta disponivel. Rode `{availability.SuggestedPullCommand}` ou escolha um modelo listado.";
     }
 }

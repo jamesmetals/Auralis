@@ -169,7 +169,7 @@ public partial class MainWindow : Window
                         }
                     });
                 }
-                catch { } // Silently fail background auto-start if Ollama is off
+                catch { } // Silently fail background auto-start if Gemini is unavailable
             });
         }
     }
@@ -233,15 +233,14 @@ public partial class MainWindow : Window
         GbContentSystem.Visibility = Visibility.Collapsed;
         GbContentAi.Visibility = Visibility.Collapsed;
 
-        GbTabDashboardBtn.Style = null;
-        GbTabSystemBtn.Style = null;
-        GbTabAiBtn.Style = null;
+        var inactiveTabStyle = (Style)FindResource("TabButtonStyle");
+        var activeTabStyle = (Style)FindResource("PrimaryButtonStyle");
 
-        GbTabDashboardBtn.Background = System.Windows.Media.Brushes.Transparent;
-        GbTabSystemBtn.Background = System.Windows.Media.Brushes.Transparent;
-        GbTabAiBtn.Background = System.Windows.Media.Brushes.Transparent;
+        GbTabDashboardBtn.Style = inactiveTabStyle;
+        GbTabSystemBtn.Style = inactiveTabStyle;
+        GbTabAiBtn.Style = inactiveTabStyle;
 
-        btn.Style = (Style)FindResource("PrimaryButtonStyle");
+        btn.Style = activeTabStyle;
 
         if (btn == GbTabDashboardBtn) GbContentDashboard.Visibility = Visibility.Visible;
         else if (btn == GbTabSystemBtn) GbContentSystem.Visibility = Visibility.Visible;
@@ -1216,12 +1215,12 @@ public partial class MainWindow : Window
         return string.Join(
             Environment.NewLine,
             [
-                "Nenhum relatorio de IA local foi salvo ainda.",
+                "Nenhum relatorio do Gemini foi salvo ainda.",
                 string.Empty,
                 "Para gerar o relatorio:",
-                "1. Confirme que o Ollama local esta acessivel.",
+                "1. Cole uma API Key valida do Google Gemini no painel.",
                 "2. Escolha um modelo listado no painel.",
-                "3. Rode 'Analisar com IA local' no booster geral ou em Rust."
+                "3. Rode a analise no booster geral ou no modulo de Rust."
             ]);
     }
 
@@ -1236,7 +1235,7 @@ public partial class MainWindow : Window
             return BuildNoAiReportText();
         }
 
-        builder.AppendLine("RELATORIO DA IA LOCAL");
+        builder.AppendLine("RELATORIO DO GEMINI");
         builder.AppendLine();
 
         if (boosterAnalysis is not null)
@@ -1272,7 +1271,7 @@ public partial class MainWindow : Window
         else
         {
             builder.AppendLine("RUST");
-            builder.AppendLine("Nenhuma leitura local de Rust foi salva ainda.");
+            builder.AppendLine("Nenhuma leitura de Rust foi salva ainda.");
         }
 
         return builder.ToString().TrimEnd();
@@ -1497,7 +1496,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            BeginBusy("Consultando o Ollama local...");
+            BeginBusy("Validando conexao com Google Gemini...");
             await SaveLocalAiSettingsFromFormAsync();
             var result = await _services.GameBoosterAiWorkflowService.TestConnectionAsync();
             await LoadLocalAiPanelAsync();
@@ -1520,7 +1519,7 @@ public partial class MainWindow : Window
             await SaveLocalAiSettingsFromFormAsync();
             await LoadLocalAiPanelAsync();
             await LoadRustPanelAsync();
-            SetStatus("Configuracao da IA local salva.", isError: false);
+            SetStatus("Configuracao do Google Gemini salva.", isError: false);
         }
         catch (Exception exception)
         {
@@ -1630,7 +1629,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            BeginBusy("Executando analise local do perfil de Rust...");
+            BeginBusy("Executando analise do perfil de Rust...");
             await SaveLocalAiSettingsFromFormAsync();
 
             var result = await _services.GameBoosterAiWorkflowService.AnalyzeRustAsync();
@@ -1686,12 +1685,12 @@ public partial class MainWindow : Window
 
         if (string.IsNullOrWhiteSpace(endpoint))
         {
-            throw new InvalidOperationException("Informe o endpoint do Ollama local.");
+            throw new InvalidOperationException("Informe a API Key do Google Gemini.");
         }
 
         if (string.IsNullOrWhiteSpace(model))
         {
-            throw new InvalidOperationException("Informe o modelo local que sera usado na analise.");
+            throw new InvalidOperationException("Informe o modelo do Gemini que sera usado na analise.");
         }
 
         return _services.GameBoosterAiWorkflowService.SaveSettingsAsync(
@@ -1717,13 +1716,9 @@ public partial class MainWindow : Window
 
         string[] preferredModels =
         [
-            "llama3.1-local:latest",
-            "llama3.2:latest",
-            "llama3:8b",
-            "gemma3:4b",
-            "gemma3:latest",
-            "deepseek-r1:8b",
-            "qwen2.5-coder:latest"
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
+            "gemini-2.0-flash"
         ];
 
         foreach (var preferredModel in preferredModels)
