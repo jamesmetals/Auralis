@@ -2,6 +2,16 @@
 
 Registro resumido dos commits atuais do projeto, com foco no que foi alterado em cada etapa.
 
+## 745f142 - 2026-03-26 - feat: add research-driven Rust optimization knowledge
+- adicionou uma base persistida de conhecimento para Rust em JSON, com regras classificadas por confianca, tipo de ajuste e condicoes por CPU, RAM, GPU/vendor e carga de memoria.
+- integrou essa base ao prompt da IA para que as recomendacoes do Rust deixem de ser genericas e passem a respeitar o hardware detectado no snapshot atual.
+- criou a documentacao `Documentos/PESQUISA_RUST_OTIMIZACOES_2026.md` e a skill reutilizavel `SKILL_PESQUISA_OTIMIZACAO_DE_JOGOS.md` para repetir o mesmo fluxo em outros games.
+
+## aff7577 - 2026-03-26 - refactor: refine dashboard copy and Rust panel UX
+- refinou a hierarquia textual, os rotulos e a linguagem do dashboard para ficar mais orientada a produto e menos tecnica.
+- ajustou a leitura do painel de Rust, melhorando o equilibrio visual dos blocos de resumo, acoes e diagnostico.
+- preparou o terreno para a nova rodada de pesquisa por jogo sem mudar a logica central do modulo.
+
 ## f12eac7 - 2026-03-26 - feat: hide AI internals from UI and add designer skill
 - removeu da interface principal detalhes tecnicos de IA que nao sao pertinentes ao usuario final, como referencias a modelo, provider, chave e configuracao operacional.
 - refinou a aba de analise inteligente e o painel de Rust com linguagem mais orientada a beneficio, resumo e diagnostico.
