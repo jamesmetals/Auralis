@@ -950,7 +950,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <Button x:Name="GbTabDashboardBtn" Content="Dashboard" Click="GbTab_Click" Style="{StaticResource PrimaryButtonStyle}" Margin="0"/>
                                     <Button x:Name="GbTabSystemBtn" Content="Sistema e Otimizacao" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Style="{StaticResource TabButtonStyle}" />
-                                    <Button x:Name="GbTabAiBtn" Content="Especialista IA" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Style="{StaticResource TabButtonStyle}" />
+                                    <Button x:Name="GbTabAiBtn" Content="Diagnostico Inteligente" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Style="{StaticResource TabButtonStyle}" />
                                 </StackPanel>
                             </Border>
 
@@ -963,8 +963,14 @@
                                             <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="22" FontWeight="Bold" Text="Visao Geral do Sistema" />
                                             <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Base inicial do otimizador integrada ao dashboard atual. Navegue pelas sub-abas acima para recursos profundos." TextWrapping="Wrap" />
                                             
-                                            <WrapPanel Margin="0,14,0,0">
-                                                <Border Width="220" Margin="0,0,12,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
+                                            <Grid Margin="0,14,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Margin="0,0,10,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Otimizacao aplicada" />
                                                         <Grid Width="130" Height="130" Margin="0,12,0,0" HorizontalAlignment="Center">
@@ -978,7 +984,7 @@
                                                         <TextBlock x:Name="OptimizationGaugeSummaryTextBlock" Margin="0,12,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Sem leitura ainda." TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Width="220" Margin="0,0,12,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
+                                                <Border Grid.Column="1" Margin="0,0,10,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="FPS estimado" />
                                                         <Grid Width="130" Height="130" Margin="0,12,0,0" HorizontalAlignment="Center">
@@ -992,7 +998,7 @@
                                                         <TextBlock x:Name="FpsGaugeSummaryTextBlock" Margin="0,12,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Atual 0 | Meta 0" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Width="220" Margin="0,0,12,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
+                                                <Border Grid.Column="2" Margin="0,0,10,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="CPU" />
                                                         <Grid Width="130" Height="130" Margin="0,12,0,0" HorizontalAlignment="Center">
@@ -1006,7 +1012,7 @@
                                                         <TextBlock x:Name="CpuGaugeSummaryTextBlock" Margin="0,12,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Sem leitura ainda." TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Width="220" Margin="0,0,12,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
+                                                <Border Grid.Column="3" Margin="0,0,0,12" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="22">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Memoria" />
                                                         <Grid Width="130" Height="130" Margin="0,12,0,0" HorizontalAlignment="Center">
@@ -1020,37 +1026,51 @@
                                                         <TextBlock x:Name="MemoryGaugeSummaryTextBlock" Margin="0,12,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Sem leitura ainda." TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                            </WrapPanel>
+                                            </Grid>
 
-                                            <WrapPanel Margin="0,2,0,0">
-                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="1.1*" />
+                                                    <ColumnDefinition Width="1.4*" />
+                                                    <ColumnDefinition Width="2.1*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Score atual" />
                                                         <TextBlock x:Name="GameBoosterScoreTextBlock" Margin="0,6,0,0" FontFamily="Segoe UI Variable Display" FontSize="24" FontWeight="Bold" Text="0%" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
+                                                <Border Grid.Column="1" Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Perfil sugerido" />
                                                         <TextBlock x:Name="GameBoosterProfileTextBlock" Margin="0,6,0,0" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Modo normal" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
-                                                    <StackPanel Width="260">
+                                                <Border Grid.Column="2" Margin="0,0,0,10" Padding="14,12" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
+                                                    <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Resumo" />
                                                         <TextBlock x:Name="GameBoosterSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Text="Sem leitura ainda." TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                            </WrapPanel>
+                                            </Grid>
                                             <TextBlock x:Name="GameBoosterTelemetryFootnoteTextBlock" Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="As leituras de CPU e memoria sao reais. FPS e economia apos otimizar sao estimativas heuristicas, nao benchmark direto." TextWrapping="Wrap" />
                                             
-                                            <WrapPanel Margin="0,10,0,0">
-                                                <Button x:Name="ApplyRecommendedGameBoosterButton" Click="ApplyRecommendedGameBoosterButton_Click" Content="Aplicar recomendadas" Style="{StaticResource PrimaryButtonStyle}" />
-                                                <Button x:Name="RevertGameBoosterSessionButton" Margin="10,0,0,0" Click="RevertGameBoosterSessionButton_Click" Content="Desfazer ultima sessao" />
-                                                <Button x:Name="RefreshGameBoosterButton" Margin="10,0,0,0" Click="RefreshGameBoosterButton_Click" Content="Atualizar leitura" />
-                                                <Button x:Name="ShowAiReportButton" Margin="10,0,0,0" Click="ShowAiReportButton_Click" Content="Exibir relatorio da IA" />
-                                                <Button x:Name="ShowComputerReportButton" Margin="10,0,0,0" Click="ShowComputerReportButton_Click" Content="Teste de hardware offline" />
-                                            </WrapPanel>
+                                            <Grid Margin="0,14,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <Button x:Name="ApplyRecommendedGameBoosterButton" Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" Click="ApplyRecommendedGameBoosterButton_Click" Content="Aplicar recomendadas" Style="{StaticResource PrimaryButtonStyle}" />
+                                                <Button x:Name="RevertGameBoosterSessionButton" Grid.Row="0" Grid.Column="1" Margin="0,0,10,10" Click="RevertGameBoosterSessionButton_Click" Content="Desfazer ultima sessao" />
+                                                <Button x:Name="RefreshGameBoosterButton" Grid.Row="0" Grid.Column="2" Margin="0,0,0,10" Click="RefreshGameBoosterButton_Click" Content="Atualizar leitura" />
+                                                <Button x:Name="ShowAiReportButton" Grid.Row="1" Grid.Column="0" Margin="0,0,10,0" Click="ShowAiReportButton_Click" Content="Exibir relatorio da IA" />
+                                                <Button x:Name="ShowComputerReportButton" Grid.Row="1" Grid.Column="1" Margin="0,0,10,0" Click="ShowComputerReportButton_Click" Content="Teste de hardware offline" />
+                                            </Grid>
 
                                             <!-- Caixa do Relatorio de IA (Dashboard) -->
                                             <Border x:Name="GameBoosterReportBorder" Margin="0,14,0,0" Padding="16" Background="{StaticResource DeepPanelBrush}" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" CornerRadius="24" Visibility="Collapsed">
@@ -1063,7 +1083,7 @@
                                                         <StackPanel>
                                                             <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Analise Tecnico / Relatorio" />
                                                             <TextBlock x:Name="GameBoosterReportTitleTextBlock" Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Sem relatorio aberto" />
-                                                            <TextBlock x:Name="GameBoosterReportSubtitleTextBlock" Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Use os botoes acima para abrir o relatorio detalhado do Sistema ou Ollama." TextWrapping="Wrap" />
+                                                            <TextBlock x:Name="GameBoosterReportSubtitleTextBlock" Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Use os botoes acima para abrir o relatorio detalhado do sistema ou da analise inteligente." TextWrapping="Wrap" />
                                                         </StackPanel>
                                                         <Button x:Name="CloseGameBoosterReportButton" Grid.Column="1" Margin="12,0,0,0" Click="CloseGameBoosterReportButton_Click" Content="Fechar relatorio" />
                                                     </Grid>
@@ -1144,38 +1164,43 @@
                                     <!-- Servidor IA -->
                                     <Border Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                         <StackPanel>
-                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Analista de Hardware e Performance (Cloud AI)" />
-                                            <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Google Gemini API" />
-                                            <TextBlock x:Name="LocalAiStatusTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="A IA analisa gargalos e processos via nuvem. Cole a Key no campo Endpoint." TextWrapping="Wrap" />
-                                            <Grid Margin="0,14,0,0">
+                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Diagnostico inteligente" />
+                                            <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Leitura guiada de hardware e sistema" />
+                                            <TextBlock x:Name="LocalAiStatusTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="O modulo inteligente revisa gargalos do PC e sugere a melhor sequencia de otimizacao para esta maquina." TextWrapping="Wrap" />
+                                            <Grid Margin="0,14,0,0" Visibility="Collapsed">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="12" />
                                                     <ColumnDefinition Width="240" />
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Grid.Column="0">
-                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="API Key do Gemini" />
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Configuracao interna" />
                                                     <TextBox x:Name="LocalAiEndpointTextBox" Margin="0,8,0,0" Text="ColeSuaChaveDaAPI_AIzaSy..." />
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="2">
-                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Modelo Alvo" />
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Perfil interno" />
                                                     <ComboBox x:Name="LocalAiModelComboBox" Margin="0,8,0,0" IsEditable="True" IsTextSearchEnabled="True">
                                                         <ComboBoxItem IsSelected="True">gemini-2.5-flash</ComboBoxItem>
                                                     </ComboBox>
                                                 </StackPanel>
                                             </Grid>
-                                            <WrapPanel Margin="0,14,0,0">
-                                                <Button x:Name="AnalyzeAndApplyButton" Click="AnalyzeAndApplyButton_Click" Content="Analisar e Otimizar Agora" Style="{StaticResource PrimaryButtonStyle}" />
-                                                <Button x:Name="TestLocalAiConnectionButton" Margin="10,0,0,0" Click="TestLocalAiConnectionButton_Click" Content="Testar Key" />
-                                                <Button x:Name="SaveLocalAiSettingsButton" Margin="10,0,0,0" Click="SaveLocalAiSettingsButton_Click" Content="Salvar" />
-                                            </WrapPanel>
-                                            <TextBlock x:Name="LocalAiCommandHintTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Cole a chave da API do Google AI Studio no campo acima. O Gemini analisara o PC e aplicara as otimizacoes automaticamente." TextWrapping="Wrap" />
+                                            <Grid Margin="0,14,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2*" />
+                                                    <ColumnDefinition Width="1*" />
+                                                    <ColumnDefinition Width="1*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Button x:Name="AnalyzeAndApplyButton" Grid.Column="0" Grid.ColumnSpan="3" Click="AnalyzeAndApplyButton_Click" Content="Gerar diagnostico inteligente" Style="{StaticResource PrimaryButtonStyle}" />
+                                                <Button x:Name="TestLocalAiConnectionButton" Grid.Column="1" Margin="0,0,10,0" Click="TestLocalAiConnectionButton_Click" Content="Atualizar disponibilidade" Visibility="Collapsed" />
+                                                <Button x:Name="SaveLocalAiSettingsButton" Grid.Column="2" Click="SaveLocalAiSettingsButton_Click" Content="Salvar configuracao" Visibility="Collapsed" />
+                                            </Grid>
+                                            <TextBlock x:Name="LocalAiCommandHintTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="A analise combina a leitura atual do sistema com o catalogo do booster para sugerir os proximos passos." TextWrapping="Wrap" />
 
                                             <Border Margin="0,14,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                 <StackPanel>
-                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Painel do Analista" />
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Resumo da leitura" />
                                                     <TextBlock x:Name="LocalAiAnalysisMetaTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma analise salva ainda." TextWrapping="Wrap" />
-                                                    <TextBlock x:Name="LocalAiAnalysisSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="Clique em Analisar e Otimizar Agora para o Gemini avaliar o PC." TextWrapping="Wrap" />
+                                                    <TextBlock x:Name="LocalAiAnalysisSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="Execute o diagnostico para receber um resumo pratico do estado atual do sistema." TextWrapping="Wrap" />
                                                     <ItemsControl x:Name="LocalAiRecommendationItemsControl" Margin="0,12,0,0">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
@@ -1209,10 +1234,14 @@
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
-                                                    <WrapPanel Margin="0,14,0,0">
-                                                        <Button x:Name="ConfirmApplyButton" Click="ConfirmApplyButton_Click" Content="Confirmar e Aplicar" Style="{StaticResource PrimaryButtonStyle}" />
-                                                        <Button x:Name="CancelApplyButton" Margin="10,0,0,0" Click="CancelApplyButton_Click" Content="Cancelar" />
-                                                    </WrapPanel>
+                                                    <Grid Margin="0,14,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button x:Name="ConfirmApplyButton" Grid.Column="0" Margin="0,0,10,0" Click="ConfirmApplyButton_Click" Content="Confirmar e Aplicar" Style="{StaticResource PrimaryButtonStyle}" />
+                                                        <Button x:Name="CancelApplyButton" Grid.Column="1" Click="CancelApplyButton_Click" Content="Cancelar" />
+                                                    </Grid>
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>
@@ -1223,21 +1252,25 @@
                                         <StackPanel>
                                             <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Target em Jogo: Rust" />
                                             <TextBlock x:Name="RustModuleSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Modulo beta testando pre-load para motor da Facepunch." TextWrapping="Wrap" />
-                                            <WrapPanel Margin="0,12,0,0">
-                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
+                                            <Grid Margin="0,12,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="CPU Alvo" />
                                                         <TextBlock x:Name="RustCpuTextBlock" Margin="0,6,0,0" Width="230" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
+                                                <Border Grid.Column="1" Margin="0,0,0,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
                                                     <StackPanel>
                                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Memoria Estimada" />
                                                         <TextBlock x:Name="RustMemoryTextBlock" Margin="0,6,0,0" FontSize="16" FontWeight="Bold" />
                                                         <TextBlock x:Name="RustPriorityHintTextBlock" Margin="0,6,0,0" Width="220" FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                            </WrapPanel>
+                                            </Grid>
 
                                             <!-- Opcionais Launch / Config -->
                                             <Grid Margin="0,10,0,0">
@@ -1264,13 +1297,17 @@
 
                                             <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                 <StackPanel>
-                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Sintese Dedicada para Rust" />
-                                                    <WrapPanel>
-                                                        <Button x:Name="LocalAiCheckAvailabilityButton" Click="TestLocalAiConnectionButton_Click" Content="Conectar Gemini (Testar Key)" Style="{StaticResource PrimaryButtonStyle}" />
-                                                        <Button x:Name="RunRustLocalAiAnalysisButton" Margin="10,0,0,0" Click="RunRustLocalAiAnalysisButton_Click" Content="Auditoria Cloud focada em Unity/Rust" />
-                                                    </WrapPanel>
-                                                    <TextBlock x:Name="RustAiAnalysisMetaTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhum perfil salvo." TextWrapping="Wrap" />
-                                                    <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="A IA local vai revisar o launch profile atual." TextWrapping="Wrap" />
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Diagnostico dedicado para Rust" />
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1.1*" />
+                                                            <ColumnDefinition Width="1.9*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button x:Name="LocalAiCheckAvailabilityButton" Grid.Column="0" Margin="0,0,10,0" Click="TestLocalAiConnectionButton_Click" Content="Atualizar disponibilidade" Visibility="Collapsed" />
+                                                        <Button x:Name="RunRustLocalAiAnalysisButton" Grid.Column="0" Grid.ColumnSpan="2" Click="RunRustLocalAiAnalysisButton_Click" Content="Analisar perfil do Rust" Style="{StaticResource PrimaryButtonStyle}" />
+                                                    </Grid>
+                                                    <TextBlock x:Name="RustAiAnalysisMetaTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma analise salva ainda." TextWrapping="Wrap" />
+                                                    <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="O diagnostico avalia argumentos de inicializacao, memoria e folga do sistema para o Rust." TextWrapping="Wrap" />
                                                     <ItemsControl x:Name="RustAiRecommendationItemsControl" Margin="0,12,0,0">
                                                         <!-- Similar to above IA output template -->
                                                         <ItemsControl.ItemTemplate>
@@ -1303,22 +1340,32 @@
                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Explorer" />
                                         <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Integração com clique direito" />
                                         <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Registre ou remova o atalho do Auralis no Explorer." TextWrapping="Wrap" />
-                                        <WrapPanel Margin="0,14,0,0">
-                                            <Button Style="{StaticResource PrimaryButtonStyle}" Click="RegisterVerbButton_Click" Content="Registrar no Explorer" />
-                                            <Button Margin="10,0,0,0" Click="UnregisterVerbButton_Click" Content="Remover do Explorer" />
-                                            <Button Margin="10,0,0,0" Click="CheckUpdatesButton_Click" Content="Verificar atualizações" />
-                                        </WrapPanel>
+                                        <Grid Margin="0,14,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Margin="0,0,10,0" Style="{StaticResource PrimaryButtonStyle}" Click="RegisterVerbButton_Click" Content="Registrar no Explorer" />
+                                            <Button Grid.Column="1" Margin="0,0,10,0" Click="UnregisterVerbButton_Click" Content="Remover do Explorer" />
+                                            <Button Grid.Column="2" Click="CheckUpdatesButton_Click" Content="Verificar atualizações" />
+                                        </Grid>
                                     </StackPanel>
                                 </Border>
                                 <Border x:Name="AdminFeatureSettingsCard" Margin="0,0,0,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
                                     <StackPanel>
                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Admin" />
                                         <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Recursos do Windows" />
-                                        <WrapPanel Margin="0,14,0,10">
-                                            <Button Style="{StaticResource PrimaryButtonStyle}" Click="EnableFeatureButton_Click" Content="Habilitar selecionada" />
-                                            <Button Margin="10,0,0,0" Click="DisableFeatureButton_Click" Content="Desabilitar selecionada" />
-                                            <Button Margin="10,0,0,0" Click="RefreshFeaturesButton_Click" Content="Atualizar lista" />
-                                        </WrapPanel>
+                                        <Grid Margin="0,14,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Margin="0,0,10,0" Style="{StaticResource PrimaryButtonStyle}" Click="EnableFeatureButton_Click" Content="Habilitar selecionada" />
+                                            <Button Grid.Column="1" Margin="0,0,10,0" Click="DisableFeatureButton_Click" Content="Desabilitar selecionada" />
+                                            <Button Grid.Column="2" Click="RefreshFeaturesButton_Click" Content="Atualizar lista" />
+                                        </Grid>
                                         <ListView x:Name="FeatureListView">
                                             <ListView.ItemTemplate>
                                                 <DataTemplate>

@@ -1064,17 +1064,20 @@ public partial class MainWindow : Window
         LocalAiModelComboBox.Text = effectiveModel;
 
         LocalAiStatusTextBlock.Text = panel.Availability.IsReachable
-            ? $"Google Gemini conectado com sucesso ({panel.Settings.ModelName})."
-            : panel.Availability.StatusMessage;
+            ? "Diagnostico inteligente pronto para uso."
+            : NormalizeAiUserMessage(
+                panel.Availability.StatusMessage,
+                "O diagnostico inteligente nao esta disponivel nesta instalacao.");
         LocalAiCommandHintTextBlock.Text = !panel.Availability.IsReachable
-            ? "Verifique a API Key do Google AI Studio e tente novamente."
-            : $"Gemini pronto. Clique em 'Analisar e Otimizar Agora' para iniciar.";
+            ? "Quando este recurso estiver habilitado, o app vai montar uma leitura pratica do sistema e dos ajustes sugeridos."
+            : "Clique em 'Gerar diagnostico inteligente' para atualizar o resumo desta maquina.";
         LocalAiAnalysisMetaTextBlock.Text = panel.LastAnalysis is null
-            ? "Nenhuma analise local salva ainda."
-            : $"Ultima analise local em {panel.LastAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm} usando {panel.LastAnalysis.ModelName}.";
+            ? "Nenhuma analise inteligente salva ainda."
+            : $"Ultima leitura em {panel.LastAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}.";
 
-        LocalAiAnalysisSummaryTextBlock.Text = panel.LastAnalysis?.ExecutiveSummary ??
-            "Clique em 'Analisar e Otimizar Agora' com a API Key do Gemini configurada.";
+        LocalAiAnalysisSummaryTextBlock.Text = NormalizeAiUserMessage(
+            panel.LastAnalysis?.ExecutiveSummary,
+            "Execute o diagnostico para receber um resumo pratico do estado atual do sistema.");
 
         LocalAiRecommendationItemsControl.ItemsSource = panel.LastAnalysis?.Recommendations
             .Select(item => new LocalAiRecommendationListItem(
@@ -1110,11 +1113,12 @@ public partial class MainWindow : Window
             : $"client.cfg esperado em: {profile.ClientConfigPath}";
 
         RustAiAnalysisMetaTextBlock.Text = rustPanel.LastAnalysis is null
-            ? "Nenhuma analise local de Rust salva ainda."
-            : $"Ultima analise de Rust em {rustPanel.LastAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm} usando {rustPanel.LastAnalysis.ModelName}.";
+            ? "Nenhuma analise de Rust salva ainda."
+            : $"Ultima leitura em {rustPanel.LastAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}.";
 
-        RustAiSummaryTextBlock.Text = rustPanel.LastAnalysis?.ExecutiveSummary ??
-            "A IA local vai revisar o launch profile atual e sugerir refinamentos para Rust.";
+        RustAiSummaryTextBlock.Text = NormalizeAiUserMessage(
+            rustPanel.LastAnalysis?.ExecutiveSummary,
+            "O diagnostico avalia argumentos de inicializacao, memoria e folga do sistema para o Rust.");
 
         RustAiRecommendationItemsControl.ItemsSource = rustPanel.LastAnalysis?.Recommendations
             .Select(item => new LocalAiRecommendationListItem(
@@ -1215,12 +1219,12 @@ public partial class MainWindow : Window
         return string.Join(
             Environment.NewLine,
             [
-                "Nenhum relatorio do Gemini foi salvo ainda.",
+                "Nenhum relatorio de analise inteligente foi salvo ainda.",
                 string.Empty,
                 "Para gerar o relatorio:",
-                "1. Cole uma API Key valida do Google Gemini no painel.",
-                "2. Escolha um modelo listado no painel.",
-                "3. Rode a analise no booster geral ou no modulo de Rust."
+                "1. Rode o diagnostico inteligente no booster geral.",
+                "2. Se quiser um foco extra em jogo, rode a leitura dedicada do Rust.",
+                "3. Abra novamente este relatorio para revisar o resumo salvo."
             ]);
     }
 
@@ -1235,34 +1239,32 @@ public partial class MainWindow : Window
             return BuildNoAiReportText();
         }
 
-        builder.AppendLine("RELATORIO DO GEMINI");
+        builder.AppendLine("RELATORIO DE ANALISE INTELIGENTE");
         builder.AppendLine();
 
         if (boosterAnalysis is not null)
         {
-            builder.AppendLine("JB GAMEBOOSTER");
+            builder.AppendLine("DIAGNOSTICO GERAL");
             builder.AppendLine($"Gerado em: {boosterAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}");
-            builder.AppendLine($"Modelo: {boosterAnalysis.ModelName}");
             builder.AppendLine($"Perfil recomendado: {boosterAnalysis.RecommendedProfile}");
             builder.AppendLine($"Prontidao: {boosterAnalysis.ReadinessLevel}");
-            builder.AppendLine($"Resumo: {boosterAnalysis.ExecutiveSummary}");
+            builder.AppendLine($"Resumo: {NormalizeAiUserMessage(boosterAnalysis.ExecutiveSummary, "Nao foi possivel montar o resumo desta leitura.")}");
             builder.AppendLine();
 
             AppendRecommendations(builder, boosterAnalysis.Recommendations);
         }
         else
         {
-            builder.AppendLine("JB GAMEBOOSTER");
+            builder.AppendLine("DIAGNOSTICO GERAL");
             builder.AppendLine("Nenhuma leitura geral do booster foi salva ainda.");
             builder.AppendLine();
         }
 
         if (rustAnalysis is not null)
         {
-            builder.AppendLine("RUST");
+            builder.AppendLine("DIAGNOSTICO DE RUST");
             builder.AppendLine($"Gerado em: {rustAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}");
-            builder.AppendLine($"Modelo: {rustAnalysis.ModelName}");
-            builder.AppendLine($"Resumo: {rustAnalysis.ExecutiveSummary}");
+            builder.AppendLine($"Resumo: {NormalizeAiUserMessage(rustAnalysis.ExecutiveSummary, "Nao foi possivel montar o resumo desta leitura de Rust.")}");
             builder.AppendLine($"Launch options: {rustAnalysis.LaunchOptionsSummary}");
             builder.AppendLine();
 
@@ -1270,7 +1272,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            builder.AppendLine("RUST");
+            builder.AppendLine("DIAGNOSTICO DE RUST");
             builder.AppendLine("Nenhuma leitura de Rust foi salva ainda.");
         }
 
@@ -1496,15 +1498,25 @@ public partial class MainWindow : Window
     {
         try
         {
-            BeginBusy("Validando conexao com Google Gemini...");
+            BeginBusy("Verificando disponibilidade do diagnostico inteligente...");
             await SaveLocalAiSettingsFromFormAsync();
             var result = await _services.GameBoosterAiWorkflowService.TestConnectionAsync();
             await LoadLocalAiPanelAsync();
-            SetStatus(result.Message, isError: !result.Succeeded);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    result.Message,
+                    result.Succeeded
+                        ? "Diagnostico inteligente pronto para uso."
+                        : "O diagnostico inteligente nao esta disponivel nesta instalacao."),
+                isError: !result.Succeeded);
         }
         catch (Exception exception)
         {
-            SetStatus(exception.Message, isError: true);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    exception.Message,
+                    "O diagnostico inteligente nao esta disponivel nesta instalacao."),
+                isError: true);
         }
         finally
         {
@@ -1519,11 +1531,15 @@ public partial class MainWindow : Window
             await SaveLocalAiSettingsFromFormAsync();
             await LoadLocalAiPanelAsync();
             await LoadRustPanelAsync();
-            SetStatus("Configuracao do Google Gemini salva.", isError: false);
+            SetStatus("Configuracao interna do diagnostico atualizada.", isError: false);
         }
         catch (Exception exception)
         {
-            SetStatus(exception.Message, isError: true);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    exception.Message,
+                    "Nao foi possivel atualizar a configuracao interna do diagnostico."),
+                isError: true);
         }
     }
 
@@ -1531,17 +1547,27 @@ public partial class MainWindow : Window
     {
         try
         {
-            BeginBusy("Executando analise com Google Gemini...");
+            BeginBusy("Executando diagnostico inteligente...");
             await SaveLocalAiSettingsFromFormAsync();
 
             var result = await _services.GameBoosterAiWorkflowService.AnalyzeAsync();
-            SetStatus(result.Message, isError: !result.Succeeded);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    result.Message,
+                    result.Succeeded
+                        ? "Diagnostico inteligente concluido."
+                        : "Nao foi possivel concluir o diagnostico inteligente."),
+                isError: !result.Succeeded);
 
             await LoadLocalAiPanelAsync();
         }
         catch (Exception exception)
         {
-            SetStatus(exception.Message, isError: true);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    exception.Message,
+                    "Nao foi possivel concluir o diagnostico inteligente."),
+                isError: true);
         }
         finally
         {
@@ -1562,7 +1588,11 @@ public partial class MainWindow : Window
 
             if (!analyzeResult.Succeeded)
             {
-                SetStatus(analyzeResult.Message, isError: true);
+                SetStatus(
+                    NormalizeAiUserMessage(
+                        analyzeResult.Message,
+                        "Nao foi possivel concluir o diagnostico inteligente."),
+                    isError: true);
                 return;
             }
 
@@ -1578,7 +1608,7 @@ public partial class MainWindow : Window
 
             // Popular o painel de preview
             ConfirmationSummaryTextBlock.Text =
-                $"O Gemini analisou o PC e encontrou {pending.Count} otimizacao(s) pendente(s). Revise abaixo e confirme para aplicar:";
+                $"A leitura inteligente encontrou {pending.Count} otimizacao(s) pendente(s). Revise abaixo e confirme para aplicar:";
 
             ConfirmationItemsControl.ItemsSource = pending
                 .Select(item => new { item.Title, Description = $"{item.Description}  |  Impacto: {item.ImpactLabel}  |  Risco: {item.RiskLabel}" })
@@ -1589,7 +1619,11 @@ public partial class MainWindow : Window
         }
         catch (Exception exception)
         {
-            SetStatus(exception.Message, isError: true);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    exception.Message,
+                    "Nao foi possivel concluir o diagnostico inteligente."),
+                isError: true);
         }
         finally
         {
@@ -1633,14 +1667,24 @@ public partial class MainWindow : Window
             await SaveLocalAiSettingsFromFormAsync();
 
             var result = await _services.GameBoosterAiWorkflowService.AnalyzeRustAsync();
-            SetStatus(result.Message, isError: !result.Succeeded);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    result.Message,
+                    result.Succeeded
+                        ? "Diagnostico dedicado de Rust concluido."
+                        : "Nao foi possivel concluir o diagnostico de Rust."),
+                isError: !result.Succeeded);
 
             await LoadRustPanelAsync();
             await LoadLocalAiPanelAsync();
         }
         catch (Exception exception)
         {
-            SetStatus(exception.Message, isError: true);
+            SetStatus(
+                NormalizeAiUserMessage(
+                    exception.Message,
+                    "Nao foi possivel concluir o diagnostico de Rust."),
+                isError: true);
         }
         finally
         {
@@ -1680,21 +1724,39 @@ public partial class MainWindow : Window
 
     private Task SaveLocalAiSettingsFromFormAsync()
     {
-        var endpoint = LocalAiEndpointTextBox.Text?.Trim();
-        var model = LocalAiModelComboBox.Text?.Trim();
-
-        if (string.IsNullOrWhiteSpace(endpoint))
-        {
-            throw new InvalidOperationException("Informe a API Key do Google Gemini.");
-        }
-
-        if (string.IsNullOrWhiteSpace(model))
-        {
-            throw new InvalidOperationException("Informe o modelo do Gemini que sera usado na analise.");
-        }
+        var fallbackSettings = _latestLocalAiPanelSnapshot?.Settings ?? LocalAiConnectionSettings.Default;
+        var endpoint = string.IsNullOrWhiteSpace(LocalAiEndpointTextBox.Text)
+            ? fallbackSettings.EndpointUrl
+            : LocalAiEndpointTextBox.Text.Trim();
+        var model = string.IsNullOrWhiteSpace(LocalAiModelComboBox.Text)
+            ? fallbackSettings.ModelName
+            : LocalAiModelComboBox.Text.Trim();
 
         return _services.GameBoosterAiWorkflowService.SaveSettingsAsync(
             new LocalAiConnectionSettings(endpoint, model));
+    }
+
+    private static string NormalizeAiUserMessage(string? message, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return fallback;
+        }
+
+        return ContainsAiTechnicalDetails(message) ? fallback : message;
+    }
+
+    private static bool ContainsAiTechnicalDetails(string message)
+    {
+        return message.Contains("Gemini", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("Google AI Studio", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("API", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("key", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("endpoint", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("modelo", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("model", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("Ollama", StringComparison.OrdinalIgnoreCase) ||
+               message.Contains("pull", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ResolveEffectiveLocalAiModel(string configuredModel, IReadOnlyList<string> availableModels)
