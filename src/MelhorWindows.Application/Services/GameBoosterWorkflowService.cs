@@ -191,6 +191,46 @@ public sealed class GameBoosterWorkflowService(
                     "SvcHostSplitThresholdInKB",
                     16777216,
                     RegistryValueKind.DWord)
+            ]),
+
+        // ── Otimizacoes de PC Avançadas (Plano Auralis) ──
+
+        new(
+            "jb-gamebooster.telemetry",
+            "Privacidade e Telemetria",
+            "Sistema",
+            "Desativa a coleta de dados em segundo plano (Telemetria) do Windows, poupando ciclos de CPU e disco.",
+            "Telemetria principal desativada.",
+            "Coleta de dados do Windows ativa.",
+            "medio",
+            "seguro",
+            RequiresRestart: true,
+            [
+                new RegistryChangeRequest(
+                    RegistryHive.LocalMachine,
+                    @"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
+                    "AllowTelemetry",
+                    0,
+                    RegistryValueKind.DWord)
+            ]),
+
+        new(
+            "jb-gamebooster.power-throttling",
+            "Desativar Power Throttling",
+            "Energia",
+            "Impede que o Windows reduza a energia de processos em segundo plano ou jogos, garantindo foco no maximo desempenho termico.",
+            "Power Throttling desativado sistematicamente.",
+            "Gerenciamento de energia dinamico limitando processos.",
+            "alto",
+            "moderado",
+            RequiresRestart: true,
+            [
+                new RegistryChangeRequest(
+                    RegistryHive.LocalMachine,
+                    @"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling",
+                    "PowerThrottlingOff",
+                    1,
+                    RegistryValueKind.DWord)
             ])
     ];
 
@@ -239,6 +279,31 @@ public sealed class GameBoosterWorkflowService(
     {
         ArgumentNullException.ThrowIfNull(settings);
         return protectedStateStore.SaveAsync(OptimizationStateKeys.SafetySettings, settings, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<GameBoosterOptimizationState>> GetPendingOptimizationsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var pending = new List<GameBoosterOptimizationState>();
+        foreach (var definition in Catalog)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!await MatchesAsync(definition.ApplyChanges, cancellationToken))
+            {
+                pending.Add(new GameBoosterOptimizationState(
+                    definition.Id,
+                    definition.Title,
+                    definition.Category,
+                    definition.Description,
+                    string.Empty,
+                    string.Empty,
+                    definition.ImpactLabel,
+                    definition.RiskLabel,
+                    false,
+                    definition.RequiresRestart));
+            }
+        }
+        return pending;
     }
 
     public async Task<OperationResult<GameBoosterDashboardSnapshot>> ApplyRecommendedAsync(

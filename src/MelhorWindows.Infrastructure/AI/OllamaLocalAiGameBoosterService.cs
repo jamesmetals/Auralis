@@ -265,13 +265,54 @@ public sealed class OllamaLocalAiGameBoosterService : ILocalAiGameBoosterService
                 .ToArray());
     }
 
+    public async Task<string> AnalyzeHardwareSnapshotAsync(
+        LocalAiConnectionSettings settings,
+        ComputerDiagnosticsSnapshot snapshot,
+        CancellationToken cancellationToken = default)
+    {
+        using var client = CreateClient(settings.EndpointUrl, timeout: TimeSpan.FromSeconds(12));
+
+        var request = new
+        {
+            model = settings.ModelName,
+            stream = false,
+            messages = new object[]
+            {
+                new
+                {
+                    role = "system",
+                    content = "Voce eh um analista experiente em otimizacao e resolucao de problemas de performance do Windows. Escreva um relatorio detalhado, tecnico mas facil de ler. Destaque viloes de memoria, gargalos de CPU/GPU e de sugestoes praticas do que o usuario pode fechar ou configurar no Windows para melhorar FPS nos games. Formate a saida em Markdown elegante com icones e tabelas se necessario. Fale OBRIGATORIAMENTE em portugues do Brasil."
+                },
+                new
+                {
+                    role = "user",
+                    content = BuildHardwareSnapshotPrompt(snapshot)
+                }
+            }
+        };
+
+        using var response = await client.PostAsJsonAsync("api/chat", request, SerializerOptions, cancellationToken);
+        var responseText = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException(
+                $"Ollama falhou ao gerar o diagnostico de hardware. Status {(int)response.StatusCode}: {responseText}");
+        }
+
+        var chatResponse = JsonSerializer.Deserialize<OllamaChatResponse>(responseText, SerializerOptions)
+            ?? throw new InvalidOperationException("Resposta vazia do Ollama.");
+
+        return chatResponse.Message?.Content ?? "O modelo de IA nao retornou nenhum conteudo valido.";
+    }
+
     private static HttpClient CreateClient(string endpointUrl, TimeSpan? timeout = null)
     {
         var normalizedBaseUrl = endpointUrl.Trim().TrimEnd('/') + "/";
         var client = new HttpClient
         {
             BaseAddress = new Uri(normalizedBaseUrl, UriKind.Absolute),
-            Timeout = timeout ?? TimeSpan.FromSeconds(12)
+            Timeout = timeout ?? TimeSpan.FromSeconds(45)
         };
 
         return client;
@@ -319,6 +360,26 @@ public sealed class OllamaLocalAiGameBoosterService : ILocalAiGameBoosterService
             """
             Estado geral do booster:
             """ + Environment.NewLine + serializedBooster;
+    }
+
+    private static string BuildHardwareSnapshotPrompt(ComputerDiagnosticsSnapshot snapshot)
+    {
+        var topProcessesList = string.Join(Environment.NewLine, snapshot.TopMemoryProcesses.Select(p => $"- {p.ProcessName}: {p.MemoryUsedGb} GB"));
+
+        return
+            $"""
+             Analise este retrato instantaneo do computador do usuario e indique recomendacoes ou possiveis dores de cabeca que esses componentes podem causar.
+             Foque tambem na relacao entre CPU e GPU, e analise a lista de processos que mais estao consumindo RAM no background.
+             
+             OS: {snapshot.WindowsVersion}
+             CPU: {snapshot.CpuLabel} ({snapshot.LogicalCoreCount} cores) - Uso atual: {snapshot.CpuUsagePercent}%
+             GPU: {snapshot.GpuLabel}
+             Memoria RAM Total: {snapshot.MemoryTotalGb} GB (Carga do Windows: {snapshot.MemoryLoadPercent}%)
+             Memoria Usada: {snapshot.MemoryUsedGb} GB / Disp: {snapshot.MemoryAvailableGb} GB
+             
+             Top processos mais pesados no instante da foto:
+             {topProcessesList}
+             """;
     }
 
     private static string BuildPullCommand(string modelName)

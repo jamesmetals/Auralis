@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Diagnostics;
+using System.Linq;
 using MelhorWindows.Application.Abstractions;
 using MelhorWindows.Application.Models;
 using Microsoft.Win32;
@@ -21,6 +23,8 @@ public sealed class WindowsComputerDiagnosticsService : IComputerDiagnosticsServ
         var totalMemoryGb = BytesToGigabytes(memoryStatus.ullTotalPhys);
         var availableMemoryGb = BytesToGigabytes(memoryStatus.ullAvailPhys);
         var usedMemoryGb = Math.Max(0, totalMemoryGb - availableMemoryGb);
+        var gpuLabel = ReadGpuLabel();
+        var topProcesses = GetTopMemoryProcesses();
 
         return new ComputerDiagnosticsSnapshot(
             DateTimeOffset.UtcNow,
@@ -31,7 +35,40 @@ public sealed class WindowsComputerDiagnosticsService : IComputerDiagnosticsServ
             memoryStatus.dwMemoryLoad,
             usedMemoryGb,
             availableMemoryGb,
-            totalMemoryGb);
+            totalMemoryGb,
+            gpuLabel,
+            topProcesses);
+    }
+
+    private static string ReadGpuLabel()
+    {
+        try
+        {
+            using var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            using var gpuKey = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinSAT", writable: false);
+            return gpuKey?.GetValue("PrimaryAdapterString") as string ?? "GPU nao identificada";
+        }
+        catch
+        {
+            return "GPU nao acessivel";
+        }
+    }
+
+    private static IReadOnlyList<ProcessResourceUsageItem> GetTopMemoryProcesses()
+    {
+        try
+        {
+            return Process.GetProcesses()
+                .Where(p => p.WorkingSet64 > 0)
+                .OrderByDescending(p => p.WorkingSet64)
+                .Take(10)
+                .Select(p => new ProcessResourceUsageItem(p.ProcessName, BytesToGigabytes((ulong)p.WorkingSet64)))
+                .ToList();
+        }
+        catch
+        {
+            return Array.Empty<ProcessResourceUsageItem>();
+        }
     }
 
     private static string ReadCpuLabel()

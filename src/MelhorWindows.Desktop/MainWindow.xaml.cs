@@ -223,9 +223,30 @@ public partial class MainWindow : Window
 
     private void HomeNavButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.Home);
 
-    private void HistoryNavButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.History);
-
     private void GameBoosterNavButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.GameBooster);
+
+    private void GbTab_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button btn) return;
+
+        GbContentDashboard.Visibility = Visibility.Collapsed;
+        GbContentSystem.Visibility = Visibility.Collapsed;
+        GbContentAi.Visibility = Visibility.Collapsed;
+
+        GbTabDashboardBtn.Style = null;
+        GbTabSystemBtn.Style = null;
+        GbTabAiBtn.Style = null;
+
+        GbTabDashboardBtn.Background = System.Windows.Media.Brushes.Transparent;
+        GbTabSystemBtn.Background = System.Windows.Media.Brushes.Transparent;
+        GbTabAiBtn.Background = System.Windows.Media.Brushes.Transparent;
+
+        btn.Style = (Style)FindResource("PrimaryButtonStyle");
+
+        if (btn == GbTabDashboardBtn) GbContentDashboard.Visibility = Visibility.Visible;
+        else if (btn == GbTabSystemBtn) GbContentSystem.Visibility = Visibility.Visible;
+        else if (btn == GbTabAiBtn) GbContentAi.Visibility = Visibility.Visible;
+    }
 
     private void SettingsNavButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.Settings);
 
@@ -252,7 +273,6 @@ public partial class MainWindow : Window
         _activePage = page;
         IconEditorView.Visibility = page == AppPage.IconEditor ? Visibility.Visible : Visibility.Collapsed;
         HomeView.Visibility = page == AppPage.Home ? Visibility.Visible : Visibility.Collapsed;
-        HistoryView.Visibility = page == AppPage.History ? Visibility.Visible : Visibility.Collapsed;
         GameBoosterView.Visibility = page == AppPage.GameBooster ? Visibility.Visible : Visibility.Collapsed;
         SettingsView.Visibility = page == AppPage.Settings ? Visibility.Visible : Visibility.Collapsed;
 
@@ -260,7 +280,6 @@ public partial class MainWindow : Window
         {
             AppPage.IconEditor => "Trocar Ícone",
             AppPage.Home => "Painel",
-            AppPage.History => "Histórico",
             AppPage.GameBooster => "JB GameBooster",
             AppPage.Settings => "Configurações",
             _ => "Auralis"
@@ -268,7 +287,6 @@ public partial class MainWindow : Window
 
         IconEditorNavButton.Style = (Style)FindResource(page == AppPage.IconEditor ? "ActiveNavButtonStyle" : "NavButtonStyle");
         HomeNavButton.Style = (Style)FindResource(page == AppPage.Home ? "ActiveNavButtonStyle" : "NavButtonStyle");
-        HistoryNavButton.Style = (Style)FindResource(page == AppPage.History ? "ActiveNavButtonStyle" : "NavButtonStyle");
         GameBoosterNavButton.Style = (Style)FindResource(page == AppPage.GameBooster ? "ActiveNavButtonStyle" : "NavButtonStyle");
         SettingsNavButton.Style = (Style)FindResource(page == AppPage.Settings ? "ActiveNavButtonStyle" : "NavButtonStyle");
     }
@@ -1046,20 +1064,18 @@ public partial class MainWindow : Window
         LocalAiModelComboBox.ItemsSource = availableModels;
         LocalAiModelComboBox.Text = effectiveModel;
 
-        LocalAiStatusTextBlock.Text = panel.Availability.StatusMessage;
+        LocalAiStatusTextBlock.Text = panel.Availability.IsReachable
+            ? $"Google Gemini conectado com sucesso ({panel.Settings.ModelName})."
+            : panel.Availability.StatusMessage;
         LocalAiCommandHintTextBlock.Text = !panel.Availability.IsReachable
-            ? "Sugestao: abra o app do Ollama ou rode `ollama serve`."
-            : panel.Availability.ConfiguredModelAvailable
-                ? $"Modelo configurado pronto para uso local: {panel.Settings.ModelName}."
-                : availableModels.Count > 0
-                    ? $"Modelo configurado ausente. Selecionei `{effectiveModel}` porque ele ja esta disponivel no Ollama local."
-                    : $"Modelo ausente. Rode `{panel.Availability.SuggestedPullCommand}` ou selecione um dos modelos detectados.";
+            ? "Verifique a API Key do Google AI Studio e tente novamente."
+            : $"Gemini pronto. Clique em 'Analisar e Otimizar Agora' para iniciar.";
         LocalAiAnalysisMetaTextBlock.Text = panel.LastAnalysis is null
             ? "Nenhuma analise local salva ainda."
             : $"Ultima analise local em {panel.LastAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm} usando {panel.LastAnalysis.ModelName}.";
 
         LocalAiAnalysisSummaryTextBlock.Text = panel.LastAnalysis?.ExecutiveSummary ??
-            "Quando o Ollama estiver acessivel, a IA local vai resumir o estado atual do booster e sugerir a proxima melhor acao.";
+            "Clique em 'Analisar e Otimizar Agora' com a API Key do Gemini configurada.";
 
         LocalAiRecommendationItemsControl.ItemsSource = panel.LastAnalysis?.Recommendations
             .Select(item => new LocalAiRecommendationListItem(
@@ -1516,7 +1532,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            BeginBusy("Executando analise local com Ollama...");
+            BeginBusy("Executando analise com Google Gemini...");
             await SaveLocalAiSettingsFromFormAsync();
 
             var result = await _services.GameBoosterAiWorkflowService.AnalyzeAsync();
@@ -1532,6 +1548,82 @@ public partial class MainWindow : Window
         {
             EndBusy();
         }
+    }
+
+    private async void AnalyzeAndApplyButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            BeginBusy("IA analisando o PC...");
+            await SaveLocalAiSettingsFromFormAsync();
+
+            // Passo 1: IA analisa e salva o diagnóstico (sem aplicar ainda)
+            var analyzeResult = await _services.GameBoosterAiWorkflowService.AnalyzeAsync();
+            await LoadLocalAiPanelAsync();
+
+            if (!analyzeResult.Succeeded)
+            {
+                SetStatus(analyzeResult.Message, isError: true);
+                return;
+            }
+
+            // Passo 2: Coletar as otimizações pendentes e exibir o painel de confirmação
+            var pending = await _services.GameBoosterWorkflowService.GetPendingOptimizationsAsync();
+
+            if (pending.Count == 0)
+            {
+                SetStatus("Sistema ja esta totalmente otimizado! Nenhuma acao pendente.", isError: false);
+                ConfirmationPanel.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            // Popular o painel de preview
+            ConfirmationSummaryTextBlock.Text =
+                $"O Gemini analisou o PC e encontrou {pending.Count} otimizacao(s) pendente(s). Revise abaixo e confirme para aplicar:";
+
+            ConfirmationItemsControl.ItemsSource = pending
+                .Select(item => new { item.Title, Description = $"{item.Description}  |  Impacto: {item.ImpactLabel}  |  Risco: {item.RiskLabel}" })
+                .ToArray();
+
+            ConfirmationPanel.Visibility = Visibility.Visible;
+            SetStatus($"{pending.Count} otimizacao(s) prontas para aplicar. Confirme no painel.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private async void ConfirmApplyButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ConfirmationPanel.Visibility = Visibility.Collapsed;
+            BeginBusy("Aplicando otimizacoes no sistema...");
+
+            var result = await _services.GameBoosterWorkflowService.ApplyRecommendedAsync();
+            SetStatus(result.Message, isError: !result.Succeeded);
+
+            await LoadGameBoosterAsync(includeLocalAi: true);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private void CancelApplyButton_Click(object sender, RoutedEventArgs e)
+    {
+        ConfirmationPanel.Visibility = Visibility.Collapsed;
+        SetStatus("Operacao cancelada pelo usuario.", isError: false);
     }
 
     private async void RunRustLocalAiAnalysisButton_Click(object sender, RoutedEventArgs e)
@@ -2179,7 +2271,7 @@ public partial class MainWindow : Window
         if (GameBoosterRestorePointCheckBox != null) GameBoosterRestorePointCheckBox.IsEnabled = enabled;
         if (TestLocalAiConnectionButton != null) TestLocalAiConnectionButton.IsEnabled = enabled;
         if (SaveLocalAiSettingsButton != null) SaveLocalAiSettingsButton.IsEnabled = enabled;
-        if (RunLocalAiAnalysisButton != null) RunLocalAiAnalysisButton.IsEnabled = enabled;
+        if (AnalyzeAndApplyButton != null) AnalyzeAndApplyButton.IsEnabled = enabled;
         if (RunRustLocalAiAnalysisButton != null) RunRustLocalAiAnalysisButton.IsEnabled = enabled;
         if (LocalAiEndpointTextBox != null) LocalAiEndpointTextBox.IsEnabled = enabled;
         if (LocalAiModelComboBox != null) LocalAiModelComboBox.IsEnabled = enabled;

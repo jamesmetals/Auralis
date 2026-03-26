@@ -70,6 +70,42 @@ public sealed class GameBoosterAiWorkflowService(
         return OperationResult<GameBoosterAiPanelSnapshot>.Success(panel, "Analise local concluida pelo JB GameBooster.");
     }
 
+    /// <summary>
+    /// Analisa o sistema com a IA e aplica automaticamente todas as otimizações pendentes do catálogo.
+    /// </summary>
+    public async Task<OperationResult<GameBoosterAiPanelSnapshot>> AnalyzeAndApplyAsync(CancellationToken cancellationToken = default)
+    {
+        var settings = await LoadSettingsAsync(cancellationToken);
+        var availability = await localAiGameBoosterService.GetAvailabilityAsync(settings, cancellationToken);
+
+        if (!availability.IsReachable)
+            return OperationResult<GameBoosterAiPanelSnapshot>.Failure(availability.StatusMessage);
+
+        // 1. Obter diagnóstico da IA
+        var dashboard = await gameBoosterWorkflowService.GetDashboardSnapshotAsync(cancellationToken);
+        var analysis = await localAiGameBoosterService.AnalyzeGameBoosterAsync(settings, dashboard, cancellationToken);
+
+        await protectedStateStore.SaveAsync(
+            OptimizationStateKeys.LocalAiLastAnalysis,
+            analysis,
+            cancellationToken);
+
+        // 2. Aplicar automaticamente todas as otimizações pendentes do catálogo
+        var applyResult = await gameBoosterWorkflowService.ApplyRecommendedAsync(cancellationToken);
+
+        // 3. Retornar painel atualizado com resultado
+        var updatedDashboard = applyResult.Value ?? dashboard;
+        var panel = new GameBoosterAiPanelSnapshot(settings, availability, analysis);
+
+        var message = applyResult.Succeeded
+            ? $"IA analisou o PC e aplicou {updatedDashboard.OptimizedItemCount} otimizacoes no sistema."
+            : $"IA analisou o PC, mas houve um erro na aplicacao: {applyResult.Message}";
+
+        return applyResult.Succeeded
+            ? OperationResult<GameBoosterAiPanelSnapshot>.Success(panel, message)
+            : OperationResult<GameBoosterAiPanelSnapshot>.Failure(message);
+    }
+
     public async Task<OperationResult<GameBoosterAiPanelSnapshot>> TestConnectionAsync(CancellationToken cancellationToken = default)
     {
         var panel = await GetPanelSnapshotAsync(cancellationToken);

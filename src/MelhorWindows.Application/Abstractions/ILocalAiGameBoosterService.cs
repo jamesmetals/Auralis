@@ -18,4 +18,9 @@ public interface ILocalAiGameBoosterService
         RustGameProfileSnapshot rustProfile,
         GameBoosterDashboardSnapshot boosterSnapshot,
         CancellationToken cancellationToken = default);
+
+    Task<string> AnalyzeHardwareSnapshotAsync(
+        LocalAiConnectionSettings settings,
+        ComputerDiagnosticsSnapshot snapshot,
+        CancellationToken cancellationToken = default);
 }

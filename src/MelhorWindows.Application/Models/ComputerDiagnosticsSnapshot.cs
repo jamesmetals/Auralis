@@ -1,4 +1,10 @@
+using System.Collections.Generic;
+
 namespace MelhorWindows.Application.Models;
+
+public sealed record ProcessResourceUsageItem(
+    string ProcessName,
+    double MemoryUsedGb);
 
 public sealed record ComputerDiagnosticsSnapshot(
     DateTimeOffset CapturedAtUtc,
@@ -9,4 +15,7 @@ public sealed record ComputerDiagnosticsSnapshot(
     double MemoryLoadPercent,
     double MemoryUsedGb,
     double MemoryAvailableGb,
-    double MemoryTotalGb);
+    double MemoryTotalGb,
+    string GpuLabel,
+    IReadOnlyList<ProcessResourceUsageItem> TopMemoryProcesses);
+
