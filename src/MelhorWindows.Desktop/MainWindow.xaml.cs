@@ -1113,12 +1113,13 @@ public partial class MainWindow : Window
             : $"client.cfg esperado em: {profile.ClientConfigPath}";
 
         RustAiAnalysisMetaTextBlock.Text = rustPanel.LastAnalysis is null
-            ? "Nenhuma analise de Rust salva ainda."
-            : $"Ultima leitura em {rustPanel.LastAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}.";
+            ? "Nenhuma leitura consultiva de Rust salva ainda."
+            : $"Ultima leitura consultiva em {rustPanel.LastAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}. Nenhuma recomendacao abaixo foi aplicada automaticamente.";
 
-        RustAiSummaryTextBlock.Text = NormalizeAiUserMessage(
+        var rustSummary = NormalizeAiUserMessage(
             rustPanel.LastAnalysis?.ExecutiveSummary,
-            "O diagnostico avalia argumentos de inicializacao, memoria e folga do sistema para o Rust.");
+            "A leitura avalia argumentos de inicializacao, memoria e folga do sistema para o Rust.");
+        RustAiSummaryTextBlock.Text = $"{rustSummary} Esta secao apenas recomenda proximos passos; ela nao aplica mudancas no jogo ou no Windows automaticamente.";
 
         RustAiRecommendationItemsControl.ItemsSource = rustPanel.LastAnalysis?.Recommendations
             .Select(item => new LocalAiRecommendationListItem(
@@ -1223,7 +1224,7 @@ public partial class MainWindow : Window
                 string.Empty,
                 "Para gerar o relatorio:",
                 "1. Rode o diagnostico inteligente no booster geral.",
-                "2. Se quiser um foco extra em jogo, rode a leitura dedicada do Rust.",
+                "2. Se quiser um foco extra em jogo, rode a leitura consultiva do Rust.",
                 "3. Abra novamente este relatorio para revisar o resumo salvo."
             ]);
     }
@@ -1264,6 +1265,7 @@ public partial class MainWindow : Window
         {
             builder.AppendLine("DIAGNOSTICO DE RUST");
             builder.AppendLine($"Gerado em: {rustAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}");
+            builder.AppendLine("Status: leitura consultiva; nenhuma recomendacao de Rust foi aplicada automaticamente.");
             builder.AppendLine($"Resumo: {NormalizeAiUserMessage(rustAnalysis.ExecutiveSummary, "Nao foi possivel montar o resumo desta leitura de Rust.")}");
             builder.AppendLine($"Launch options: {rustAnalysis.LaunchOptionsSummary}");
             builder.AppendLine();
@@ -1339,6 +1341,7 @@ public partial class MainWindow : Window
                 ? $"Steam localconfig.vdf detectado em: {rustProfile.SteamLocalConfigPath}"
                 : "Steam localconfig.vdf nao detectado neste perfil.");
             builder.AppendLine($"Launch options sugeridos: {rustProfile.LaunchOptions}");
+            builder.AppendLine("Status do painel Rust: leitura consultiva, sem aplicacao automatica no jogo.");
         }
 
         builder.AppendLine();
@@ -1671,7 +1674,7 @@ public partial class MainWindow : Window
                 NormalizeAiUserMessage(
                     result.Message,
                     result.Succeeded
-                        ? "Diagnostico dedicado de Rust concluido."
+                        ? "Leitura consultiva do Rust concluida. Nenhuma alteracao foi aplicada automaticamente."
                         : "Nao foi possivel concluir o diagnostico de Rust."),
                 isError: !result.Succeeded);
 

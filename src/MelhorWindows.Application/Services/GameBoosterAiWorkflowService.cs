@@ -167,7 +167,7 @@ public sealed class GameBoosterAiWorkflowService(
 
         return OperationResult<RustGameBoosterPanelSnapshot>.Success(
             new RustGameBoosterPanelSnapshot(rustProfile, analysis),
-            "Analise do perfil de Rust concluida.");
+            "Leitura consultiva do Rust concluida. Nenhuma alteracao foi aplicada automaticamente.");
     }
 
     private async Task<LocalAiConnectionSettings> LoadSettingsAsync(CancellationToken cancellationToken)

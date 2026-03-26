@@ -1251,7 +1251,7 @@
                                     <Border Margin="0,12,0,0" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                         <StackPanel>
                                             <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Perfil em foco" />
-                                            <TextBlock x:Name="RustModuleSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Leitura dedicada para launch options, memoria e estabilidade do Rust." TextWrapping="Wrap" />
+                                            <TextBlock x:Name="RustModuleSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Leitura consultiva para launch options, memoria e estabilidade do Rust. Nada desta area e aplicado automaticamente." TextWrapping="Wrap" />
                                             <Grid Margin="0,12,0,0">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
@@ -1297,17 +1297,20 @@
 
                                             <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                 <StackPanel>
-                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Diagnostico dedicado para Rust" />
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Leitura consultiva para Rust" />
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="1.1*" />
                                                             <ColumnDefinition Width="1.9*" />
                                                         </Grid.ColumnDefinitions>
                                                         <Button x:Name="LocalAiCheckAvailabilityButton" Grid.Column="0" Margin="0,0,10,0" Click="TestLocalAiConnectionButton_Click" Content="Atualizar disponibilidade" Visibility="Collapsed" />
-                                                        <Button x:Name="RunRustLocalAiAnalysisButton" Grid.Column="0" Grid.ColumnSpan="2" Click="RunRustLocalAiAnalysisButton_Click" Content="Gerar leitura dedicada do Rust" Style="{StaticResource PrimaryButtonStyle}" />
+                                                        <Button x:Name="RunRustLocalAiAnalysisButton" Grid.Column="0" Grid.ColumnSpan="2" Click="RunRustLocalAiAnalysisButton_Click" Content="Gerar leitura consultiva do Rust" Style="{StaticResource PrimaryButtonStyle}" />
                                                     </Grid>
-                                                    <TextBlock x:Name="RustAiAnalysisMetaTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma analise salva ainda." TextWrapping="Wrap" />
-                                                    <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="O diagnostico avalia argumentos de inicializacao, memoria e folga do sistema para o Rust." TextWrapping="Wrap" />
+                                                    <TextBlock x:Name="RustAiAnalysisMetaTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma leitura consultiva salva ainda." TextWrapping="Wrap" />
+                                                    <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="A leitura avalia argumentos de inicializacao, memoria e folga do sistema para o Rust. Nenhuma recomendacao e aplicada automaticamente." TextWrapping="Wrap" />
+                                                    <Border Margin="0,12,0,0" Padding="12" Background="#151F2B" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
+                                                        <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="As acoes abaixo sao apenas sugeridas. O painel de Rust ainda nao escreve no jogo, no Steam ou no Windows automaticamente." TextWrapping="Wrap" />
+                                                    </Border>
                                                     <ItemsControl x:Name="RustAiRecommendationItemsControl" Margin="0,12,0,0">
                                                         <!-- Similar to above IA output template -->
                                                         <ItemsControl.ItemTemplate>
@@ -1316,6 +1319,7 @@
                                                                     <StackPanel>
                                                                         <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
                                                                         <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Reason}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,8,0,0" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource SoftBrush}" Text="Proximo passo sugerido" />
                                                                         <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding SuggestedAction}" TextWrapping="Wrap" />
                                                                     </StackPanel>
                                                                 </Border>
