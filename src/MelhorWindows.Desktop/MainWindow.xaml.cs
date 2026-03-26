@@ -1,6 +1,7 @@
 using System.IO;
 using System.Globalization;
 using System.Diagnostics;
+using System.ComponentModel;
 using System.Text;
 using MelhorWindows.Desktop.Providers;
 using System.Windows;
@@ -25,6 +26,7 @@ public partial class MainWindow : Window
 {
     private readonly DesktopServices _services = DesktopComposition.Create();
     private readonly LaunchOptions _launchOptions = LaunchOptions.Parse(Environment.GetCommandLineArgs());
+    private readonly RustExtremeFocusCoordinator _rustExtremeFocusCoordinator;
 
     private string? _selectedFolderPath;
     private string? _selectedImagePath;
@@ -43,10 +45,16 @@ public partial class MainWindow : Window
     private GameBoosterDashboardSnapshot? _latestGameBoosterSnapshot;
     private GameBoosterAiPanelSnapshot? _latestLocalAiPanelSnapshot;
     private RustGameBoosterPanelSnapshot? _latestRustPanelSnapshot;
+    private string? _selectedSpecificGameId;
+    private bool _isRustExtremeFocusActive;
+    private string? _rustExplorerRestoreScriptPath;
+    private ExtremeFocusWindowSnapshot? _extremeFocusWindowSnapshot;
 
     public MainWindow()
     {
         InitializeComponent();
+        _rustExtremeFocusCoordinator = new RustExtremeFocusCoordinator(_services.AppDataPaths);
+        Closing += MainWindow_Closing;
         MaxHeight = SystemParameters.WorkArea.Height - 24;
         MaxWidth = SystemParameters.WorkArea.Width - 24;
         Height = Math.Min(Height, MaxHeight);
@@ -231,6 +239,7 @@ public partial class MainWindow : Window
 
         GbContentDashboard.Visibility = Visibility.Collapsed;
         GbContentSystem.Visibility = Visibility.Collapsed;
+        GbContentGames.Visibility = Visibility.Collapsed;
         GbContentAi.Visibility = Visibility.Collapsed;
 
         var inactiveTabStyle = (Style)FindResource("TabButtonStyle");
@@ -238,12 +247,14 @@ public partial class MainWindow : Window
 
         GbTabDashboardBtn.Style = inactiveTabStyle;
         GbTabSystemBtn.Style = inactiveTabStyle;
+        GbTabGamesBtn.Style = inactiveTabStyle;
         GbTabAiBtn.Style = inactiveTabStyle;
 
         btn.Style = activeTabStyle;
 
         if (btn == GbTabDashboardBtn) GbContentDashboard.Visibility = Visibility.Visible;
         else if (btn == GbTabSystemBtn) GbContentSystem.Visibility = Visibility.Visible;
+        else if (btn == GbTabGamesBtn) GbContentGames.Visibility = Visibility.Visible;
         else if (btn == GbTabAiBtn) GbContentAi.Visibility = Visibility.Visible;
     }
 
@@ -1152,6 +1163,51 @@ public partial class MainWindow : Window
                     ? "Rust"
                     : item.RelatedOptimizationId))
             .ToArray() ?? Array.Empty<LocalAiRecommendationListItem>();
+
+        UpdateRustGameCardState();
+        UpdateSpecificGameSelection();
+    }
+
+    private void UpdateRustGameCardState()
+    {
+        if (_latestRustPanelSnapshot is null)
+        {
+            RustGameCardLastOptimizationTextBlock.Text = "Nenhuma leitura dedicada carregada ainda.";
+            RustGameCardStatusTextBlock.Text = "Clique para abrir o painel dedicado do Rust.";
+            return;
+        }
+
+        RustGameCardLastOptimizationTextBlock.Text = _latestRustPanelSnapshot.LastAppliedAtUtc is null
+            ? "Nenhuma automacao aplicada ainda."
+            : $"Ultima aplicacao em {_latestRustPanelSnapshot.LastAppliedAtUtc.Value.ToLocalTime():dd/MM/yyyy HH:mm}.";
+
+        var pendingCount = _latestRustPanelSnapshot.Optimizations.Count(item => item.CanApply);
+        RustGameCardStatusTextBlock.Text = _selectedSpecificGameId == "rust"
+            ? pendingCount == 0
+                ? "Painel aberto. Os ajustes automaticos recomendados ja estao alinhados."
+                : $"Painel aberto. {pendingCount} ajuste(s) automatico(s) ainda podem ser aplicados."
+            : pendingCount == 0
+                ? "Clique para revisar as leituras e confirmar o FOCO EXTREMO."
+                : $"Clique para revisar {pendingCount} ajuste(s) automatico(s) e a leitura da IA.";
+    }
+
+    private void UpdateSpecificGameSelection()
+    {
+        var rustSelected = string.Equals(_selectedSpecificGameId, "rust", StringComparison.OrdinalIgnoreCase);
+
+        RustGameDetailsBorder.Visibility = rustSelected ? Visibility.Visible : Visibility.Collapsed;
+        GameSpecificSelectionHintBorder.Visibility = rustSelected ? Visibility.Collapsed : Visibility.Visible;
+        RustGameCardSelectionBadge.Visibility = rustSelected ? Visibility.Visible : Visibility.Collapsed;
+
+        if (RustGameCardButton != null)
+        {
+            RustGameCardButton.BorderBrush = rustSelected
+                ? (System.Windows.Media.Brush)FindResource("PrimaryBrush")
+                : (System.Windows.Media.Brush)FindResource("BorderBrushSoft");
+            RustGameCardButton.Background = rustSelected
+                ? (System.Windows.Media.Brush)FindResource("SurfaceElevatedBrush")
+                : (System.Windows.Media.Brush)FindResource("SurfaceBrush");
+        }
     }
 
     private void UpdateGameBoosterTelemetry(GameBoosterDashboardSnapshot snapshot)
@@ -1286,7 +1342,7 @@ public partial class MainWindow : Window
         {
             builder.AppendLine("DIAGNOSTICO DE RUST");
             builder.AppendLine($"Gerado em: {rustAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}");
-            builder.AppendLine("Status: leitura consultiva; nenhuma recomendacao de Rust foi aplicada automaticamente.");
+            builder.AppendLine("Status: leitura consultiva combinada com automacoes reversiveis disponiveis na aba Jogos especificos.");
             builder.AppendLine($"Resumo: {NormalizeAiUserMessage(rustAnalysis.ExecutiveSummary, "Nao foi possivel montar o resumo desta leitura de Rust.")}");
             builder.AppendLine($"Launch options: {rustAnalysis.LaunchOptionsSummary}");
             builder.AppendLine();
@@ -1362,7 +1418,7 @@ public partial class MainWindow : Window
                 ? $"Steam localconfig.vdf detectado em: {rustProfile.SteamLocalConfigPath}"
                 : "Steam localconfig.vdf nao detectado neste perfil.");
             builder.AppendLine($"Launch options sugeridos: {rustProfile.LaunchOptions}");
-            builder.AppendLine("Status do painel Rust: leitura consultiva, sem aplicacao automatica no jogo.");
+            builder.AppendLine("Status do painel Rust: use a aba Jogos especificos para aplicar ou desfazer automacoes reversiveis do Rust.");
 
             if (_latestRustPanelSnapshot is not null)
             {
@@ -1823,6 +1879,202 @@ public partial class MainWindow : Window
         finally
         {
             EndBusy();
+        }
+    }
+
+    private void GameSpecificCardButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string gameId })
+        {
+            return;
+        }
+
+        _selectedSpecificGameId = gameId;
+        RustExtremeFocusConfirmationPanel.Visibility = Visibility.Collapsed;
+        UpdateRustGameCardState();
+        UpdateSpecificGameSelection();
+    }
+
+    private void ExtremeRustFocusButton_Click(object sender, RoutedEventArgs e)
+    {
+        RustExtremeFocusConfirmationPanel.Visibility = Visibility.Visible;
+    }
+
+    private void CancelRustExtremeFocusButton_Click(object sender, RoutedEventArgs e)
+    {
+        RustExtremeFocusConfirmationPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private void ConfirmRustExtremeFocusButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            BeginBusy("Ativando FOCO EXTREMO do Rust...");
+            RustExtremeFocusConfirmationPanel.Visibility = Visibility.Collapsed;
+            var result = _rustExtremeFocusCoordinator.ActivateForRust();
+            EnterRustExtremeFocusMode(result);
+            SetStatus(
+                $"FOCO EXTREMO ativado. {result.ClosedProcessCount} processo(s) fechado(s), Explorer pausado e Rust iniciado.",
+                isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private void RestoreExplorerAfterExtremeFocusButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            _rustExtremeFocusCoordinator.RestoreExplorer(_rustExplorerRestoreScriptPath ?? string.Empty);
+            SetStatus("Explorer restaurado para a sessao atual.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+    }
+
+    private void LaunchRustFromExtremeFocusButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "steam://rungameid/252490",
+                UseShellExecute = true
+            });
+
+            SetStatus("Rust solicitado novamente ao Steam.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+    }
+
+    private void ExitRustExtremeFocusButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ExitRustExtremeFocusMode(restoreExplorer: true);
+            SetStatus("Modo extremo encerrado. Explorer restaurado.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+    }
+
+    private void EnterRustExtremeFocusMode(RustExtremeFocusActivationResult result)
+    {
+        var workArea = SystemParameters.WorkArea;
+        var restoreBounds = WindowState == WindowState.Normal
+            ? new Rect(Left, Top, Width, Height)
+            : RestoreBounds;
+
+        _extremeFocusWindowSnapshot = new ExtremeFocusWindowSnapshot(
+            restoreBounds.Left,
+            restoreBounds.Top,
+            restoreBounds.Width,
+            restoreBounds.Height,
+            MinWidth,
+            MinHeight,
+            MaxWidth,
+            MaxHeight,
+            ResizeMode,
+            Topmost,
+            WindowState,
+            _activePage,
+            _selectedSpecificGameId);
+        _rustExplorerRestoreScriptPath = result.RestoreScriptPath;
+        _isRustExtremeFocusActive = true;
+
+        MainShellBorder.Visibility = Visibility.Collapsed;
+        ExtremeFocusOverlayRoot.Visibility = Visibility.Visible;
+        ExtremeFocusStatusTextBlock.Text =
+            $"Rust iniciado. {result.ClosedProcessCount} processo(s) nao essencial(is) foram fechados e {result.ExplorerProcessCount} instancia(s) do Explorer foram encerradas.";
+        ExtremeFocusRestoreScriptTextBlock.Text = result.RestoreScriptPath;
+
+        WindowState = WindowState.Normal;
+        ResizeMode = System.Windows.ResizeMode.NoResize;
+        Topmost = true;
+        MinWidth = 420;
+        MinHeight = 260;
+        MaxWidth = 420;
+        MaxHeight = 320;
+        Width = 420;
+        Height = 300;
+        Left = workArea.Right - Width - 24;
+        Top = workArea.Bottom - Height - 24;
+    }
+
+    private void ExitRustExtremeFocusMode(bool restoreExplorer)
+    {
+        if (!_isRustExtremeFocusActive)
+        {
+            return;
+        }
+
+        if (restoreExplorer)
+        {
+            _rustExtremeFocusCoordinator.RestoreExplorer(_rustExplorerRestoreScriptPath ?? string.Empty);
+        }
+
+        ExtremeFocusOverlayRoot.Visibility = Visibility.Collapsed;
+        MainShellBorder.Visibility = Visibility.Visible;
+        RustExtremeFocusConfirmationPanel.Visibility = Visibility.Collapsed;
+        RestoreWindowFromExtremeFocus();
+        _isRustExtremeFocusActive = false;
+        _rustExplorerRestoreScriptPath = null;
+    }
+
+    private void RestoreWindowFromExtremeFocus()
+    {
+        if (_extremeFocusWindowSnapshot is null)
+        {
+            return;
+        }
+
+        var snapshot = _extremeFocusWindowSnapshot;
+        WindowState = WindowState.Normal;
+        ResizeMode = snapshot.ResizeMode;
+        Topmost = snapshot.Topmost;
+        MinWidth = snapshot.MinWidth;
+        MinHeight = snapshot.MinHeight;
+        MaxWidth = snapshot.MaxWidth;
+        MaxHeight = snapshot.MaxHeight;
+        Width = snapshot.Width;
+        Height = snapshot.Height;
+        Left = snapshot.Left;
+        Top = snapshot.Top;
+        WindowState = snapshot.WindowState;
+        ShowPage(snapshot.ActivePage);
+        _selectedSpecificGameId = snapshot.SelectedSpecificGameId;
+        UpdateRustGameCardState();
+        UpdateSpecificGameSelection();
+        _extremeFocusWindowSnapshot = null;
+    }
+
+    private void MainWindow_Closing(object? sender, CancelEventArgs e)
+    {
+        if (!_isRustExtremeFocusActive)
+        {
+            return;
+        }
+
+        try
+        {
+            _rustExtremeFocusCoordinator.RestoreExplorer(_rustExplorerRestoreScriptPath ?? string.Empty);
+        }
+        catch
+        {
+            // Ignore restore failures during shutdown.
         }
     }
 
@@ -2420,6 +2672,21 @@ public partial class MainWindow : Window
         string ApplyButtonText,
         string UndoButtonText);
 
+    private sealed record ExtremeFocusWindowSnapshot(
+        double Left,
+        double Top,
+        double Width,
+        double Height,
+        double MinWidth,
+        double MinHeight,
+        double MaxWidth,
+        double MaxHeight,
+        System.Windows.ResizeMode ResizeMode,
+        bool Topmost,
+        WindowState WindowState,
+        AppPage ActivePage,
+        string? SelectedSpecificGameId);
+
     private enum AppPage
     {
         IconEditor,
@@ -2477,6 +2744,19 @@ public partial class MainWindow : Window
         if (SaveLocalAiSettingsButton != null) SaveLocalAiSettingsButton.IsEnabled = enabled;
         if (AnalyzeAndApplyButton != null) AnalyzeAndApplyButton.IsEnabled = enabled;
         if (RunRustLocalAiAnalysisButton != null) RunRustLocalAiAnalysisButton.IsEnabled = enabled;
+        if (ApplyAllRustOptimizationsButton != null)
+        {
+            var hasPendingRustOptimizations = _latestRustPanelSnapshot?.Optimizations.Any(item => item.CanApply) == true;
+            ApplyAllRustOptimizationsButton.IsEnabled = enabled && hasPendingRustOptimizations;
+        }
+        if (RustGameCardButton != null) RustGameCardButton.IsEnabled = enabled;
+        if (ExtremeRustFocusButton != null) ExtremeRustFocusButton.IsEnabled = enabled;
+        if (ConfirmRustExtremeFocusButton != null) ConfirmRustExtremeFocusButton.IsEnabled = enabled;
+        if (CancelRustExtremeFocusButton != null) CancelRustExtremeFocusButton.IsEnabled = enabled;
+        if (RestoreExplorerAfterExtremeFocusButton != null) RestoreExplorerAfterExtremeFocusButton.IsEnabled = enabled;
+        if (ExitRustExtremeFocusButton != null) ExitRustExtremeFocusButton.IsEnabled = enabled;
+        if (LaunchRustFromExtremeFocusButton != null) LaunchRustFromExtremeFocusButton.IsEnabled = enabled;
+        if (RustOptimizationItemsControl != null) RustOptimizationItemsControl.IsEnabled = enabled;
         if (LocalAiEndpointTextBox != null) LocalAiEndpointTextBox.IsEnabled = enabled;
         if (LocalAiModelComboBox != null) LocalAiModelComboBox.IsEnabled = enabled;
 

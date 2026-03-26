@@ -54,6 +54,14 @@
             <GradientStop Offset="0" Color="#FF8A49" />
             <GradientStop Offset="1" Color="#FF6B17" />
         </LinearGradientBrush>
+        <LinearGradientBrush x:Key="DangerButtonBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0" Color="#F25454" />
+            <GradientStop Offset="1" Color="#C81F1F" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="DangerButtonHoverBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0" Color="#FF6767" />
+            <GradientStop Offset="1" Color="#DC2F2F" />
+        </LinearGradientBrush>
         <RadialGradientBrush x:Key="AmbientOrbBrush" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
             <GradientStop Offset="0" Color="#35FD6004" />
             <GradientStop Offset="0.7" Color="#10FD6004" />
@@ -153,6 +161,39 @@
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="MinWidth" Value="0" />
         </Style>
+        <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryFgBrush}" />
+            <Setter Property="Background" Value="{StaticResource DangerButtonBrush}" />
+            <Setter Property="BorderBrush" Value="#D23A3A" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="MinWidth" Value="148" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="18"
+                            SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{StaticResource DangerButtonHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.92" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="RoundIconButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Width" Value="40" />
             <Setter Property="Height" Value="40" />
@@ -181,6 +222,40 @@
             <Setter Property="MinWidth" Value="0" />
             <Setter Property="Padding" Value="18,0" />
             <Setter Property="Height" Value="40" />
+        </Style>
+        <Style x:Key="GameCardButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Height" Value="Auto" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="24"
+                            SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{StaticResource SurfaceElevatedBrush}" />
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource PrimarySoftBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.95" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style TargetType="TextBox">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -301,6 +376,7 @@
 
         <!-- ═══════════════════ MAIN SHELL ═══════════════════ -->
         <Border
+            x:Name="MainShellBorder"
             Margin="24"
             Background="{StaticResource ShellBrush}"
             BorderBrush="{StaticResource DividerBrush}"
@@ -950,6 +1026,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <Button x:Name="GbTabDashboardBtn" Content="Dashboard" Click="GbTab_Click" Style="{StaticResource PrimaryButtonStyle}" Margin="0"/>
                                     <Button x:Name="GbTabSystemBtn" Content="Sistema e Otimizacao" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Style="{StaticResource TabButtonStyle}" />
+                                    <Button x:Name="GbTabGamesBtn" Content="Jogos especificos" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Style="{StaticResource TabButtonStyle}" />
                                     <Button x:Name="GbTabAiBtn" Content="Diagnostico Inteligente" Click="GbTab_Click" Margin="4,0,0,0" Padding="16,8" Style="{StaticResource TabButtonStyle}" />
                                 </StackPanel>
                             </Border>
@@ -1157,7 +1234,221 @@
                                 </StackPanel>
                             </ScrollViewer>
 
-                            <!-- Tab 3: Diagnostico e jogos -->
+                            <!-- Tab 3: Jogos especificos -->
+                            <ScrollViewer Grid.Row="1" x:Name="GbContentGames" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <Border Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Jogos especificos" />
+                                            <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Perfis dedicados por jogo" />
+                                            <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="As automacoes e leituras dedicadas ficam separadas aqui. Escolha um card para abrir o painel completo do jogo selecionado." TextWrapping="Wrap" />
+
+                                            <WrapPanel Margin="0,16,0,0">
+                                                <Button
+                                                    x:Name="RustGameCardButton"
+                                                    Width="340"
+                                                    Margin="0,0,14,14"
+                                                    Tag="rust"
+                                                    Click="GameSpecificCardButton_Click"
+                                                    Style="{StaticResource GameCardButtonStyle}">
+                                                    <StackPanel>
+                                                        <Border Height="156" CornerRadius="22,22,0,0" ClipToBounds="True">
+                                                            <Grid>
+                                                                <Image Source="Assets/Games/rust-header.jpg" Stretch="UniformToFill" />
+                                                                <Rectangle Fill="#880A1118" />
+                                                                <StackPanel Margin="18" VerticalAlignment="Bottom">
+                                                                    <Border x:Name="RustGameCardSelectionBadge" Width="98" Padding="8,4" Background="#A8FD6004" CornerRadius="999" Visibility="Collapsed">
+                                                                        <TextBlock HorizontalAlignment="Center" FontSize="10" FontWeight="Bold" Text="SELECIONADO" />
+                                                                    </Border>
+                                                                    <TextBlock Margin="0,10,0,0" FontFamily="Segoe UI Variable Display" FontSize="24" FontWeight="Bold" Text="Rust" />
+                                                                    <TextBlock Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource PrimaryFgBrush}" Text="Leitura dedicada, automacoes reversiveis e foco extremo" TextWrapping="Wrap" />
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </Border>
+                                                        <StackPanel Margin="18,16,18,18">
+                                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Ultima otimizacao" />
+                                                            <TextBlock x:Name="RustGameCardLastOptimizationTextBlock" Margin="0,6,0,0" FontSize="13" FontWeight="SemiBold" Text="Nenhuma automacao aplicada ainda." TextWrapping="Wrap" />
+                                                            <TextBlock x:Name="RustGameCardStatusTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Clique para abrir o painel dedicado do Rust." TextWrapping="Wrap" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Button>
+                                            </WrapPanel>
+
+                                            <Border x:Name="GameSpecificSelectionHintBorder" Margin="0,4,0,0" Padding="18" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="20">
+                                                <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Selecione um card para abrir as otimizacoes, diagnosticos e acoes dedicadas do jogo." TextWrapping="Wrap" />
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border x:Name="RustGameDetailsBorder" Margin="0,12,0,0" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2.1*" />
+                                                    <ColumnDefinition Width="1*" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Rust" />
+                                                    <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="20" FontWeight="Bold" Text="Painel dedicado do Rust" />
+                                                    <TextBlock x:Name="RustModuleSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Leitura consultiva para launch options, memoria e estabilidade do Rust." TextWrapping="Wrap" />
+                                                </StackPanel>
+                                                <Border Grid.Column="1" Margin="16,0,0,0" Padding="16" Background="{StaticResource SurfaceStrongBrush}" CornerRadius="20">
+                                                    <StackPanel>
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Ultimo alinhamento" />
+                                                        <TextBlock x:Name="RustOptimizationLastAppliedTextBlock" Margin="0,8,0,0" FontSize="13" FontWeight="SemiBold" Text="Nenhuma otimizacao automatica do Rust foi aplicada ainda." TextWrapping="Wrap" />
+                                                        <TextBlock x:Name="RustOptimizationStatusTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="O app pode aplicar ajustes em launch options do Steam e no client.cfg do Rust, um a um ou em lote." TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+
+                                            <Border Margin="0,16,0,0" Padding="18" Background="#2A1313" BorderBrush="#D44747" BorderThickness="1" CornerRadius="22">
+                                                <StackPanel>
+                                                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Foreground="#FFD0D0" Text="FOCO EXTREMO" />
+                                                    <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="#F3BABA" Text="Fecha quase tudo que nao for essencial para o Rust, mantem Discord aberto se ele ja estiver rodando, encerra o Explorer e reduz o Auralis para um popup de controle." TextWrapping="Wrap" />
+                                                    <Grid Margin="0,14,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button x:Name="ExtremeRustFocusButton" Grid.Column="0" Click="ExtremeRustFocusButton_Click" Content="ATIVAR FOCO EXTREMO" Style="{StaticResource DangerButtonStyle}" />
+                                                        <TextBlock Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="Use apenas quando voce quiser dedicar a sessao inteira ao Rust e estiver pronto para fechar apps nao essenciais." TextWrapping="Wrap" />
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Border x:Name="RustExtremeFocusConfirmationPanel" Margin="0,12,0,0" Padding="18" Background="#351111" BorderBrush="#F25454" BorderThickness="1" CornerRadius="22" Visibility="Collapsed">
+                                                <StackPanel>
+                                                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Foreground="#FFD2D2" Text="Confirmar FOCO EXTREMO" />
+                                                    <TextBlock Margin="0,10,0,0" FontSize="12" Text="Se voce aceitar, o Auralis vai preparar uma sessao agressiva para o Rust. O Discord permanece aberto; o restante pode ser fechado sem salvar." TextWrapping="Wrap" />
+                                                    <TextBlock Margin="0,12,0,0" FontSize="12" FontWeight="SemiBold" Text="Ao confirmar, o app vai:" />
+                                                    <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="1. Fechar processos e programas nao essenciais da sua sessao atual." TextWrapping="Wrap" />
+                                                    <TextBlock Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="2. Encerrar o Explorer para liberar mais memoria e distracoes visuais." TextWrapping="Wrap" />
+                                                    <TextBlock Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="3. Reduzir o Auralis para um popup com comando de restauracao do Explorer." TextWrapping="Wrap" />
+                                                    <TextBlock Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="4. Abrir o Rust em seguida pelo Steam." TextWrapping="Wrap" />
+                                                    <Grid Margin="0,16,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button x:Name="ConfirmRustExtremeFocusButton" Grid.Column="0" Margin="0,0,10,0" Click="ConfirmRustExtremeFocusButton_Click" Content="Confirmar FOCO EXTREMO" Style="{StaticResource DangerButtonStyle}" />
+                                                        <Button x:Name="CancelRustExtremeFocusButton" Grid.Column="1" Click="CancelRustExtremeFocusButton_Click" Content="Cancelar" />
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Grid Margin="0,16,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
+                                                    <StackPanel>
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Processador detectado" />
+                                                        <TextBlock x:Name="RustCpuTextBlock" Margin="0,6,0,0" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Border>
+                                                <Border Grid.Column="1" Margin="0,0,0,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
+                                                    <StackPanel>
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Memoria detectada" />
+                                                        <TextBlock x:Name="RustMemoryTextBlock" Margin="0,6,0,0" FontSize="16" FontWeight="Bold" />
+                                                        <TextBlock x:Name="RustPriorityHintTextBlock" Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+
+                                            <Grid Margin="0,10,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="12" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
+                                                    <StackPanel>
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Argumentos de inicializacao" />
+                                                        <TextBox x:Name="RustLaunchOptionsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="45" Background="Transparent" BorderThickness="0" Foreground="{StaticResource MutedBrush}"/>
+                                                        <TextBlock x:Name="RustSteamPathTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Border>
+                                                <Border Grid.Column="2" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
+                                                    <StackPanel>
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Comandos recomendados" />
+                                                        <TextBox x:Name="RustClientCommandsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="45" Background="Transparent" BorderThickness="0" Foreground="{StaticResource MutedBrush}"/>
+                                                        <TextBlock x:Name="RustConfigPathTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+
+                                            <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
+                                                <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Otimizacoes automaticas do Rust" />
+                                                    <Grid Margin="0,12,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button x:Name="ApplyAllRustOptimizationsButton" Grid.Column="0" Margin="0,0,10,0" Click="ApplyAllRustOptimizationsButton_Click" Content="Aplicar recomendadas do Rust" Style="{StaticResource PrimaryButtonStyle}" />
+                                                        <Border Grid.Column="1" Padding="12,10" Background="#151F2B" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
+                                                            <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Cada item abaixo pode ser aplicado e desfeito individualmente. BIOS, pagefile e driver continuam como recomendacao manual." TextWrapping="Wrap" />
+                                                        </Border>
+                                                    </Grid>
+                                                    <ItemsControl x:Name="RustOptimizationItemsControl" Margin="0,12,0,0">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                                                                    <StackPanel>
+                                                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
+                                                                        <TextBlock Margin="0,5,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding Category}" />
+                                                                        <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding TargetText}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
+                                                                        <Grid Margin="0,10,0,0">
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="*" />
+                                                                                <ColumnDefinition Width="*" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <Button Grid.Column="0" Margin="0,0,10,0" Tag="{Binding Id}" Click="ApplyRustOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
+                                                                            <Button Grid.Column="1" Tag="{Binding Id}" Click="UndoRustOptimizationButton_Click" Content="{Binding UndoButtonText}" IsEnabled="{Binding CanUndo}" />
+                                                                        </Grid>
+                                                                    </StackPanel>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
+                                                <StackPanel>
+                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Leitura consultiva para Rust" />
+                                                    <Button x:Name="RunRustLocalAiAnalysisButton" Click="RunRustLocalAiAnalysisButton_Click" Content="Gerar leitura consultiva do Rust" Style="{StaticResource PrimaryButtonStyle}" />
+                                                    <TextBlock x:Name="RustAiAnalysisMetaTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma leitura consultiva salva ainda." TextWrapping="Wrap" />
+                                                    <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="A leitura avalia argumentos de inicializacao, memoria e folga do sistema para o Rust. Nenhuma recomendacao e aplicada automaticamente." TextWrapping="Wrap" />
+                                                    <Border Margin="0,12,0,0" Padding="12" Background="#151F2B" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
+                                                        <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="A IA interpreta o seu hardware e usa a base pesquisada do Rust para decidir o que realmente faz sentido para esta maquina." TextWrapping="Wrap" />
+                                                    </Border>
+                                                    <ItemsControl x:Name="RustAiRecommendationItemsControl" Margin="0,12,0,0">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                                                                    <StackPanel>
+                                                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
+                                                                        <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Reason}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,8,0,0" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource SoftBrush}" Text="Proximo passo sugerido" />
+                                                                        <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding SuggestedAction}" TextWrapping="Wrap" />
+                                                                    </StackPanel>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <!-- Tab 4: Diagnostico inteligente -->
                             <ScrollViewer Grid.Row="1" x:Name="GbContentAi" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
                                     
@@ -1247,129 +1538,10 @@
                                         </StackPanel>
                                     </Border>
 
-                                    <!-- Integracao especifica de Rust -->
-                                    <Border Margin="0,12,0,0" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
+                                    <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                         <StackPanel>
-                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Perfil em foco" />
-                                            <TextBlock x:Name="RustModuleSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Leitura consultiva para launch options, memoria e estabilidade do Rust. Nada desta area e aplicado automaticamente." TextWrapping="Wrap" />
-                                            <Grid Margin="0,12,0,0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <Border Grid.Column="0" Margin="0,0,10,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
-                                                    <StackPanel>
-                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Processador detectado" />
-                                                        <TextBlock x:Name="RustCpuTextBlock" Margin="0,6,0,0" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                                    </StackPanel>
-                                                </Border>
-                                                <Border Grid.Column="1" Margin="0,0,0,10" Padding="14,12" Background="{StaticResource SurfaceBrush}" CornerRadius="20" BorderThickness="1" BorderBrush="{StaticResource BorderBrushSoft}">
-                                                    <StackPanel>
-                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Memoria detectada" />
-                                                        <TextBlock x:Name="RustMemoryTextBlock" Margin="0,6,0,0" FontSize="16" FontWeight="Bold" />
-                                                        <TextBlock x:Name="RustPriorityHintTextBlock" Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
-                                                    </StackPanel>
-                                                </Border>
-                                            </Grid>
-
-                                            <!-- Opcionais Launch / Config -->
-                                            <Grid Margin="0,10,0,0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="12" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <Border Grid.Column="0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
-                                                    <StackPanel>
-                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Argumentos de inicializacao" />
-                                                        <TextBox x:Name="RustLaunchOptionsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="45" Background="Transparent" BorderThickness="0" Foreground="{StaticResource MutedBrush}"/>
-                                                        <TextBlock x:Name="RustSteamPathTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
-                                                    </StackPanel>
-                                                </Border>
-                                                <Border Grid.Column="2" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
-                                                    <StackPanel>
-                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Comandos recomendados" />
-                                                        <TextBox x:Name="RustClientCommandsTextBox" Margin="0,10,0,0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="45" Background="Transparent" BorderThickness="0" Foreground="{StaticResource MutedBrush}"/>
-                                                        <TextBlock x:Name="RustConfigPathTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
-                                                    </StackPanel>
-                                                </Border>
-                                            </Grid>
-
-                                            <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
-                                                <StackPanel>
-                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Otimizacoes automaticas do Rust" />
-                                                    <TextBlock x:Name="RustOptimizationStatusTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="O app pode aplicar ajustes em launch options do Steam e no client.cfg do Rust, um a um ou em lote." TextWrapping="Wrap" />
-                                                    <TextBlock x:Name="RustOptimizationLastAppliedTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma otimizacao automatica do Rust foi aplicada ainda." TextWrapping="Wrap" />
-                                                    <Grid Margin="0,12,0,0">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="*" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <Button x:Name="ApplyAllRustOptimizationsButton" Grid.Column="0" Margin="0,0,10,0" Click="ApplyAllRustOptimizationsButton_Click" Content="Aplicar recomendadas do Rust" Style="{StaticResource PrimaryButtonStyle}" />
-                                                        <Border Grid.Column="1" Padding="12,10" Background="#151F2B" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
-                                                            <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Cada item abaixo pode ser aplicado e desfeito individualmente. Itens de BIOS, pagefile e driver continuam como recomendacao manual." TextWrapping="Wrap" />
-                                                        </Border>
-                                                    </Grid>
-                                                    <ItemsControl x:Name="RustOptimizationItemsControl" Margin="0,12,0,0">
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
-                                                                    <StackPanel>
-                                                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
-                                                                        <TextBlock Margin="0,5,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding Category}" />
-                                                                        <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
-                                                                        <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding TargetText}" TextWrapping="Wrap" />
-                                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
-                                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
-                                                                        <Grid Margin="0,10,0,0">
-                                                                            <Grid.ColumnDefinitions>
-                                                                                <ColumnDefinition Width="*" />
-                                                                                <ColumnDefinition Width="*" />
-                                                                            </Grid.ColumnDefinitions>
-                                                                            <Button Grid.Column="0" Margin="0,0,10,0" Tag="{Binding Id}" Click="ApplyRustOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
-                                                                            <Button Grid.Column="1" Tag="{Binding Id}" Click="UndoRustOptimizationButton_Click" Content="{Binding UndoButtonText}" IsEnabled="{Binding CanUndo}" />
-                                                                        </Grid>
-                                                                    </StackPanel>
-                                                                </Border>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                </StackPanel>
-                                            </Border>
-
-                                            <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
-                                                <StackPanel>
-                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Leitura consultiva para Rust" />
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="1.1*" />
-                                                            <ColumnDefinition Width="1.9*" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <Button x:Name="LocalAiCheckAvailabilityButton" Grid.Column="0" Margin="0,0,10,0" Click="TestLocalAiConnectionButton_Click" Content="Atualizar disponibilidade" Visibility="Collapsed" />
-                                                        <Button x:Name="RunRustLocalAiAnalysisButton" Grid.Column="0" Grid.ColumnSpan="2" Click="RunRustLocalAiAnalysisButton_Click" Content="Gerar leitura consultiva do Rust" Style="{StaticResource PrimaryButtonStyle}" />
-                                                    </Grid>
-                                                    <TextBlock x:Name="RustAiAnalysisMetaTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma leitura consultiva salva ainda." TextWrapping="Wrap" />
-                                                    <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="A leitura avalia argumentos de inicializacao, memoria e folga do sistema para o Rust. Nenhuma recomendacao e aplicada automaticamente." TextWrapping="Wrap" />
-                                                    <Border Margin="0,12,0,0" Padding="12" Background="#151F2B" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
-                                                        <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="As acoes abaixo sao apenas sugeridas. O painel de Rust ainda nao escreve no jogo, no Steam ou no Windows automaticamente." TextWrapping="Wrap" />
-                                                    </Border>
-                                                    <ItemsControl x:Name="RustAiRecommendationItemsControl" Margin="0,12,0,0">
-                                                        <!-- Similar to above IA output template -->
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
-                                                                    <StackPanel>
-                                                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
-                                                                        <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Reason}" TextWrapping="Wrap" />
-                                                                        <TextBlock Margin="0,8,0,0" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource SoftBrush}" Text="Proximo passo sugerido" />
-                                                                        <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding SuggestedAction}" TextWrapping="Wrap" />
-                                                                    </StackPanel>
-                                                                </Border>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                </StackPanel>
-                                            </Border>
+                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Jogos especificos" />
+                                            <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="As leituras dedicadas, automacoes reversiveis e o FOCO EXTREMO de cada jogo ficam na aba Jogos especificos para nao misturar com o booster geral." TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
@@ -1467,6 +1639,40 @@
                     <TextBlock FontFamily="Figtree" FontSize="18" FontWeight="Bold" Text="Processando..." />
                     <TextBlock x:Name="BusyOverlayTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Aplicando ícone e atualizando o Explorer..." TextWrapping="Wrap" />
                     <ProgressBar Margin="0,14,0,0" Height="4" IsIndeterminate="True" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="ExtremeFocusOverlayRoot" Visibility="Collapsed">
+            <Border
+                Width="420"
+                Padding="22"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="#D44747"
+                BorderThickness="1"
+                CornerRadius="26"
+                MouseLeftButtonDown="WindowHeader_MouseLeftButtonDown">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Modo extremo" />
+                    <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="22" FontWeight="Bold" Text="Rust em foco" />
+                    <TextBlock x:Name="ExtremeFocusStatusTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="O Rust foi iniciado com o minimo possivel de distrações. Use os controles abaixo para restaurar o Explorer ou sair do modo extremo." TextWrapping="Wrap" />
+                    <Border Margin="0,14,0,0" Padding="14" Background="#171F2A" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                        <StackPanel>
+                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource PrimarySoftBrush}" Text="Script de restauracao do Explorer" />
+                            <TextBlock x:Name="ExtremeFocusRestoreScriptTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="LaunchRustFromExtremeFocusButton" Grid.Column="0" Margin="0,0,10,10" Click="LaunchRustFromExtremeFocusButton_Click" Content="Abrir Rust novamente" Style="{StaticResource PrimaryButtonStyle}" />
+                        <Button x:Name="RestoreExplorerAfterExtremeFocusButton" Grid.Column="1" Margin="0,0,0,10" Click="RestoreExplorerAfterExtremeFocusButton_Click" Content="Restaurar Explorer" />
+                        <Button x:Name="ExitRustExtremeFocusButton" Grid.Column="0" Grid.ColumnSpan="2" Click="ExitRustExtremeFocusButton_Click" Content="Encerrar modo extremo" Style="{StaticResource DangerButtonStyle}" />
+                    </Grid>
                 </StackPanel>
             </Border>
         </Grid>
