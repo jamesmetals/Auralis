@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -325,12 +326,61 @@ public sealed class DesktopIniFolderIconIntegrationService : IFolderIconIntegrat
         SHChangeNotify(ShcneAssocChanged, ShcnfIdList, null, IntPtr.Zero);
     }
 
-    private static Task RefreshExplorerIconCacheAsync(CancellationToken cancellationToken)
+    private static async Task RefreshExplorerIconCacheAsync(CancellationToken cancellationToken)
     {
-        // ie4uinit.exe -ClearIconCache foi descontinuado silenciosamente no Windows 10 1903+
-        // e causa lentidão desnecessária (timeout de até 10s). O SHChangeNotify já é suficiente
-        // para forçar o Explorer a reler o desktop.ini no Windows moderno.
-        return Task.CompletedTask;
+        DeleteStaleIconCacheFiles();
+
+        try
+        {
+            using var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = "ie4uinit.exe",
+                Arguments = "-show",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            });
+
+            if (process is not null)
+            {
+                await process.WaitForExitAsync(cancellationToken).WaitAsync(TimeSpan.FromSeconds(5), cancellationToken);
+            }
+        }
+        catch (Exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Best-effort: ie4uinit may not exist on some Windows editions.
+        }
+    }
+
+    private static void DeleteStaleIconCacheFiles()
+    {
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+        TryDeleteFile(Path.Combine(localAppData, "IconCache.db"));
+
+        var explorerCacheDir = Path.Combine(localAppData, "Microsoft", "Windows", "Explorer");
+
+        if (!Directory.Exists(explorerCacheDir))
+        {
+            return;
+        }
+
+        foreach (var cacheFile in Directory.EnumerateFiles(explorerCacheDir, "iconcache*.db"))
+        {
+            TryDeleteFile(cacheFile);
+        }
+    }
+
+    private static void TryDeleteFile(string filePath)
+    {
+        try
+        {
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+        }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
     }
 
     private static Task FinalizeShellRefreshAsync(
