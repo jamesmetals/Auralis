@@ -1363,6 +1363,11 @@
                                         <StackPanel>
                                             <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Tweaks Operacionais (Toggles Manuais)" />
                                             <ItemsControl x:Name="GameBoosterOptimizationItemsControl" Margin="0,12,0,0">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                                 <Border Margin="0,0,0,12" Padding="16" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="20">
@@ -1561,6 +1566,11 @@
                                                         </Border>
                                                     </Grid>
                                                     <ItemsControl x:Name="RustOptimizationItemsControl" Margin="0,12,0,0">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
                                                                 <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
@@ -1597,6 +1607,11 @@
                                                         <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="A IA interpreta o seu hardware e usa a base pesquisada do Rust para decidir o que realmente faz sentido para esta maquina." TextWrapping="Wrap" />
                                                     </Border>
                                                     <ItemsControl x:Name="RustAiRecommendationItemsControl" Margin="0,12,0,0">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
                                                                 <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
@@ -1660,8 +1675,40 @@
                                                 <StackPanel>
                                                     <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Resumo da leitura" />
                                                     <TextBlock x:Name="LocalAiAnalysisMetaTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma analise salva ainda." TextWrapping="Wrap" />
-                                                    <TextBlock x:Name="LocalAiAnalysisSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="Execute o diagnostico para receber um resumo pratico do estado atual do sistema." TextWrapping="Wrap" />
+                                                    
+                                                    <Grid Margin="0,14,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Grid.Column="0" Margin="0,0,6,0" Padding="12" Background="{StaticResource DeepPanelBrush}" CornerRadius="14">
+                                                            <StackPanel>
+                                                                <TextBlock FontSize="10" Foreground="{StaticResource SoftBrush}" Text="Score Atual" />
+                                                                <TextBlock x:Name="LocalAiScoreTextBlock" Margin="0,4,0,0" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Text="--" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                        <Border Grid.Column="1" Margin="0,0,6,0" Padding="12" Background="{StaticResource DeepPanelBrush}" CornerRadius="14">
+                                                            <StackPanel>
+                                                                <TextBlock FontSize="10" Foreground="{StaticResource SoftBrush}" Text="Perfil" />
+                                                                <TextBlock x:Name="LocalAiProfileTextBlock" Margin="0,4,0,0" FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="--" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                        <Border Grid.Column="2" Padding="12" Background="{StaticResource DeepPanelBrush}" CornerRadius="14">
+                                                            <StackPanel>
+                                                                <TextBlock FontSize="10" Foreground="{StaticResource SoftBrush}" Text="Prontidao" />
+                                                                <TextBlock x:Name="LocalAiReadinessTextBlock" Margin="0,4,0,0" FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="--" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </Grid>
+
+                                                    <TextBlock x:Name="LocalAiAnalysisSummaryTextBlock" Margin="0,14,0,0" FontSize="12" Text="Execute o diagnostico para receber um resumo pratico do estado atual do sistema." TextWrapping="Wrap" />
                                                     <ItemsControl x:Name="LocalAiRecommendationItemsControl" Margin="0,12,0,0">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
                                                                 <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
@@ -1683,6 +1730,11 @@
                                                     <TextBlock FontFamily="Figtree" FontSize="14" FontWeight="Bold" Foreground="{StaticResource SecondaryAccentBrush}" Text="Otimizacoes detectadas - confirme para aplicar" />
                                                     <TextBlock x:Name="ConfirmationSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" />
                                                     <ItemsControl x:Name="ConfirmationItemsControl" Margin="0,12,0,0">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
                                                                 <Border Margin="0,0,0,8" Padding="14,12" Background="#1A241B" BorderBrush="#314A35" BorderThickness="1" CornerRadius="18">
@@ -1834,6 +1886,11 @@
                                         <TextBlock FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Programas de inicialização" />
                                         <TextBlock x:Name="StartupManagerCountTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
                                         <ItemsControl x:Name="StartupItemsControl" Margin="0,12,0,0">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Margin="0,0,0,8" Padding="14,10" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
@@ -1862,6 +1919,11 @@
                                         <TextBlock FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Duplicatas encontradas" />
                                         <TextBlock x:Name="DuplicateFinderSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
                                         <ItemsControl x:Name="DuplicateGroupsItemsControl" Margin="0,12,0,0">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Margin="0,0,0,8" Padding="14,10" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
@@ -1900,6 +1962,11 @@
                                         <TextBlock FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Entradas do menu de contexto" />
                                         <TextBlock x:Name="ContextMenuCleanerCountTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
                                         <ItemsControl x:Name="ContextMenuItemsControl" Margin="0,12,0,0">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Margin="0,0,0,8" Padding="14,10" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">

@@ -1671,6 +1671,10 @@ public partial class MainWindow : Window
             ? "Nenhuma analise inteligente salva ainda."
             : $"Ultima leitura em {panel.LastAnalysis.GeneratedAtUtc.ToLocalTime():dd/MM/yyyy HH:mm}.";
 
+        LocalAiScoreTextBlock.Text = panel.LastAnalysis is null ? "--" : $"{panel.LastAnalysis.ExecutiveSummary.Split(' ')[0]}%";
+        LocalAiProfileTextBlock.Text = panel.LastAnalysis?.RecommendedProfile ?? "--";
+        LocalAiReadinessTextBlock.Text = panel.LastAnalysis?.ReadinessLevel ?? "--";
+
         LocalAiAnalysisSummaryTextBlock.Text = NormalizeAiUserMessage(
             panel.LastAnalysis?.ExecutiveSummary,
             "Execute o diagnostico para receber um resumo pratico do estado atual do sistema.");
