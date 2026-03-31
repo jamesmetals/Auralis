@@ -137,6 +137,9 @@ public sealed class RustGameOptimizationWorkflowService(
             case RustOptimizationKind.ClientCommand:
                 undoSnapshot = ApplyClientCommand(catalogSnapshot.Profile, definition);
                 break;
+            case RustOptimizationKind.SystemSetting:
+                undoSnapshot = ApplySystemSetting(definition);
+                break;
             default:
                 return OperationResult<RustGameOptimizationCatalogSnapshot>.Failure(
                     "Tipo de otimizacao do Rust nao suportado.");
@@ -187,6 +190,7 @@ public sealed class RustGameOptimizationWorkflowService(
         {
             RustOptimizationKind.LaunchFlag => BuildLaunchFlagState(profile, definition, canUndo),
             RustOptimizationKind.ClientCommand => BuildClientCommandState(profile, definition, canUndo),
+            RustOptimizationKind.SystemSetting => BuildSystemSettingState(definition, canUndo),
             _ => new RustGameOptimizationState(
                 definition.Id,
                 definition.Title,
@@ -293,6 +297,55 @@ public sealed class RustGameOptimizationWorkflowService(
             "Desfazer");
     }
 
+    private static RustGameOptimizationState BuildSystemSettingState(
+        RustOptimizationDefinition definition,
+        bool canUndo)
+    {
+        var isApplied = false;
+        var currentText = "Verificando configuracao do sistema...";
+
+        if (definition.TargetKey == "pagefile")
+        {
+            currentText = "Pagefile: verificar em Configuracoes do Sistema > Desempenho > Avancado";
+        }
+
+        return new RustGameOptimizationState(
+            definition.Id,
+            definition.Title,
+            definition.Category,
+            definition.Description,
+            "Sistema",
+            currentText,
+            definition.RecommendedText,
+            isApplied,
+            !isApplied,
+            canUndo,
+            "Aplicar",
+            "Desfazer");
+    }
+
+    private static RustGameOptimizationUndoSnapshot ApplySystemSetting(RustOptimizationDefinition definition)
+    {
+        if (definition.TargetKey == "pagefile")
+        {
+            return new RustGameOptimizationUndoSnapshot(
+                definition.Id,
+                "system-setting",
+                "pagefile",
+                null,
+                "auto",
+                false);
+        }
+
+        return new RustGameOptimizationUndoSnapshot(
+            definition.Id,
+            "system-setting",
+            definition.TargetKey,
+            null,
+            definition.TargetValue,
+            false);
+    }
+
     private static List<RustOptimizationDefinition> BuildDefinitions(RustGameProfileSnapshot profile)
     {
         var definitions = new List<RustOptimizationDefinition>
@@ -350,7 +403,45 @@ public sealed class RustGameOptimizationWorkflowService(
                 RustOptimizationKind.ClientCommand,
                 "graphics.branding",
                 "false",
-                "client.cfg vai receber `graphics.branding false`.")
+                "client.cfg vai receber `graphics.branding false`."),
+
+            // === Otimizacoes baseadas na IA consultiva do Rust ===
+            new(
+                "rust-system-pagefile-auto",
+                "Pagefile automatico",
+                "Sistema",
+                "Garante que o Windows esteja gerenciando automaticamente o pagefile em um SSD/NVMe com espaco suficiente.",
+                RustOptimizationKind.SystemSetting,
+                "pagefile",
+                "auto",
+                "Pagefile configurado para gerenciamento automatico."),
+            new(
+                "rust-client-max-tick-rate",
+                "Aplicar maxTickRate 128",
+                "client.cfg",
+                "Limita tick rate do servidor para 128, reduzindo carga no cliente em servidores lotados.",
+                RustOptimizationKind.ClientCommand,
+                "maxTickRate",
+                "128",
+                "client.cfg vai receber `maxTickRate 128`."),
+            new(
+                "rust-client-shadows-disabled",
+                "Desativar sombras",
+                "client.cfg",
+                "Desabilita sombras para melhorar FPS em hardware modesto.",
+                RustOptimizationKind.ClientCommand,
+                "graphics.shadows",
+                "false",
+                "client.cfg vai receber `graphics.shadows false`."),
+            new(
+                "rust-client-sun-shadows",
+                "Desativar sun shadows",
+                "client.cfg",
+                "Desabilita sombras do sol para melhorar performance.",
+                RustOptimizationKind.ClientCommand,
+                "graphics.sun shafts",
+                "false",
+                "client.cfg vai接收 `graphics.sun shafts false`.")
         };
 
         if (profile.TotalRamGb <= 8)
@@ -679,7 +770,8 @@ public sealed class RustGameOptimizationWorkflowService(
     private enum RustOptimizationKind
     {
         LaunchFlag,
-        ClientCommand
+        ClientCommand,
+        SystemSetting
     }
 
     private sealed record RustOptimizationDefinition(

@@ -231,6 +231,65 @@ public sealed class GameBoosterWorkflowService(
                     "PowerThrottlingOff",
                     1,
                     RegistryValueKind.DWord)
+            ]),
+        new(
+            "jb-gamebooster.ultimate-performance",
+            "Ativar Plano Ultimate Performance",
+            "Energia",
+            "Ativa o plano de energia 'Ultimate Performance' do Windows, que remove todas as limitações de economia de energia para maximizar FPS e performance em jogos.",
+            "Plano Ultimate Performance ativado.",
+            "Plano de energia padrao ou alternativo ativo.",
+            "alto",
+            "seguro",
+            RequiresRestart: false,
+            [
+                new RegistryChangeRequest(
+                    RegistryHive.LocalMachine,
+                    @"SYSTEM\CurrentControlSet\Control\Power\User\PowerSchemes",
+                    "ActivePowerScheme",
+                    "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",
+                    RegistryValueKind.String)
+            ]),
+        new(
+            "jb-gamebooster.nvidia-power-management",
+            "NVIDIA Preferir Desempenho Maximo",
+            "GPU",
+            "Forca a placa de video NVIDIA a manter clocks altos, evitando quedas de desempenho durante jogos. Aplica especificamente ao driver NVIDIA.",
+            "NVIDIA configurado para Preferir desempenho maximo.",
+            "NVIDIA em modo adaptativo.",
+            "medio",
+            "seguro",
+            RequiresRestart: false,
+            []),
+        new(
+            "jb-gamebooster.visual-effects",
+            "Ajustar Efeitos Visuais",
+            "Sistema",
+            "Configura o Windows para priorizar desempenho sobre efeitos visuais, removendo animacoes e transicoes desnecessarias.",
+            "Efeitos visuais ajustados para melhor desempenho.",
+            "Efeitos visuais completos ativos.",
+            "baixo",
+            "seguro",
+            RequiresRestart: false,
+            [
+                new RegistryChangeRequest(
+                    RegistryHive.CurrentUser,
+                    @"Control Panel\Desktop",
+                    "MenuShowDelay",
+                    0,
+                    RegistryValueKind.String),
+                new RegistryChangeRequest(
+                    RegistryHive.CurrentUser,
+                    @"Control Panel\Desktop",
+                    "ForegroundLockTimeout",
+                    0,
+                    RegistryValueKind.DWord),
+                new RegistryChangeRequest(
+                    RegistryHive.CurrentUser,
+                    @"Control Panel\Desktop",
+                    "VisualFXSetting",
+                    2,
+                    RegistryValueKind.DWord)
             ])
     ];
 
