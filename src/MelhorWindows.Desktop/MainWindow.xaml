@@ -2257,5 +2257,21 @@
             </Border>
         </Grid>
 
+        <!-- Modal/Popup Overlay for confirmations and errors -->
+        <Grid x:Name="ModalOverlayGrid" Visibility="Collapsed">
+            <Border Background="#CC000000" MouseDown="ModalOverlayGrid_MouseDown" />
+            <Border x:Name="ModalPopupBorder" MaxWidth="450" MaxHeight="400" Padding="24" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource SecondaryAccentBrush}" BorderThickness="1" CornerRadius="24" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <StackPanel>
+                    <TextBlock x:Name="ModalPopupTitle" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Foreground="{StaticResource SecondaryAccentBrush}" Text="Aviso" Margin="0,0,0,12" />
+                    <TextBlock x:Name="ModalPopupMessage" FontSize="14" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,0,0,16" />
+                    <StackPanel x:Name="ModalPopupCheckboxes" Visibility="Collapsed" Margin="0,0,0,16" />
+                    <StackPanel x:Name="ModalPopupButtons" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="ModalPopupConfirmButton" Click="ModalPopupConfirmButton_Click" Content="Confirmar" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,10,0" Visibility="Collapsed" />
+                        <Button x:Name="ModalPopupCancelButton" Click="ModalPopupCancelButton_Click" Content="Cancelar" Visibility="Collapsed" />
+                        <Button x:Name="ModalPopupOkButton" Click="ModalPopupOkButton_Click" Content="OK" Style="{StaticResource PrimaryButtonStyle}" Visibility="Collapsed" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

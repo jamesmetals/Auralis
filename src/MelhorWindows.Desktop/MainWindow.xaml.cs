@@ -2556,7 +2556,7 @@ public partial class MainWindow : Window
         
         if (selected.Count == 0)
         {
-            SetStatus("Selecione pelo menos uma otimizacao para aplicar.", isError: true);
+            ShowModal("Aviso", "Selecione pelo menos uma otimização para aplicar.");
             return;
         }
 
@@ -2591,7 +2591,7 @@ public partial class MainWindow : Window
         
         if (selected.Count == 0)
         {
-            SetStatus("Selecione pelo menos uma recomendacao para aplicar.", isError: true);
+            ShowModal("Aviso", "Selecione pelo menos uma otimização para aplicar.");
             return;
         }
 
@@ -3478,6 +3478,46 @@ public partial class MainWindow : Window
         StatusBorder.BorderBrush = isError ? StatusErrorBorderBrush : StatusSuccessBorderBrush;
         StatusTextBlock.Foreground = isError ? StatusErrorTextBrush : StatusSuccessTextBrush;
         StatusTextBlock.Text = isError ? $"Erro: {message}" : message;
+    }
+
+    private void ShowModal(string title, string message, bool showConfirmCancel = false, Action? onConfirm = null)
+    {
+        ModalPopupTitle.Text = title;
+        ModalPopupMessage.Text = message;
+        ModalPopupCheckboxes.Visibility = Visibility.Collapsed;
+        
+        ModalPopupConfirmButton.Visibility = showConfirmCancel ? Visibility.Visible : Visibility.Collapsed;
+        ModalPopupCancelButton.Visibility = showConfirmCancel ? Visibility.Visible : Visibility.Collapsed;
+        ModalPopupOkButton.Visibility = showConfirmCancel ? Visibility.Collapsed : Visibility.Visible;
+        
+        _pendingModalAction = onConfirm;
+        ModalOverlayGrid.Visibility = Visibility.Visible;
+    }
+
+    private Action? _pendingModalAction;
+
+    private void ModalPopupOkButton_Click(object sender, RoutedEventArgs e)
+    {
+        ModalOverlayGrid.Visibility = Visibility.Collapsed;
+    }
+
+    private void ModalPopupConfirmButton_Click(object sender, RoutedEventArgs e)
+    {
+        ModalOverlayGrid.Visibility = Visibility.Collapsed;
+        _pendingModalAction?.Invoke();
+        _pendingModalAction = null;
+    }
+
+    private void ModalPopupCancelButton_Click(object sender, RoutedEventArgs e)
+    {
+        ModalOverlayGrid.Visibility = Visibility.Collapsed;
+        _pendingModalAction = null;
+    }
+
+    private void ModalOverlayGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        ModalOverlayGrid.Visibility = Visibility.Collapsed;
+        _pendingModalAction = null;
     }
 
     private static string FormatStatus(WindowsFeatureStatus status) =>
