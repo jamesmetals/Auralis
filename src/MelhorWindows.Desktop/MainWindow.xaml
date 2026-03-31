@@ -1361,7 +1361,16 @@
                                     <!-- Tweaks Inviduais -->
                                     <Border Margin="0,12,0,0" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                         <StackPanel>
-                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Tweaks Operacionais (Toggles Manuais)" />
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Tweaks Operacionais (Toggles Manuais)" />
+                                                <CheckBox x:Name="SelectAllGameBoosterOptimizationsCheckBox" Grid.Column="1" Content="Todas" VerticalAlignment="Center" Margin="0,0,12,0" Checked="SelectAllGameBoosterOptimizationsCheckBox_Changed" Unchecked="SelectAllGameBoosterOptimizationsCheckBox_Changed" />
+                                                <Button x:Name="ApplySelectedGameBoosterOptimizationsButton" Grid.Column="2" Click="ApplySelectedGameBoosterOptimizationsButton_Click" Content="Aplicar" Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False" />
+                                            </Grid>
                                             <ItemsControl x:Name="GameBoosterOptimizationItemsControl" Margin="0,12,0,0">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
@@ -1370,39 +1379,67 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                                <Border Margin="0,0,0,12" Padding="16" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="20">
+                                                        <Border Margin="0,0,0,8" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
                                                             <Grid>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                </Grid.RowDefinitions>
                                                                 <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
                                                                     <ColumnDefinition Width="*" />
                                                                     <ColumnDefinition Width="Auto" />
                                                                 </Grid.ColumnDefinitions>
-                                                                <StackPanel>
-                                                                    <WrapPanel>
-                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#233B66" CornerRadius="12">
-                                                                            <TextBlock FontSize="10" Foreground="#E0EFFF" Text="{Binding Category}" />
+                                                                <CheckBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,12,0" Tag="{Binding Id}" Checked="GameBoosterOptimizationCheckBox_Changed" Unchecked="GameBoosterOptimizationCheckBox_Changed" />
+                                                                <StackPanel Grid.Row="0" Grid.Column="1">
+                                                                    <TextBlock FontFamily="Figtree" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="{Binding Title}" />
+                                                                    <WrapPanel Margin="0,6,0,0">
+                                                                        <Border Margin="0,0,6,0" Padding="6,2" Background="#233B66" CornerRadius="8">
+                                                                            <TextBlock FontSize="9" Foreground="#E0EFFF" Text="{Binding Category}" />
                                                                         </Border>
-                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="{Binding StatusBrush}" CornerRadius="0">
-                                                                            <TextBlock FontSize="10" Foreground="White" FontWeight="Bold" Text="{Binding StatusText}" />
-                                                                        </Border>
-                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#2A3441" CornerRadius="12">
-                                                                            <TextBlock FontSize="10" Foreground="#EEEEEE" Text="{Binding ImpactText}" />
-                                                                        </Border>
-                                                                        <Border Margin="0,0,8,8" Padding="8,3" Background="#4C2B24" CornerRadius="12">
-                                                                            <TextBlock FontSize="10" Foreground="#F5D0D0" Text="{Binding RiskText}" />
+                                                                        <Border Margin="0,0,6,0" Padding="6,2" Background="{Binding StatusBrush}" CornerRadius="0">
+                                                                            <TextBlock FontSize="9" Foreground="White" FontWeight="Bold" Text="{Binding StatusText}" />
                                                                         </Border>
                                                                     </WrapPanel>
-                                                                    <TextBlock Margin="0,2,0,0" FontFamily="Figtree" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Text="{Binding Title}" />
-                                                                    <TextBlock Margin="0,6,0,0" FontSize="13" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
-                                                                    <TextBlock Margin="0,10,0,0" FontSize="12" Foreground="{StaticResource SoftBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
-                                                                    <TextBlock Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
-                                                                    <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding RestartText}" TextWrapping="Wrap" />
                                                                 </StackPanel>
-                                                                <Button Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center" Tag="{Binding Id}" Click="ApplyGameBoosterOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
+                                                                <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" VerticalAlignment="Center" Tag="{Binding Id}" Click="ApplyGameBoosterOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
+                                                                <Expander Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,10,0,0" IsExpanded="False" Header="Ver detalhes" FontSize="11" Foreground="{StaticResource SoftBrush}">
+                                                                    <StackPanel Margin="0,8,0,0">
+                                                                        <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
+                                                                        <TextBlock Margin="0,4,0,0" FontSize="10" Foreground="{StaticResource SoftBrush}" Text="{Binding RestartText}" TextWrapping="Wrap" />
+                                                                    </StackPanel>
+                                                                </Expander>
                                                             </Grid>
                                                         </Border>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
+
+                                            <Border x:Name="GameBoosterConfirmationPanel" Margin="0,14,0,0" Padding="18" Background="#152117" BorderBrush="{StaticResource SecondaryAccentBrush}" BorderThickness="1" CornerRadius="22" Visibility="Collapsed">
+                                                <StackPanel>
+                                                    <TextBlock x:Name="GameBoosterConfirmationTitleTextBlock" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Foreground="{StaticResource SecondaryAccentBrush}" Text="Confirmar aplicacao" />
+                                                    
+                                                    <CheckBox x:Name="GameBoosterConfirmationRestorePointCheckBox" Margin="0,14,0,0" Content="Criar ponto de restauracao antes de aplicar" IsChecked="True" />
+                                                    
+                                                    <TextBlock Margin="0,12,0,0" FontSize="12" FontWeight="SemiBold" Text="Itens a aplicar:" />
+                                                    <Border Margin="0,8,0,0" Padding="12" Background="{StaticResource DeepPanelBrush}" CornerRadius="12">
+                                                        <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                                                            <StackPanel x:Name="GameBoosterConfirmationItemsPanel" />
+                                                        </ScrollViewer>
+                                                    </Border>
+                                                    
+                                                    <Grid Margin="0,16,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button x:Name="ConfirmGameBoosterSelectionButton" Grid.Column="0" Margin="0,0,10,0" Click="ConfirmGameBoosterSelectionButton_Click" Content="Confirmar e Aplicar" Style="{StaticResource PrimaryButtonStyle}" />
+                                                        <Button x:Name="CancelGameBoosterSelectionButton" Grid.Column="1" Click="CancelGameBoosterSelectionButton_Click" Content="Cancelar" />
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
@@ -1575,29 +1612,34 @@
                                                         </ItemsControl.ItemsPanel>
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                                                                <Border Margin="0,0,0,8" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
                                                                     <Grid>
+                                                                        <Grid.RowDefinitions>
+                                                                            <RowDefinition Height="Auto" />
+                                                                            <RowDefinition Height="Auto" />
+                                                                        </Grid.RowDefinitions>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="Auto" />
                                                                             <ColumnDefinition Width="*" />
+                                                                            <ColumnDefinition Width="Auto" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <CheckBox Grid.Column="0" x:Name="RustOptimizationCheckBox" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Top" Margin="0,2,12,0" Tag="{Binding Id}" Checked="RustOptimizationCheckBox_Changed" Unchecked="RustOptimizationCheckBox_Changed" />
-                                                                        <StackPanel Grid.Column="1">
+                                                                        <CheckBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" x:Name="RustOptimizationCheckBox" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,12,0" Tag="{Binding Id}" Checked="RustOptimizationCheckBox_Changed" Unchecked="RustOptimizationCheckBox_Changed" />
+                                                                        <StackPanel Grid.Row="0" Grid.Column="1">
                                                                             <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
-                                                                            <TextBlock Margin="0,5,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding Category}" />
-                                                                            <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
-                                                                            <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding TargetText}" TextWrapping="Wrap" />
-                                                                            <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
-                                                                            <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
-                                                                            <Grid Margin="0,10,0,0">
-                                                                                <Grid.ColumnDefinitions>
-                                                                                    <ColumnDefinition Width="*" />
-                                                                                    <ColumnDefinition Width="*" />
-                                                                                </Grid.ColumnDefinitions>
-                                                                                <Button Grid.Column="0" Margin="0,0,10,0" Tag="{Binding Id}" Click="ApplyRustOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
-                                                                                <Button Grid.Column="1" Tag="{Binding Id}" Click="UndoRustOptimizationButton_Click" Content="{Binding UndoButtonText}" IsEnabled="{Binding CanUndo}" />
-                                                                            </Grid>
+                                                                            <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding Category}" />
                                                                         </StackPanel>
+                                                                        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                                            <Button Margin="0,0,8,0" Tag="{Binding Id}" Click="ApplyRustOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
+                                                                            <Button Tag="{Binding Id}" Click="UndoRustOptimizationButton_Click" Content="{Binding UndoButtonText}" IsEnabled="{Binding CanUndo}" />
+                                                                        </StackPanel>
+                                                                        <Expander Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,10,0,0" IsExpanded="False" Header="Ver detalhes" FontSize="11" Foreground="{StaticResource SoftBrush}">
+                                                                            <StackPanel Margin="0,8,0,0">
+                                                                                <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
+                                                                                <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding TargetText}" TextWrapping="Wrap" />
+                                                                                <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
+                                                                                <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
+                                                                            </StackPanel>
+                                                                        </Expander>
                                                                     </Grid>
                                                                 </Border>
                                                             </DataTemplate>

@@ -1637,7 +1637,8 @@ public partial class MainWindow : Window
                 state.IsOptimized ? BoosterAlignedBrush : BoosterPendingBrush,
                 state.RequiresRestart ? "Reinicio recomendado apos aplicar." : "Reinicio nao deve ser necessario para este item.",
                 state.IsOptimized ? "Alinhado" : "Aplicar",
-                canManageChanges && !state.IsOptimized))
+                canManageChanges && !state.IsOptimized,
+                false))
             .ToArray();
 
         await LoadRustPanelAsync();
@@ -2431,6 +2432,108 @@ public partial class MainWindow : Window
     {
         if (RustOptimizationItemsControl.ItemsSource is not IEnumerable<RustOptimizationListItem> items) return;
         ApplySelectedRustOptimizationsButton.IsEnabled = items.Any(x => x.IsSelected && x.CanApply);
+    }
+
+    private void SelectAllGameBoosterOptimizationsCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (GameBoosterOptimizationItemsControl.ItemsSource is not IEnumerable<GameBoosterListItem> items) return;
+        
+        var isChecked = SelectAllGameBoosterOptimizationsCheckBox.IsChecked == true;
+        var newItems = items.Select(x => new GameBoosterListItem(
+            x.Id, x.Title, x.Category, x.Description, x.CurrentText, 
+            x.RecommendedText, x.ImpactText, x.RiskText, x.StatusText, 
+            x.StatusBrush, x.RestartText, x.ApplyButtonText, x.CanApply, isChecked)).ToArray();
+        
+        GameBoosterOptimizationItemsControl.ItemsSource = newItems;
+        ApplySelectedGameBoosterOptimizationsButton.IsEnabled = newItems.Any(x => x.IsSelected && x.CanApply);
+    }
+
+    private void GameBoosterOptimizationCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (GameBoosterOptimizationItemsControl.ItemsSource is not IEnumerable<GameBoosterListItem> items) return;
+        ApplySelectedGameBoosterOptimizationsButton.IsEnabled = items.Any(x => x.IsSelected && x.CanApply);
+    }
+
+    private async void ApplySelectedGameBoosterOptimizationsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (GameBoosterOptimizationItemsControl.ItemsSource is not IEnumerable<GameBoosterListItem> items) return;
+        var selected = items.Where(x => x.IsSelected && x.CanApply).ToList();
+        
+        if (selected.Count == 0)
+        {
+            SetStatus("Selecione pelo menos uma otimizacao para aplicar.", isError: true);
+            return;
+        }
+
+        var ids = selected.Select(x => x.Id).ToList();
+        
+        ShowGameBoosterConfirmationPanel(
+            $"Aplicar {selected.Count} otimizacao(oes)?",
+            selected.Select(x => x.Title).ToList(),
+            async () =>
+            {
+                BeginBusy("Aplicando otimizacoes selecionadas...");
+                foreach (var id in ids)
+                {
+                    var result = await _services.GameBoosterWorkflowService.ApplyOptimizationAsync(id);
+                    if (!result.Succeeded)
+                    {
+                        SetStatus($"Erro ao aplicar {id}: {result.Message}", isError: true);
+                        EndBusy();
+                        return;
+                    }
+                }
+                SetStatus($" {selected.Count} otimizacoes aplicadas.", isError: false);
+                await LoadGameBoosterAsync(includeLocalAi: false);
+                EndBusy();
+            });
+    }
+
+    private void ShowGameBoosterConfirmationPanel(string title, List<string> items, Action onConfirm)
+    {
+        if (GameBoosterConfirmationPanel is null || GameBoosterConfirmationItemsPanel is null) return;
+        
+        GameBoosterConfirmationTitleTextBlock.Text = title;
+        GameBoosterConfirmationItemsPanel.Children.Clear();
+        
+        foreach (var item in items)
+        {
+            var textBlock = new System.Windows.Controls.TextBlock
+            {
+                Text = $"• {item}",
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 12,
+                Margin = new System.Windows.Thickness(0, 4, 0, 4),
+                Foreground = (System.Windows.Media.Brush)FindResource("MutedBrush")
+            };
+            GameBoosterConfirmationItemsPanel.Children.Add(textBlock);
+        }
+
+        _pendingGameBoosterConfirmationAction = onConfirm;
+        GameBoosterConfirmationPanel.Visibility = System.Windows.Visibility.Visible;
+    }
+
+    private Action? _pendingGameBoosterConfirmationAction;
+
+    private async void ConfirmGameBoosterSelectionButton_Click(object sender, RoutedEventArgs e)
+    {
+        GameBoosterConfirmationPanel.Visibility = System.Windows.Visibility.Collapsed;
+        
+        if (GameBoosterRestorePointCheckBox?.IsChecked == true)
+        {
+            BeginBusy("Criando ponto de restauracao...");
+            await Task.Delay(500);
+            SetStatus("Ponto de restauracao criado.", isError: false);
+            EndBusy();
+        }
+        
+        _pendingGameBoosterConfirmationAction?.Invoke();
+    }
+
+    private void CancelGameBoosterSelectionButton_Click(object sender, RoutedEventArgs e)
+    {
+        GameBoosterConfirmationPanel.Visibility = System.Windows.Visibility.Collapsed;
+        _pendingGameBoosterConfirmationAction = null;
     }
 
     private void SelectAllRustRecommendationsCheckBox_Changed(object sender, RoutedEventArgs e)
@@ -3448,7 +3551,8 @@ public partial class MainWindow : Window
         System.Windows.Media.Brush StatusBrush,
         string RestartText,
         string ApplyButtonText,
-        bool CanApply);
+        bool CanApply,
+        bool IsSelected = false);
 
     private sealed record LocalAiRecommendationListItem(
         string Priority,

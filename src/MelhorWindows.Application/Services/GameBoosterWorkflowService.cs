@@ -232,13 +232,14 @@ public sealed class GameBoosterWorkflowService(
                     1,
                     RegistryValueKind.DWord)
             ]),
+
         new(
             "jb-gamebooster.ultimate-performance",
             "Ativar Plano Ultimate Performance",
             "Energia",
-            "Ativa o plano de energia 'Ultimate Performance' do Windows, que remove todas as limitações de economia de energia para maximizar FPS e performance em jogos.",
+            "Ativa o plano de energia Ultimate Performance do Windows para maximo desempenho.",
             "Plano Ultimate Performance ativado.",
-            "Plano de energia padrao ou alternativo ativo.",
+            "Plano de energia padrao ativo.",
             "alto",
             "seguro",
             RequiresRestart: false,
@@ -250,11 +251,12 @@ public sealed class GameBoosterWorkflowService(
                     "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",
                     RegistryValueKind.String)
             ]),
+
         new(
             "jb-gamebooster.nvidia-power-management",
             "NVIDIA Preferir Desempenho Maximo",
             "GPU",
-            "Forca a placa de video NVIDIA a manter clocks altos, evitando quedas de desempenho durante jogos. Aplica especificamente ao driver NVIDIA.",
+            "Forca a placa de video NVIDIA a manter clocks altos. Abra o Painel de Controle NVIDIA manualmente.",
             "NVIDIA configurado para Preferir desempenho maximo.",
             "NVIDIA em modo adaptativo.",
             "medio",
