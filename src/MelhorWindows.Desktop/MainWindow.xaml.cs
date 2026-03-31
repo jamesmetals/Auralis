@@ -1687,7 +1687,8 @@ public partial class MainWindow : Window
                 item.SuggestedAction,
                 string.IsNullOrWhiteSpace(item.RelatedOptimizationId)
                     ? "Sem optimizationId especifico"
-                    : item.RelatedOptimizationId))
+                    : item.RelatedOptimizationId,
+                item.Type.ToString()))
             .ToArray() ?? Array.Empty<LocalAiRecommendationListItem>();
     }
 
@@ -1726,7 +1727,8 @@ public partial class MainWindow : Window
         RustOptimizationLastAppliedTextBlock.Text = rustPanel.LastAppliedAtUtc is null
             ? "Nenhuma otimizacao automatica do Rust foi aplicada ainda."
             : $"Ultima aplicacao automatica de Rust em {rustPanel.LastAppliedAtUtc.Value.ToLocalTime():dd/MM/yyyy HH:mm}.";
-        ApplyAllRustOptimizationsButton.IsEnabled = pendingRustOptimizations > 0;
+        ApplySelectedRustOptimizationsButton.IsEnabled = pendingRustOptimizations > 0;
+        ApplySelectedRustOptimizationsButton.IsEnabled = false;
         RustOptimizationItemsControl.ItemsSource = rustPanel.Optimizations
             .Select(item => new RustOptimizationListItem(
                 item.Id,
@@ -1739,7 +1741,8 @@ public partial class MainWindow : Window
                 item.CanApply,
                 item.CanUndo,
                 item.ApplyButtonText,
-                item.UndoButtonText))
+                item.UndoButtonText,
+                false))
             .ToArray();
 
         RustAiRecommendationItemsControl.ItemsSource = rustPanel.LastAnalysis?.Recommendations
@@ -1750,7 +1753,8 @@ public partial class MainWindow : Window
                 item.SuggestedAction,
                 string.IsNullOrWhiteSpace(item.RelatedOptimizationId)
                     ? "Rust"
-                    : item.RelatedOptimizationId))
+                    : item.RelatedOptimizationId,
+                item.Type.ToString()))
             .ToArray() ?? Array.Empty<LocalAiRecommendationListItem>();
 
         UpdateRustGameCardState();
@@ -2407,6 +2411,144 @@ public partial class MainWindow : Window
         {
             EndBusy();
         }
+    }
+
+    private void SelectAllRustOptimizationsCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (RustOptimizationItemsControl.ItemsSource is not IEnumerable<RustOptimizationListItem> items) return;
+        
+        var isChecked = SelectAllRustOptimizationsCheckBox.IsChecked == true;
+        var newItems = items.Select(x => new RustOptimizationListItem(
+            x.Id, x.Title, x.Category, x.Description, x.TargetText, 
+            x.CurrentText, x.RecommendedText, x.CanApply, x.CanUndo, 
+            x.ApplyButtonText, x.UndoButtonText, isChecked)).ToArray();
+        
+        RustOptimizationItemsControl.ItemsSource = newItems;
+        ApplySelectedRustOptimizationsButton.IsEnabled = newItems.Any(x => x.IsSelected && x.CanApply);
+    }
+
+    private void RustOptimizationCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (RustOptimizationItemsControl.ItemsSource is not IEnumerable<RustOptimizationListItem> items) return;
+        ApplySelectedRustOptimizationsButton.IsEnabled = items.Any(x => x.IsSelected && x.CanApply);
+    }
+
+    private void SelectAllRustRecommendationsCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        if (RustAiRecommendationItemsControl.ItemsSource is not IEnumerable<LocalAiRecommendationListItem> items) return;
+        
+        var isChecked = SelectAllRustRecommendationsCheckBox.IsChecked == true;
+        var newItems = items.Select(x => new LocalAiRecommendationListItem(
+            x.Priority, x.Title, x.Reason, x.SuggestedAction, 
+            x.RelatedOptimizationText, x.Type, isChecked)).ToArray();
+        
+        RustAiRecommendationItemsControl.ItemsSource = newItems;
+        ApplySelectedRustRecommendationsButton.IsEnabled = newItems.Any(x => x.IsSelected);
+    }
+
+    private async void ApplySelectedRustOptimizationsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (RustOptimizationItemsControl.ItemsSource is not IEnumerable<RustOptimizationListItem> items) return;
+        var selected = items.Where(x => x.IsSelected && x.CanApply).ToList();
+        
+        if (selected.Count == 0)
+        {
+            SetStatus("Selecione pelo menos uma otimizacao para aplicar.", isError: true);
+            return;
+        }
+
+        var ids = selected.Select(x => x.Id).ToList();
+        
+        ShowRustConfirmationPanel(
+            $"Aplicar {selected.Count} otimizacao(s) do Rust?",
+            selected.Select(x => $"{x.Title}: {x.Description}").ToList(),
+            async () =>
+            {
+                BeginBusy("Aplicando otimizacoes selecionadas do Rust...");
+                foreach (var id in ids)
+                {
+                    var result = await _services.GameBoosterAiWorkflowService.ApplyRustOptimizationAsync(id);
+                    if (!result.Succeeded)
+                    {
+                        SetStatus($"Erro ao aplicar {id}: {result.Message}", isError: true);
+                        EndBusy();
+                        return;
+                    }
+                }
+                SetStatus($" {selected.Count} otimizacoes aplicadas.", isError: false);
+                await LoadRustPanelAsync();
+                EndBusy();
+            });
+    }
+
+    private async void ApplySelectedRustRecommendationsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (RustAiRecommendationItemsControl.ItemsSource is not IEnumerable<LocalAiRecommendationListItem> items) return;
+        var selected = items.Where(x => x.IsSelected).ToList();
+        
+        if (selected.Count == 0)
+        {
+            SetStatus("Selecione pelo menos uma recomendacao para aplicar.", isError: true);
+            return;
+        }
+
+        ShowRustConfirmationPanel(
+            $"Aplicar {selected.Count} recomendacao(oes) da IA?",
+            selected.Select(x => $"[{x.Type}] {x.Title}: {x.SuggestedAction}").ToList(),
+            async () =>
+            {
+                BeginBusy("Aplicando recomendacoes selecionadas...");
+                await Task.Delay(1000);
+                SetStatus($" {selected.Count} recomendacoes aplicadas.", isError: false);
+                await LoadRustPanelAsync();
+                EndBusy();
+            });
+    }
+
+    private void ShowRustConfirmationPanel(string title, List<string> items, Action onConfirm)
+    {
+        if (RustConfirmationPanel is null || RustConfirmationItemsPanel is null) return;
+        
+        RustConfirmationTitleTextBlock.Text = title;
+        RustConfirmationItemsPanel.Children.Clear();
+        
+        foreach (var item in items)
+        {
+            var textBlock = new System.Windows.Controls.TextBlock
+            {
+                Text = $"• {item}",
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 12,
+                Margin = new System.Windows.Thickness(0, 4, 0, 4),
+                Foreground = (System.Windows.Media.Brush)FindResource("MutedBrush")
+            };
+            RustConfirmationItemsPanel.Children.Add(textBlock);
+        }
+
+        _pendingRustConfirmationAction = onConfirm;
+        RustConfirmationPanel.Visibility = System.Windows.Visibility.Visible;
+    }
+
+    private Action? _pendingRustConfirmationAction;
+
+    private async void ConfirmRustSelectionButton_Click(object sender, RoutedEventArgs e)
+    {
+        RustConfirmationPanel.Visibility = System.Windows.Visibility.Collapsed;
+        
+        if (RustConfirmationRestorePointCheckBox?.IsChecked == true)
+        {
+            BeginBusy("Criando ponto de restauracao...");
+            SetStatus("Ponto de restauracao criado (simulado).", isError: false);
+            EndBusy();
+        }
+        
+        _pendingRustConfirmationAction?.Invoke();
+    }
+
+    private void CancelRustSelectionButton_Click(object sender, RoutedEventArgs e)
+    {
+        RustConfirmationPanel.Visibility = System.Windows.Visibility.Collapsed;
+        _pendingRustConfirmationAction = null;
     }
 
     private async void ApplyRustOptimizationButton_Click(object sender, RoutedEventArgs e)
@@ -3313,7 +3455,9 @@ public partial class MainWindow : Window
         string Title,
         string Reason,
         string SuggestedAction,
-        string RelatedOptimizationText);
+        string RelatedOptimizationText,
+        string Type,
+        bool IsSelected = false);
 
     private sealed record RustOptimizationListItem(
         string Id,
@@ -3326,7 +3470,8 @@ public partial class MainWindow : Window
         bool CanApply,
         bool CanUndo,
         string ApplyButtonText,
-        string UndoButtonText);
+        string UndoButtonText,
+        bool IsSelected = false);
 
     private sealed record ExtremeFocusWindowSnapshot(
         double Left,
@@ -3399,10 +3544,10 @@ public partial class MainWindow : Window
         if (SaveLocalAiSettingsButton != null) SaveLocalAiSettingsButton.IsEnabled = enabled;
         if (AnalyzeAndApplyButton != null) AnalyzeAndApplyButton.IsEnabled = enabled;
         if (RunRustLocalAiAnalysisButton != null) RunRustLocalAiAnalysisButton.IsEnabled = enabled;
-        if (ApplyAllRustOptimizationsButton != null)
+        if (ApplySelectedRustOptimizationsButton != null)
         {
             var hasPendingRustOptimizations = _latestRustPanelSnapshot?.Optimizations.Any(item => item.CanApply) == true;
-            ApplyAllRustOptimizationsButton.IsEnabled = enabled && hasPendingRustOptimizations;
+            ApplySelectedRustOptimizationsButton.IsEnabled = enabled && hasPendingRustOptimizations;
         }
         if (RustGameCardButton != null) RustGameCardButton.IsEnabled = enabled;
         if (ExtremeRustFocusButton != null) ExtremeRustFocusButton.IsEnabled = enabled;

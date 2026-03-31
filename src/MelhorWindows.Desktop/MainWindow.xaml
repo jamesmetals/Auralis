@@ -1554,17 +1554,19 @@
 
                                             <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                 <StackPanel>
-                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Otimizacoes automaticas do Rust" />
-                                                    <Grid Margin="0,12,0,0">
+                                                    <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        <Button x:Name="ApplyAllRustOptimizationsButton" Grid.Column="0" Margin="0,0,10,0" Click="ApplyAllRustOptimizationsButton_Click" Content="Aplicar recomendadas do Rust" Style="{StaticResource PrimaryButtonStyle}" />
-                                                        <Border Grid.Column="1" Padding="12,10" Background="#151F2B" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
-                                                            <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Cada item abaixo pode ser aplicado e desfeito individualmente. BIOS, pagefile e driver continuam como recomendacao manual." TextWrapping="Wrap" />
-                                                        </Border>
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Otimizacoes automaticas do Rust" />
+                                                        <CheckBox x:Name="SelectAllRustOptimizationsCheckBox" Grid.Column="1" Content="Todas" VerticalAlignment="Center" Margin="0,0,8,0" Checked="SelectAllRustOptimizationsCheckBox_Changed" Unchecked="SelectAllRustOptimizationsCheckBox_Changed" />
+                                                        <Button x:Name="ApplySelectedRustOptimizationsButton" Grid.Column="2" Click="ApplySelectedRustOptimizationsButton_Click" Content="Aplicar Selecionadas" Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False" />
                                                     </Grid>
+                                                    <Border Margin="0,12,0,0" Padding="12,10" Background="#151F2B" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
+                                                        <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Cada item abaixo pode ser aplicado e desfeito individualmente. BIOS, pagefile e driver continuam como recomendacao manual." TextWrapping="Wrap" />
+                                                    </Border>
                                                     <ItemsControl x:Name="RustOptimizationItemsControl" Margin="0,12,0,0">
                                                         <ItemsControl.ItemsPanel>
                                                             <ItemsPanelTemplate>
@@ -1574,22 +1576,29 @@
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
                                                                 <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
-                                                                    <StackPanel>
-                                                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
-                                                                        <TextBlock Margin="0,5,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding Category}" />
-                                                                        <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
-                                                                        <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding TargetText}" TextWrapping="Wrap" />
-                                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
-                                                                        <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
-                                                                        <Grid Margin="0,10,0,0">
-                                                                            <Grid.ColumnDefinitions>
-                                                                                <ColumnDefinition Width="*" />
-                                                                                <ColumnDefinition Width="*" />
-                                                                            </Grid.ColumnDefinitions>
-                                                                            <Button Grid.Column="0" Margin="0,0,10,0" Tag="{Binding Id}" Click="ApplyRustOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
-                                                                            <Button Grid.Column="1" Tag="{Binding Id}" Click="UndoRustOptimizationButton_Click" Content="{Binding UndoButtonText}" IsEnabled="{Binding CanUndo}" />
-                                                                        </Grid>
-                                                                    </StackPanel>
+                                                                    <Grid>
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="Auto" />
+                                                                            <ColumnDefinition Width="*" />
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <CheckBox Grid.Column="0" x:Name="RustOptimizationCheckBox" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Top" Margin="0,2,12,0" Tag="{Binding Id}" Checked="RustOptimizationCheckBox_Changed" Unchecked="RustOptimizationCheckBox_Changed" />
+                                                                        <StackPanel Grid.Column="1">
+                                                                            <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
+                                                                            <TextBlock Margin="0,5,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding Category}" />
+                                                                            <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Description}" TextWrapping="Wrap" />
+                                                                            <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding TargetText}" TextWrapping="Wrap" />
+                                                                            <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding CurrentText}" TextWrapping="Wrap" />
+                                                                            <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding RecommendedText}" TextWrapping="Wrap" />
+                                                                            <Grid Margin="0,10,0,0">
+                                                                                <Grid.ColumnDefinitions>
+                                                                                    <ColumnDefinition Width="*" />
+                                                                                    <ColumnDefinition Width="*" />
+                                                                                </Grid.ColumnDefinitions>
+                                                                                <Button Grid.Column="0" Margin="0,0,10,0" Tag="{Binding Id}" Click="ApplyRustOptimizationButton_Click" Content="{Binding ApplyButtonText}" IsEnabled="{Binding CanApply}" Style="{StaticResource PrimaryButtonStyle}" />
+                                                                                <Button Grid.Column="1" Tag="{Binding Id}" Click="UndoRustOptimizationButton_Click" Content="{Binding UndoButtonText}" IsEnabled="{Binding CanUndo}" />
+                                                                            </Grid>
+                                                                        </StackPanel>
+                                                                    </Grid>
                                                                 </Border>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
@@ -1599,14 +1608,27 @@
 
                                             <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
                                                 <StackPanel>
-                                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Leitura consultiva para Rust" />
-                                                    <Button x:Name="RunRustLocalAiAnalysisButton" Click="RunRustLocalAiAnalysisButton_Click" Content="Gerar leitura consultiva do Rust" Style="{StaticResource PrimaryButtonStyle}" />
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Leitura consultiva para Rust" />
+                                                        <CheckBox x:Name="SelectAllRustRecommendationsCheckBox" Grid.Column="1" Content="Selecionar Todas" VerticalAlignment="Center" Checked="SelectAllRustRecommendationsCheckBox_Changed" Unchecked="SelectAllRustRecommendationsCheckBox_Changed" />
+                                                    </Grid>
+                                                    <Button x:Name="RunRustLocalAiAnalysisButton" Margin="0,12,0,0" Click="RunRustLocalAiAnalysisButton_Click" Content="Gerar leitura consultiva do Rust" Style="{StaticResource PrimaryButtonStyle}" />
                                                     <TextBlock x:Name="RustAiAnalysisMetaTextBlock" Margin="0,10,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Nenhuma leitura consultiva salva ainda." TextWrapping="Wrap" />
-                                                    <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="A leitura avalia argumentos de inicializacao, memoria e folga do sistema para o Rust. Nenhuma recomendacao e aplicada automaticamente." TextWrapping="Wrap" />
-                                                    <Border Margin="0,12,0,0" Padding="12" Background="#151F2B" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16">
-                                                        <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="A IA interpreta o seu hardware e usa a base pesquisada do Rust para decidir o que realmente faz sentido para esta maquina." TextWrapping="Wrap" />
+                                                    
+                                                    <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource DeepPanelBrush}" CornerRadius="16">
+                                                        <StackPanel>
+                                                            <TextBlock x:Name="RustAiSummaryHeaderTextBlock" Style="{StaticResource SectionTitleStyle}" Text="Resumo da Análise" />
+                                                            <TextBlock x:Name="RustAiSummaryTextBlock" Margin="0,8,0,0" FontSize="12" Text="A leitura avalia argumentos de inicializacao, memoria e folga do sistema para o Rust. Nenhuma recomendacao e aplicada automaticamente." TextWrapping="Wrap" />
+                                                        </StackPanel>
                                                     </Border>
-                                                    <ItemsControl x:Name="RustAiRecommendationItemsControl" Margin="0,12,0,0">
+
+                                                    <TextBlock Margin="0,16,0,8" FontSize="12" FontWeight="SemiBold" Text="Recomendacoes da IA (selecione as que deseja aplicar):" />
+                                                    
+                                                    <ItemsControl x:Name="RustAiRecommendationItemsControl" Margin="0,4,0,0">
                                                         <ItemsControl.ItemsPanel>
                                                             <ItemsPanelTemplate>
                                                                 <StackPanel />
@@ -1615,16 +1637,80 @@
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
                                                                 <Border Margin="0,0,0,10" Padding="14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
-                                                                    <StackPanel>
-                                                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
-                                                                        <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="{Binding Reason}" TextWrapping="Wrap" />
-                                                                        <TextBlock Margin="0,8,0,0" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource SoftBrush}" Text="Proximo passo sugerido" />
-                                                                        <TextBlock Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding SuggestedAction}" TextWrapping="Wrap" />
-                                                                    </StackPanel>
+                                                                    <Grid>
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="Auto" />
+                                                                            <ColumnDefinition Width="*" />
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Top" Margin="0,2,12,0" />
+                                                                        <StackPanel Grid.Column="1">
+                                                                            <StackPanel Orientation="Horizontal">
+                                                                                <Border Padding="8,3" CornerRadius="10" Margin="0,0,8,0">
+                                                                                    <Border.Style>
+                                                                                        <Style TargetType="Border">
+                                                                                            <Style.Triggers>
+                                                                                                <DataTrigger Binding="{Binding Type}" Value="Steam">
+                                                                                                    <Setter Property="Background" Value="#2980B9"/>
+                                                                                                </DataTrigger>
+                                                                                                <DataTrigger Binding="{Binding Type}" Value="Nvidia">
+                                                                                                    <Setter Property="Background" Value="#27AE60"/>
+                                                                                                </DataTrigger>
+                                                                                                <DataTrigger Binding="{Binding Type}" Value="Windows">
+                                                                                                    <Setter Property="Background" Value="#E67E22"/>
+                                                                                                </DataTrigger>
+                                                                                                <DataTrigger Binding="{Binding Type}" Value="General">
+                                                                                                    <Setter Property="Background" Value="#8E44AD"/>
+                                                                                                </DataTrigger>
+                                                                                            </Style.Triggers>
+                                                                                        </Style>
+                                                                                    </Border.Style>
+                                                                                    <TextBlock FontSize="10" FontWeight="Bold" Foreground="White" Text="{Binding Type}" />
+                                                                                </Border>
+                                                                                <Border Padding="8,3" CornerRadius="10" Background="{StaticResource SurfaceStrongBrush}">
+                                                                                    <TextBlock FontSize="10" Foreground="{StaticResource MutedBrush}" Text="{Binding Priority}" />
+                                                                                </Border>
+                                                                            </StackPanel>
+                                                                            <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="14" FontWeight="Bold" Text="{Binding Title}" TextWrapping="Wrap" />
+                                                                            <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                                                                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SoftBrush}" Text="Por que: " />
+                                                                                <TextBlock FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding Reason}" TextWrapping="Wrap" />
+                                                                            </StackPanel>
+                                                                            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                                                                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" Text="Acao: " />
+                                                                                <TextBlock FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="{Binding SuggestedAction}" TextWrapping="Wrap" />
+                                                                            </StackPanel>
+                                                                        </StackPanel>
+                                                                    </Grid>
                                                                 </Border>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
+
+                                                    <Button x:Name="ApplySelectedRustRecommendationsButton" Margin="0,16,0,0" Click="ApplySelectedRustRecommendationsButton_Click" Content="Aplicar Selecionadas" Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False" />
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Border x:Name="RustConfirmationPanel" Margin="0,14,0,0" Padding="18" Background="#152117" BorderBrush="{StaticResource SecondaryAccentBrush}" BorderThickness="1" CornerRadius="22" Visibility="Collapsed">
+                                                <StackPanel>
+                                                    <TextBlock x:Name="RustConfirmationTitleTextBlock" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Foreground="{StaticResource SecondaryAccentBrush}" Text="Confirmar aplicacao" />
+                                                    
+                                                    <CheckBox x:Name="RustConfirmationRestorePointCheckBox" Margin="0,14,0,0" Content="Criar ponto de restauracao antes de aplicar" IsChecked="True" />
+                                                    
+                                                    <TextBlock Margin="0,12,0,0" FontSize="12" FontWeight="SemiBold" Text="Itens a aplicar:" />
+                                                    <Border Margin="0,8,0,0" Padding="12" Background="{StaticResource DeepPanelBrush}" CornerRadius="12">
+                                                        <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                                                            <StackPanel x:Name="RustConfirmationItemsPanel" />
+                                                        </ScrollViewer>
+                                                    </Border>
+                                                    
+                                                    <Grid Margin="0,16,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button x:Name="ConfirmRustSelectionButton" Grid.Column="0" Margin="0,0,10,0" Click="ConfirmRustSelectionButton_Click" Content="Confirmar e Aplicar" Style="{StaticResource PrimaryButtonStyle}" />
+                                                        <Button x:Name="CancelRustSelectionButton" Grid.Column="1" Click="CancelRustSelectionButton_Click" Content="Cancelar" />
+                                                    </Grid>
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>

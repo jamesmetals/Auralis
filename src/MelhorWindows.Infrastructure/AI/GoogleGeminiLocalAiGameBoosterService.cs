@@ -50,13 +50,13 @@ public sealed class GoogleGeminiLocalAiGameBoosterService : ILocalAiGameBoosterS
                      $"Itens otimizados: {snapshot.OptimizedItemCount} de {snapshot.TotalItemCount}\n" +
                      "Responda EXATAMENTE neste formato JSON puro:\n" +
                      "{\n" +
-                     "  \"Summary\": \"Um texto resumido de 1 paragrafo.\",\n" +
+                     "  \"Summary\": \"Um texto resumido com paragrafos separados por \\n\\n.\",\n" +
                      "  \"SuggestedProfile\": \"Performance Maxima\",\n" +
                      "  \"ReadinessLevel\": \"Alta\",\n" +
                      "  \"Recommendations\": [\n" +
-                     "    { \"Priority\": \"Alta\", \"Title\": \"Desativar X\", \"Reason\": \"Causa lag\", \"SuggestedAction\": \"Desativar\", \"RelatedOptimizationId\": null }\n" +
+                     "    { \"Priority\": \"Alta\", \"Title\": \"Desativar X\", \"Reason\": \"Causa lag\", \"SuggestedAction\": \"Desativar\", \"RelatedOptimizationId\": null, \"Type\": \"Windows\" }\n" +
                      "  ]\n" +
-                     "}";
+                     "}\n\nIMPORTANTE: Use Type como 'Windows', 'Steam', 'Nvidia' ou 'General' conforme o tipo de configuracao. Separe o Summary em paragrafos com \\n\\n.";
 
         var responseJson = await CallGeminiAsync(settings, prompt, cancellationToken);
         if (string.IsNullOrWhiteSpace(responseJson))
@@ -73,12 +73,22 @@ public sealed class GoogleGeminiLocalAiGameBoosterService : ILocalAiGameBoosterS
             {
                 foreach(var item in recArray)
                 {
+                    var typeStr = item?["Type"]?.GetValue<string>() ?? "General";
+                    var recType = typeStr.ToLower() switch
+                    {
+                        "nvidia" => RecommendationType.Nvidia,
+                        "steam" => RecommendationType.Steam,
+                        "windows" => RecommendationType.Windows,
+                        _ => RecommendationType.General
+                    };
+
                     recs.Add(new GameBoosterAiRecommendation(
                         item?["Priority"]?.GetValue<string>() ?? "Normal",
                         item?["Title"]?.GetValue<string>() ?? "Dica",
                         item?["Reason"]?.GetValue<string>() ?? "",
                         item?["SuggestedAction"]?.GetValue<string>() ?? "",
-                        item?["RelatedOptimizationId"]?.GetValue<string>()));
+                        item?["RelatedOptimizationId"]?.GetValue<string>(),
+                        recType));
                 }
             }
 
@@ -118,12 +128,22 @@ public sealed class GoogleGeminiLocalAiGameBoosterService : ILocalAiGameBoosterS
             {
                 foreach(var item in recArray)
                 {
+                    var typeStr = item?["Type"]?.GetValue<string>() ?? "General";
+                    var recType = typeStr.ToLower() switch
+                    {
+                        "nvidia" => RecommendationType.Nvidia,
+                        "steam" => RecommendationType.Steam,
+                        "windows" => RecommendationType.Windows,
+                        _ => RecommendationType.General
+                    };
+
                     recs.Add(new GameBoosterAiRecommendation(
                         item?["Priority"]?.GetValue<string>() ?? "Normal",
                         item?["Title"]?.GetValue<string>() ?? "Dica",
                         item?["Reason"]?.GetValue<string>() ?? "",
                         item?["SuggestedAction"]?.GetValue<string>() ?? "",
-                        item?["RelatedOptimizationId"]?.GetValue<string>()));
+                        item?["RelatedOptimizationId"]?.GetValue<string>(),
+                        recType));
                 }
             }
 
@@ -193,12 +213,12 @@ public sealed class GoogleGeminiLocalAiGameBoosterService : ILocalAiGameBoosterS
             $"Resumo do booster: {telemetry.OptimizationSummary}\n\n" +
             "Responda EXATAMENTE neste JSON puro:\n" +
             "{\n" +
-            "  \"Summary\": \"Resumo executivo da situacao do Rust neste PC.\",\n" +
+            "  \"Summary\": \"Resumo com paragrafos separados por \\n\\n sobre a situacao do Rust.\",\n" +
             "  \"LaunchOptionsSummary\": \"Leitura critica das launch options atuais.\",\n" +
             "  \"Recommendations\": [\n" +
-            "    { \"Priority\": \"Alta\", \"Title\": \"Titulo curto\", \"Reason\": \"Motivo especifico para este hardware\", \"SuggestedAction\": \"Acao objetiva e segura\", \"RelatedOptimizationId\": null }\n" +
+            "    { \"Priority\": \"Alta\", \"Title\": \"Titulo curto\", \"Reason\": \"Motivo especifico para este hardware\", \"SuggestedAction\": \"Acao objetiva e segura\", \"RelatedOptimizationId\": null, \"Type\": \"Steam\" }\n" +
             "  ]\n" +
-            "}";
+            "}\n\nIMPORTANTE: Use Type como 'Steam' para configuracoes do Steam/Rust, 'Nvidia' para perfis NVIDIA, 'Windows' para configuracoes do SO. Separe o Summary em paragrafos com \\n\\n.";
     }
 
     private static string ExtractApiKey(LocalAiConnectionSettings settings)

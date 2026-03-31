@@ -1,5 +1,13 @@
 namespace MelhorWindows.Application.Models;
 
+public enum RecommendationType
+{
+    Steam,
+    Nvidia,
+    Windows,
+    General
+}
+
 public sealed record GameBoosterAiAnalysisSnapshot(
     DateTimeOffset GeneratedAtUtc,
     string EndpointUrl,
@@ -14,4 +22,5 @@ public sealed record GameBoosterAiRecommendation(
     string Title,
     string Reason,
     string SuggestedAction,
-    string? RelatedOptimizationId);
+    string? RelatedOptimizationId,
+    RecommendationType Type = RecommendationType.General);
