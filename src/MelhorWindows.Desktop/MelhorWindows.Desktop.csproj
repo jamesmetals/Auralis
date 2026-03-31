@@ -40,4 +40,40 @@
     <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\..\installer\Sync-InstalledAuralis.ps1&quot; -ProjectPath &quot;$(MSBuildProjectFullPath)&quot; -Configuration &quot;$(Configuration)&quot; -InstallRoot &quot;$([System.Environment]::ExpandEnvironmentVariables(`%LOCALAPPDATA%\\Programs\\Auralis`))&quot;"
           WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
+
+  <Target Name="BuildFolderMonitorWorker" BeforeTargets="Build;Publish">
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\MelhorWindows.FolderMonitorWorker\MelhorWindows.FolderMonitorWorker.csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration);RuntimeIdentifier=;SelfContained=false" />
+  </Target>
+
+  <Target Name="CopyFolderMonitorWorkerToOutput" AfterTargets="Build">
+    <ItemGroup>
+      <FolderMonitorWorkerArtifacts Include="$(MSBuildProjectDirectory)\..\MelhorWindows.FolderMonitorWorker\bin\$(Configuration)\net8.0-windows\FolderMonitorWorker.exe" />
+      <FolderMonitorWorkerArtifacts Include="$(MSBuildProjectDirectory)\..\MelhorWindows.FolderMonitorWorker\bin\$(Configuration)\net8.0-windows\FolderMonitorWorker.dll" />
+      <FolderMonitorWorkerArtifacts Include="$(MSBuildProjectDirectory)\..\MelhorWindows.FolderMonitorWorker\bin\$(Configuration)\net8.0-windows\FolderMonitorWorker.deps.json" />
+      <FolderMonitorWorkerArtifacts Include="$(MSBuildProjectDirectory)\..\MelhorWindows.FolderMonitorWorker\bin\$(Configuration)\net8.0-windows\FolderMonitorWorker.runtimeconfig.json" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(FolderMonitorWorkerArtifacts)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('%(FolderMonitorWorkerArtifacts.FullPath)')" />
+  </Target>
+
+  <Target Name="IncludeFolderMonitorWorkerInPublish" BeforeTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <FolderMonitorWorkerPublish Include="$(MSBuildProjectDirectory)\..\MelhorWindows.FolderMonitorWorker\bin\$(Configuration)\net8.0-windows\FolderMonitorWorker.exe" />
+      <FolderMonitorWorkerPublish Include="$(MSBuildProjectDirectory)\..\MelhorWindows.FolderMonitorWorker\bin\$(Configuration)\net8.0-windows\FolderMonitorWorker.dll" />
+      <FolderMonitorWorkerPublish Include="$(MSBuildProjectDirectory)\..\MelhorWindows.FolderMonitorWorker\bin\$(Configuration)\net8.0-windows\FolderMonitorWorker.deps.json" />
+      <FolderMonitorWorkerPublish Include="$(MSBuildProjectDirectory)\..\MelhorWindows.FolderMonitorWorker\bin\$(Configuration)\net8.0-windows\FolderMonitorWorker.runtimeconfig.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ResolvedFileToPublish Include="@(FolderMonitorWorkerPublish)" Condition="Exists('%(FolderMonitorWorkerPublish.FullPath)')">
+        <RelativePath>%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 </Project>

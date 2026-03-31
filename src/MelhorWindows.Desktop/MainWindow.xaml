@@ -94,6 +94,8 @@
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Height" Value="40" />
             <Setter Property="MinWidth" Value="104" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Padding" Value="16,0" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -105,7 +107,10 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="18"
                             SnapsToDevicePixels="True">
-                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -139,7 +144,10 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="18"
                             SnapsToDevicePixels="True">
-                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -177,7 +185,10 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="18"
                             SnapsToDevicePixels="True">
-                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -206,9 +217,9 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="MinWidth" Value="0" />
             <Setter Property="Height" Value="44" />
-            <Setter Property="Width" Value="196" />
             <Setter Property="Padding" Value="14,0" />
         </Style>
         <Style x:Key="ActiveNavButtonStyle" TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
@@ -298,6 +309,112 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="8,4" />
             <Setter Property="FontFamily" Value="Figtree" />
+        </Style>
+        <Style x:Key="DarkComboBoxItemStyle" TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border
+                            x:Name="ItemBorder"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="10"
+                            SnapsToDevicePixels="True">
+                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource SurfaceStrongBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource SurfaceStrongBrush}" />
+                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ItemBorder" Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="MinWidth" Value="192" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="MaxDropDownHeight" Value="240" />
+            <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItemStyle}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border
+                                x:Name="ComboBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter
+                                        Margin="{TemplateBinding Padding}"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        Content="{TemplateBinding SelectionBoxItem}"
+                                        ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Margin="0,0,12,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Segoe MDL2 Assets"
+                                        FontSize="10"
+                                        Foreground="{StaticResource SoftBrush}"
+                                        Text="&#xE70D;" />
+                                </Grid>
+                            </Border>
+                            <Popup
+                                x:Name="PART_Popup"
+                                AllowsTransparency="True"
+                                Focusable="False"
+                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                Placement="Bottom"
+                                PopupAnimation="Fade">
+                                <Border
+                                    MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                    Margin="0,8,0,0"
+                                    Padding="6"
+                                    Background="{StaticResource SurfaceElevatedBrush}"
+                                    BorderBrush="{StaticResource BorderBrushSoft}"
+                                    BorderThickness="1"
+                                    CornerRadius="16">
+                                    <ScrollViewer MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ComboBorder" Property="BorderBrush" Value="{StaticResource PrimarySoftBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="ComboBorder" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ComboBorder" Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style TargetType="CheckBox">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -441,13 +558,13 @@
                         </Border>
 
                         <!-- Row 1: Nav items -->
-                        <StackPanel Grid.Row="1" Margin="12,12,12,0">
+                        <StackPanel Grid.Row="1" Margin="8,12,16,0">
 
                             <Button
                                 x:Name="IconEditorNavButton"
                                 Click="IconEditorNavButton_Click"
                                 Style="{StaticResource ActiveNavButtonStyle}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                                     <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Text="&#xE8C8;" />
                                     <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="Trocar Ícone" />
                                 </StackPanel>
@@ -458,9 +575,20 @@
                                 Margin="0,4,0,0"
                                 Click="GameBoosterNavButton_Click"
                                 Style="{StaticResource NavButtonStyle}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                                     <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Text="&#xE7FC;" />
                                     <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="JB GameBooster" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button
+                                x:Name="ResourcesNavButton"
+                                Margin="0,4,0,0"
+                                Click="ResourcesNavButton_Click"
+                                Style="{StaticResource NavButtonStyle}">
+                                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                                    <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Text="&#xE74C;" />
+                                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="Recursos" />
                                 </StackPanel>
                             </Button>
 
@@ -471,7 +599,7 @@
                                 Margin="0,0,0,0"
                                 Click="HomeNavButton_Click"
                                 Style="{StaticResource NavButtonStyle}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                                     <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Text="&#xE80F;" />
                                     <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="Painel" />
                                 </StackPanel>
@@ -482,7 +610,7 @@
                                 Margin="0,4,0,0"
                                 Click="SettingsNavButton_Click"
                                 Style="{StaticResource NavButtonStyle}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                                     <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Text="&#xE713;" />
                                     <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Text="Configurações" />
                                 </StackPanel>
@@ -678,7 +806,7 @@
                             <Grid Grid.Row="2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="148" />
+                                    <ColumnDefinition Width="184" />
                                 </Grid.ColumnDefinitions>
 
                                 <!-- Drop zone -->
@@ -737,7 +865,7 @@
                                 </Border>
 
                                 <!-- Actions panel -->
-                                <Border Grid.Column="1" Margin="12,0,0,0" Padding="12" Background="{StaticResource PanelBrush}" CornerRadius="26">
+                                <Border Grid.Column="1" Margin="16,0,6,0" Padding="14" Background="{StaticResource PanelBrush}" CornerRadius="26">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="*" />
@@ -775,6 +903,8 @@
                                             Content="Aplicar"
                                             FontSize="12"
                                             Height="34"
+                                            HorizontalAlignment="Stretch"
+                                            MinWidth="0"
                                             Style="{StaticResource PrimaryButtonStyle}" />
                                         <Button
                                             x:Name="RestoreDefaultButton"
@@ -783,56 +913,25 @@
                                             Content="Restaurar"
                                             FontSize="11"
                                             Height="30"
+                                            HorizontalAlignment="Stretch"
+                                            MinWidth="0"
                                             Opacity="0.8" />
                                     </Grid>
                                 </Border>
                             </Grid>
 
                             <!-- ── Row 3: Compact info row (fit mode) ── -->
-                            <Border Grid.Row="3" Margin="0,10,0,0" Padding="14,10" Background="{StaticResource PanelBrush}" CornerRadius="22">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock
-                                            FontSize="11"
-                                            Foreground="{StaticResource MutedBrush}"
-                                            Text="Modo:"
-                                            VerticalAlignment="Center" />
-                                        <ComboBox
-                                            x:Name="FitModeComboBox"
-                                            Margin="6,0,0,0"
-                                            Height="26"
-                                            FontSize="11"
-                                            MinWidth="0"
-                                            SelectionChanged="FitModeComboBox_SelectionChanged"
-                                            SelectedIndex="0">
-                                            <ComboBoxItem Content="Enquadrar ao quadrado" Tag="CropToSquare" />
-                                            <ComboBoxItem Content="Mostrar imagem completa" Tag="FitInsideSquare" />
-                                        </ComboBox>
-                                    </StackPanel>
-
-                                    <Button
-                                        Grid.Column="1"
-                                        Click="CancelButton_Click"
-                                        Content="Fechar"
-                                        FontSize="11"
-                                        Height="26"
-                                        MinWidth="60"
-                                        Padding="10,0"
-                                        Opacity="0.65" />
-                                </Grid>
-                            </Border>
+                            <Border
+                                x:Name="FitModeBar"
+                                Grid.Row="3"
+                                Visibility="Collapsed" />
 
                             <!-- ── Row 4: Adjustment card ── -->
                             <Border
                                 x:Name="ImageAdjustmentCard"
                                 Grid.Row="4"
                                 Margin="0,8,0,0"
-                                Padding="12,10"
+                                Padding="14,14"
                                 Background="{StaticResource PanelBrush}"
                                 CornerRadius="22"
                                 Visibility="Collapsed">
@@ -842,12 +941,19 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            x:Name="AdjustmentHintTextBlock"
-                                            FontSize="11"
-                                            Foreground="{StaticResource MutedBrush}"
-                                            TextWrapping="Wrap"
-                                            VerticalAlignment="Center" />
+                                        <StackPanel>
+                                            <TextBlock
+                                                FontSize="12"
+                                                FontWeight="SemiBold"
+                                                Text="Ajuste da imagem" />
+                                            <TextBlock
+                                                x:Name="AdjustmentHintTextBlock"
+                                                Margin="0,4,0,0"
+                                                FontSize="11"
+                                                Foreground="{StaticResource MutedBrush}"
+                                                TextWrapping="Wrap"
+                                                VerticalAlignment="Center" />
+                                        </StackPanel>
                                         <CheckBox
                                             x:Name="ManualCropCheckBox"
                                             Grid.Column="1"
@@ -857,6 +963,34 @@
                                             Content="Ajuste fino do corte"
                                             Unchecked="ManualCropCheckBox_Changed" />
                                     </Grid>
+                                    <Border
+                                        Margin="0,12,0,0"
+                                        Padding="12"
+                                        Background="{StaticResource DeepPanelBrush}"
+                                        BorderBrush="{StaticResource BorderBrushSoft}"
+                                        BorderThickness="1"
+                                        CornerRadius="18">
+                                        <StackPanel>
+                                            <TextBlock
+                                                FontSize="11"
+                                                Foreground="{StaticResource MutedBrush}"
+                                                Text="Como adaptar a imagem ao ícone" />
+                                            <ComboBox
+                                                x:Name="FitModeComboBox"
+                                                Margin="0,8,0,0"
+                                                Height="30"
+                                                Background="{StaticResource InputBrush}"
+                                                BorderBrush="{StaticResource BorderBrushSoft}"
+                                                FontSize="11"
+                                                Foreground="{StaticResource TextBrush}"
+                                                SelectionChanged="FitModeComboBox_SelectionChanged"
+                                                SelectedIndex="0"
+                                                Style="{StaticResource DarkComboBoxStyle}">
+                                                <ComboBoxItem Content="Enquadrar ao quadrado" Tag="CropToSquare" />
+                                                <ComboBoxItem Content="Mostrar imagem completa" Tag="FitInsideSquare" />
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </Border>
                                     <Border
                                         x:Name="ManualCropPanel"
                                         Margin="0,10,0,0"
@@ -914,52 +1048,126 @@
                                 </Border>
                             </StackPanel>
 
-                            <!-- ── Row 8: Icon library ── -->
+                            <!-- ── Row 8: Icon library (collapsible sections) ── -->
                             <Grid Grid.Row="8">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="8" />
-                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="8" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
+                                <!-- Search bar -->
                                 <Grid Grid.Row="0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="180" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Biblioteca" VerticalAlignment="Center" />
+                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Bibliotecas" VerticalAlignment="Center" />
                                     <Grid Grid.Column="1">
                                         <TextBox x:Name="IconLibrarySearchTextBox" Padding="30,5,10,5" FontSize="11" TextChanged="IconLibrarySearchTextBox_TextChanged" />
                                         <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="{StaticResource SoftBrush}" Text="&#xE721;" IsHitTestVisible="False" />
                                     </Grid>
                                 </Grid>
 
-                                <ListBox
-                                    x:Name="IconLibraryListBox"
-                                    Grid.Row="2"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                    ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                    SelectionChanged="IconLibraryListBox_SelectionChanged">
-                                    <ListBox.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <UniformGrid Columns="10" />
-                                        </ItemsPanelTemplate>
-                                    </ListBox.ItemsPanel>
-                                    <ListBox.ItemContainerStyle>
-                                        <StaticResource ResourceKey="LibraryItemStyle" />
-                                    </ListBox.ItemContainerStyle>
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Width="34" Height="34">
-                                                <Border Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{Binding TileBackgroundBrush}" CornerRadius="10">
-                                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" Text="{Binding Glyph}" />
-                                                </Border>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                                <!-- Ícones Genéricos (collapsible) -->
+                                <StackPanel Grid.Row="2">
+                                    <Button x:Name="ToggleGenericLibraryButton" Click="ToggleGenericLibrary_Click" Style="{StaticResource NavButtonStyle}" HorizontalContentAlignment="Stretch" Padding="8,6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{StaticResource PrimaryBrush}" Text="&#xE8B7;" VerticalAlignment="Center" />
+                                                <TextBlock Margin="8,0,0,0" FontSize="12" FontWeight="SemiBold" Text="Ícones Genéricos" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                            <TextBlock x:Name="GenericLibraryArrow" Grid.Column="1" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{StaticResource SoftBrush}" Text="&#xE70D;" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Button>
+                                    <ListBox
+                                        x:Name="IconLibraryListBox"
+                                        Margin="0,6,0,0"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                        SelectionChanged="IconLibraryListBox_SelectionChanged">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Columns="10" />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.ItemContainerStyle>
+                                            <StaticResource ResourceKey="LibraryItemStyle" />
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Width="34" Height="34">
+                                                    <Border Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{Binding TileBackgroundBrush}" CornerRadius="10">
+                                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" Text="{Binding Glyph}" />
+                                                    </Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+
+                                <!-- Ícones Personalizados (collapsible, starts collapsed) -->
+                                <StackPanel Grid.Row="4">
+                                    <Button x:Name="TogglePersonalLibraryButton" Click="TogglePersonalLibrary_Click" Style="{StaticResource NavButtonStyle}" HorizontalContentAlignment="Stretch" Padding="8,6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{StaticResource SecondaryAccentBrush}" Text="&#xE77B;" VerticalAlignment="Center" />
+                                                <TextBlock Margin="8,0,0,0" FontSize="12" FontWeight="SemiBold" Text="Ícones Personalizados" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                            <TextBlock x:Name="PersonalLibraryArrow" Grid.Column="1" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{StaticResource SoftBrush}" Text="&#xE76C;" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Button>
+                                    <ListBox
+                                        x:Name="PersonalIconLibraryListBox"
+                                        Margin="0,6,0,0"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                        Visibility="Collapsed"
+                                        SelectionChanged="PersonalIconLibraryListBox_SelectionChanged">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Columns="10" />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.ItemContainerStyle>
+                                            <StaticResource ResourceKey="LibraryItemStyle" />
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Width="34" Height="34" ToolTip="{Binding DisplayName}">
+                                                    <Border Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="10">
+                                                        <Border.Background>
+                                                            <ImageBrush ImageSource="{Binding PreviewPath}" Stretch="Uniform" />
+                                                        </Border.Background>
+                                                    </Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Border
+                                        x:Name="PersonalLibraryEmptyBorder"
+                                        Margin="0,6,0,0"
+                                        Padding="12,8"
+                                        Background="{StaticResource PanelBrush}"
+                                        CornerRadius="18"
+                                        Visibility="Collapsed">
+                                        <TextBlock FontSize="11" Foreground="{StaticResource SoftBrush}" Text="Seus ícones salvos aparecerão aqui. Aplique um ícone e clique em 'Salvar na biblioteca'." />
+                                    </Border>
+                                </StackPanel>
                             </Grid>
 
                         </Grid>
@@ -1613,6 +1821,205 @@
                             </StackPanel>
                         </ScrollViewer>
 
+                        <!-- ─────────────────────────────────────
+                             PAGE: ResourcesView
+                             ───────────────────────────────────── -->
+                        <ScrollViewer x:Name="ResourcesView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Recursos Complementares" />
+                                <TextBlock Margin="0,6,0,0" FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Ferramentas extras para o Windows" />
+                                <TextBlock Margin="0,8,0,20" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Selecione uma ferramenta para instalar ou executar. Cada recurso funciona de forma independente." TextWrapping="Wrap" />
+
+                                <WrapPanel>
+                                    <!-- Card: Monitor de Pasta -->
+                                    <Border Width="280" Margin="0,0,14,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
+                                        <StackPanel>
+                                            <Border Width="44" Height="44" HorizontalAlignment="Left" CornerRadius="14">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Offset="0" Color="#FF7A2F" />
+                                                        <GradientStop Offset="1" Color="#FD6004" />
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="White" Text="&#xE8B7;" />
+                                            </Border>
+                                            <TextBlock Margin="0,14,0,0" FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="Monitor de Pasta" />
+                                            <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Monitora todas as alterações em uma pasta escolhida. Registra criação, exclusão e renomeação de arquivos em um log automático." TextWrapping="Wrap" MinHeight="54" />
+                                            <Grid Margin="0,14,0,0">
+                                                <Button x:Name="InstallFolderMonitorButton" Click="InstallFolderMonitorButton_Click" Content="Instalar" Style="{StaticResource PrimaryButtonStyle}" />
+                                                <StackPanel x:Name="FolderMonitorInstalledPanel" Orientation="Horizontal" Visibility="Collapsed">
+                                                    <Border Padding="10,6" Background="#1A3D1A" CornerRadius="12" VerticalAlignment="Center">
+                                                        <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#7AE582" Text="✓ Instalado" />
+                                                    </Border>
+                                                    <Button Margin="10,0,0,0" Click="UninstallFolderMonitorButton_Click" Content="Desinstalar" FontSize="11" Padding="10,6" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Card: Limpeza de Temporários -->
+                                    <Border Width="280" Margin="0,0,14,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
+                                        <StackPanel>
+                                            <Border Width="44" Height="44" HorizontalAlignment="Left" Background="#E74D3C" CornerRadius="14">
+                                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="White" Text="&#xE74D;" />
+                                            </Border>
+                                            <TextBlock Margin="0,14,0,0" FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="Limpeza de Temporários" />
+                                            <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Limpa pastas Temp do Windows, caches e prefetch. Mostra preview do espaço que será liberado antes de confirmar." TextWrapping="Wrap" MinHeight="54" />
+                                            <Button x:Name="RunTempCleanerButton" Margin="0,14,0,0" Click="RunTempCleanerButton_Click" Content="Escanear temporarios" Style="{StaticResource PrimaryButtonStyle}" />
+                                            <TextBlock x:Name="TempCleanerResultTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Card: Gerenciador de Startup -->
+                                    <Border Width="280" Margin="0,0,14,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
+                                        <StackPanel>
+                                            <Border Width="44" Height="44" HorizontalAlignment="Left" Background="#27AE60" CornerRadius="14">
+                                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="White" Text="&#xE768;" />
+                                            </Border>
+                                            <TextBlock Margin="0,14,0,0" FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="Gerenciador de Startup" />
+                                            <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Lista programas que abrem com o Windows. Ativa ou desativa sem precisar do Gerenciador de Tarefas." TextWrapping="Wrap" MinHeight="54" />
+                                            <Button x:Name="OpenStartupManagerButton" Margin="0,14,0,0" Click="OpenStartupManagerButton_Click" Content="Abrir painel" Style="{StaticResource PrimaryButtonStyle}" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Card: Detector de Duplicatas -->
+                                    <Border Width="280" Margin="0,0,14,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
+                                        <StackPanel>
+                                            <Border Width="44" Height="44" HorizontalAlignment="Left" Background="#2980B9" CornerRadius="14">
+                                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="White" Text="&#xE721;" />
+                                            </Border>
+                                            <TextBlock Margin="0,14,0,0" FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="Detector de Duplicatas" />
+                                            <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Varre uma pasta e encontra arquivos duplicados por hash. Mostra grupos de duplicatas com tamanho total." TextWrapping="Wrap" MinHeight="54" />
+                                            <Button x:Name="OpenDuplicateFinderButton" Margin="0,14,0,0" Click="OpenDuplicateFinderButton_Click" Content="Escanear pasta" Style="{StaticResource PrimaryButtonStyle}" />
+                                            <TextBlock x:Name="DuplicateFinderResultTextBlock" Margin="0,8,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Card: Limpador de Menu de Contexto -->
+                                    <Border Width="280" Margin="0,0,14,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
+                                        <StackPanel>
+                                            <Border Width="44" Height="44" HorizontalAlignment="Left" Background="#8E44AD" CornerRadius="14">
+                                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="White" Text="&#xE712;" />
+                                            </Border>
+                                            <TextBlock Margin="0,14,0,0" FontFamily="Segoe UI Variable Display" FontSize="15" FontWeight="Bold" Text="Limpador de Menu de Contexto" />
+                                            <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Lista todas as entradas do menu de contexto do Windows. Remova itens indesejados de programas desinstalados." TextWrapping="Wrap" MinHeight="54" />
+                                            <Button x:Name="OpenContextMenuCleanerButton" Margin="0,14,0,0" Click="OpenContextMenuCleanerButton_Click" Content="Abrir painel" Style="{StaticResource PrimaryButtonStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                </WrapPanel>
+
+                                <!-- Temp Cleaner Confirmation Panel -->
+                                <Border x:Name="TempCleanerConfirmPanel" Margin="0,0,0,14" Padding="20" Background="{StaticResource DeepPanelBrush}" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" CornerRadius="24" Visibility="Collapsed">
+                                    <StackPanel>
+                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Preview da limpeza" />
+                                        <TextBlock x:Name="TempCleanerPreviewTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                                        <Grid Margin="0,14,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Button x:Name="ConfirmTempCleanButton" Grid.Column="0" Margin="0,0,10,0" Click="ConfirmTempCleanButton_Click" Content="Limpar agora" Style="{StaticResource PrimaryButtonStyle}" />
+                                            <Button Grid.Column="1" Click="CancelTempCleanButton_Click" Content="Cancelar" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Startup Manager Panel -->
+                                <Border x:Name="StartupManagerPanel" Margin="0,0,0,14" Padding="20" Background="{StaticResource DeepPanelBrush}" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" CornerRadius="24" Visibility="Collapsed">
+                                    <StackPanel>
+                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Programas de inicialização" />
+                                        <TextBlock x:Name="StartupManagerCountTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                                        <ItemsControl x:Name="StartupItemsControl" Margin="0,12,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,0,8" Padding="14,10" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel>
+                                                                <TextBlock FontSize="13" FontWeight="SemiBold" Text="{Binding Name}" />
+                                                                <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding Source}" />
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Tag="{Binding Key}" Click="ToggleStartupEntryButton_Click" Content="{Binding ToggleText}" Padding="10,6" IsEnabled="{Binding CanToggle}" />
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <Button Margin="0,8,0,0" Click="CloseStartupManagerPanel_Click" Content="Fechar painel" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Duplicate Finder Results Panel -->
+                                <Border x:Name="DuplicateFinderPanel" Margin="0,0,0,14" Padding="20" Background="{StaticResource DeepPanelBrush}" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" CornerRadius="24" Visibility="Collapsed">
+                                    <StackPanel>
+                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Duplicatas encontradas" />
+                                        <TextBlock x:Name="DuplicateFinderSummaryTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                                        <ItemsControl x:Name="DuplicateGroupsItemsControl" Margin="0,12,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,0,8" Padding="14,10" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                                                        <StackPanel>
+                                                            <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding SizeText}" />
+                                                            <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding PathsText}" TextWrapping="Wrap" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock
+                                            x:Name="DuplicateFinderActionHintTextBlock"
+                                            Margin="0,12,0,0"
+                                            FontSize="11"
+                                            Foreground="{StaticResource SoftBrush}"
+                                            Text="A correção mantém 1 copia por grupo e move o restante para a Lixeira."
+                                            TextWrapping="Wrap"
+                                            Visibility="Collapsed" />
+                                        <WrapPanel Margin="0,10,0,0">
+                                            <Button
+                                                x:Name="ResolveDuplicateGroupsButton"
+                                                Margin="0,0,10,0"
+                                                Click="ResolveDuplicateGroupsButton_Click"
+                                                Content="Mover excedentes para a Lixeira"
+                                                Style="{StaticResource PrimaryButtonStyle}"
+                                                Visibility="Collapsed" />
+                                            <Button Click="CloseDuplicateFinderPanel_Click" Content="Fechar painel" />
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Context Menu Cleaner Panel -->
+                                <Border x:Name="ContextMenuCleanerPanel" Margin="0,0,0,14" Padding="20" Background="{StaticResource DeepPanelBrush}" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" CornerRadius="24" Visibility="Collapsed">
+                                    <StackPanel>
+                                        <TextBlock FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Entradas do menu de contexto" />
+                                        <TextBlock x:Name="ContextMenuCleanerCountTextBlock" Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                                        <ItemsControl x:Name="ContextMenuItemsControl" Margin="0,12,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,0,8" Padding="14,10" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="18">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel>
+                                                                <TextBlock FontSize="13" FontWeight="SemiBold" Text="{Binding DisplayName}" />
+                                                                <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding Command}" TextWrapping="Wrap" />
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Tag="{Binding KeyPath}" Click="RemoveContextMenuEntryButton_Click" Content="Remover" Padding="10,6" Style="{StaticResource DangerButtonStyle}" />
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <Button Margin="0,8,0,0" Click="CloseContextMenuCleanerPanel_Click" Content="Fechar painel" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+
                     </Grid>
                     <!-- End Row 2: Pages -->
 
@@ -1622,6 +2029,70 @@
             </Grid>
         </Border>
         <!-- End main shell border -->
+
+        <!-- ═══════════════════ INSTALL SUCCESS DIALOG ═══════════════════ -->
+        <Grid x:Name="InstallSuccessOverlayRoot" Visibility="Collapsed">
+            <Border Background="#99000000" />
+            <Border
+                Width="460"
+                Padding="28"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{StaticResource DeepPanelBrush}"
+                BorderBrush="{StaticResource DividerBrush}"
+                BorderThickness="1"
+                CornerRadius="28">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="40" Height="40" CornerRadius="12">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Offset="0" Color="#27AE60" />
+                                    <GradientStop Offset="1" Color="#1E8449" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="White" Text="&#xE73E;" />
+                        </Border>
+                        <TextBlock Margin="14,0,0,0" VerticalAlignment="Center" FontFamily="Segoe UI Variable Display" FontSize="20" FontWeight="Bold" Text="Monitor de Pasta Instalado!" />
+                    </StackPanel>
+                    <TextBlock Margin="0,18,0,0" FontSize="14" FontWeight="SemiBold" Text="Como funciona:" />
+                    <StackPanel Margin="0,12,0,0">
+                        <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}" Text="1. Clique com o botão direito em qualquer pasta no Explorer" />
+                        <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="2. Selecione 'Monitorar essa pasta'" />
+                        <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="3. Uma pasta FolderMonitor_Logs será criada com o registro de todas as alterações" />
+                        <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="O monitoramento roda em segundo plano enquanto a janela do monitor estiver aberta." />
+                    </StackPanel>
+                    <Button Margin="0,22,0,0" Click="CloseInstallSuccessDialog_Click" Content="Entendi ✓" Style="{StaticResource PrimaryButtonStyle}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ═══════════════════ SAVE TO LIBRARY DIALOG ═══════════════════ -->
+        <Grid x:Name="SaveToLibraryOverlayRoot" Visibility="Collapsed">
+            <Border Background="#99000000" />
+            <Border
+                Width="400"
+                Padding="24"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{StaticResource DeepPanelBrush}"
+                BorderBrush="{StaticResource DividerBrush}"
+                BorderThickness="1"
+                CornerRadius="28">
+                <StackPanel>
+                    <TextBlock FontFamily="Segoe UI Variable Display" FontSize="18" FontWeight="Bold" Text="Ícone aplicado com sucesso!" />
+                    <TextBlock Margin="0,10,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Deseja salvar esse ícone na sua biblioteca pessoal para reutilizar no futuro?" TextWrapping="Wrap" />
+                    <Grid Margin="0,18,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Margin="0,0,10,0" Click="SaveToPersonalLibraryButton_Click" Content="Salvar na biblioteca" Style="{StaticResource PrimaryButtonStyle}" />
+                        <Button Grid.Column="1" Click="SkipSaveToLibraryButton_Click" Content="Não, obrigado" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
 
         <!-- ═══════════════════ BUSY OVERLAY ═══════════════════ -->
         <Grid x:Name="BusyOverlayRoot" Visibility="Collapsed">

@@ -8,11 +8,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using MelhorWindows.Application.Abstractions;
 using MelhorWindows.Application.Models;
+using MelhorWindows.Application.Services;
 using MelhorWindows.Domain.Authorization;
 using MelhorWindows.Domain.Entities;
 using MelhorWindows.Domain.Enums;
 using MelhorWindows.Infrastructure.Imaging;
+using MelhorWindows.WindowsIntegration.Registry;
 using Microsoft.Win32;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
@@ -31,10 +34,13 @@ public partial class MainWindow : Window
     private string? _selectedFolderPath;
     private string? _selectedImagePath;
     private HistoryCardItem? _selectedHistoryItem;
+    private PersonalLibraryListItem? _selectedPersonalIconItem;
     private int _selectedImageWidth;
     private int _selectedImageHeight;
     private AppPage _activePage = AppPage.Home;
     private IReadOnlyList<BuiltInIconItem> _allBuiltInIcons = Array.Empty<BuiltInIconItem>();
+    private IReadOnlyDictionary<string, StartupEntryListItem> _startupEntryLookup =
+        new Dictionary<string, StartupEntryListItem>(StringComparer.OrdinalIgnoreCase);
 
     private CancellationTokenSource? _previewGenerationCts;
     private int _busyOperations;
@@ -50,6 +56,12 @@ public partial class MainWindow : Window
     private bool _isExtremeFocusBalloonExpanded;
     private string? _rustExplorerRestoreScriptPath;
     private ExtremeFocusWindowSnapshot? _extremeFocusWindowSnapshot;
+    private FolderIconHistoryEntry? _pendingPersonalLibraryEntry;
+    private bool _isGenericLibraryExpanded = true;
+    private bool _isPersonalLibraryExpanded;
+    private bool _hasTempCleanerPreview;
+    private IReadOnlyList<DuplicateFinderService.DuplicateGroup> _lastDuplicateGroups =
+        Array.Empty<DuplicateFinderService.DuplicateGroup>();
 
     public MainWindow()
     {
@@ -63,6 +75,7 @@ public partial class MainWindow : Window
         LoadLaunchContext();
         LoadCurrentUser();
         LoadEditorDefaults();
+        ApplyLibrarySectionState();
         CloseDashboard();
     }
 
@@ -107,6 +120,7 @@ public partial class MainWindow : Window
                 "Sincronizando historico",
                 "Recuperando os icones recentes prontos para reaplicar.");
             await LoadHistoryAsync();
+            await RefreshPersonalIconLibraryAsync();
 
             ReportInitializationProgress(
                 reportProgress,
@@ -227,6 +241,9 @@ public partial class MainWindow : Window
         GeneratedPreviewImage.Source = null;
         SourcePreviewPlaceholderTextBlock.Visibility = Visibility.Visible;
         GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Visible;
+        SaveToLibraryOverlayRoot.Visibility = Visibility.Collapsed;
+        InstallSuccessOverlayRoot.Visibility = Visibility.Collapsed;
+        CloseResourcePanels();
         UpdateAdjustmentVisibility();
     }
 
@@ -263,6 +280,8 @@ public partial class MainWindow : Window
 
     private void IconEditorNavButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.IconEditor);
 
+    private void ResourcesNavButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.Resources);
+
     private void AccountButton_Click(object sender, RoutedEventArgs e) => ShowPage(AppPage.Home);
 
     private void DashboardCloseButton_Click(object sender, RoutedEventArgs e) => CloseDashboard();
@@ -286,6 +305,7 @@ public partial class MainWindow : Window
         HomeView.Visibility = page == AppPage.Home ? Visibility.Visible : Visibility.Collapsed;
         GameBoosterView.Visibility = page == AppPage.GameBooster ? Visibility.Visible : Visibility.Collapsed;
         SettingsView.Visibility = page == AppPage.Settings ? Visibility.Visible : Visibility.Collapsed;
+        ResourcesView.Visibility = page == AppPage.Resources ? Visibility.Visible : Visibility.Collapsed;
 
         PageTitleTextBlock.Text = page switch
         {
@@ -293,6 +313,7 @@ public partial class MainWindow : Window
             AppPage.Home => "Painel",
             AppPage.GameBooster => "JB GameBooster",
             AppPage.Settings => "Configurações",
+            AppPage.Resources => "Recursos",
             _ => "Auralis"
         };
 
@@ -300,6 +321,10 @@ public partial class MainWindow : Window
         HomeNavButton.Style = (Style)FindResource(page == AppPage.Home ? "ActiveNavButtonStyle" : "NavButtonStyle");
         GameBoosterNavButton.Style = (Style)FindResource(page == AppPage.GameBooster ? "ActiveNavButtonStyle" : "NavButtonStyle");
         SettingsNavButton.Style = (Style)FindResource(page == AppPage.Settings ? "ActiveNavButtonStyle" : "NavButtonStyle");
+        ResourcesNavButton.Style = (Style)FindResource(page == AppPage.Resources ? "ActiveNavButtonStyle" : "NavButtonStyle");
+
+        if (page == AppPage.Resources)
+            RefreshFolderMonitorStatus();
     }
 
     private void CloseDashboard()
@@ -324,6 +349,34 @@ public partial class MainWindow : Window
         ApplyLibraryFilter();
     }
 
+    private async Task RefreshPersonalIconLibraryAsync()
+    {
+        var items = (await _services.PersonalIconLibraryService.GetAllAsync())
+            .Where(entry => File.Exists(entry.StoredIconPath))
+            .Select(entry =>
+            {
+                var previewPath = ResolvePersonalLibraryPreviewPath(entry);
+                return new PersonalLibraryListItem(
+                    entry,
+                    entry.DisplayName,
+                    previewPath,
+                    CreateBitmapImageFromPathForHistory(previewPath));
+            })
+            .ToArray();
+
+        PersonalIconLibraryListBox.ItemsSource = items;
+
+        if (_selectedPersonalIconItem is not null &&
+            items.All(item => item.Entry.Id != _selectedPersonalIconItem.Entry.Id))
+        {
+            _selectedPersonalIconItem = null;
+            PersonalIconLibraryListBox.SelectedItem = null;
+            UpdateSelectionSummaryVisibility();
+        }
+
+        ApplyLibrarySectionState();
+    }
+
     private void ApplyLibraryFilter()
     {
         if (IconLibraryListBox is null)
@@ -335,6 +388,37 @@ public partial class MainWindow : Window
         IconLibraryListBox.ItemsSource = string.IsNullOrWhiteSpace(query)
             ? _allBuiltInIcons
             : _allBuiltInIcons.Where(item => item.Label.Contains(query, StringComparison.OrdinalIgnoreCase)).ToArray();
+    }
+
+    private void ApplyLibrarySectionState()
+    {
+        if (IconLibraryListBox is not null)
+        {
+            IconLibraryListBox.Visibility = _isGenericLibraryExpanded ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (GenericLibraryArrow is not null)
+        {
+            GenericLibraryArrow.Text = ResolveSectionArrowGlyph(_isGenericLibraryExpanded);
+        }
+
+        if (PersonalIconLibraryListBox is not null)
+        {
+            PersonalIconLibraryListBox.Visibility = _isPersonalLibraryExpanded ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (PersonalLibraryArrow is not null)
+        {
+            PersonalLibraryArrow.Text = ResolveSectionArrowGlyph(_isPersonalLibraryExpanded);
+        }
+
+        if (PersonalLibraryEmptyBorder is not null)
+        {
+            PersonalLibraryEmptyBorder.Visibility =
+                _isPersonalLibraryExpanded && (PersonalIconLibraryListBox?.Items.Count ?? 0) == 0
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+        }
     }
 
     private void RefreshFolderPresentation()
@@ -350,6 +434,18 @@ public partial class MainWindow : Window
     }
 
     private void IconLibrarySearchTextBox_TextChanged(object sender, TextChangedEventArgs e) => ApplyLibraryFilter();
+
+    private void ToggleGenericLibrary_Click(object sender, RoutedEventArgs e)
+    {
+        _isGenericLibraryExpanded = !_isGenericLibraryExpanded;
+        ApplyLibrarySectionState();
+    }
+
+    private void TogglePersonalLibrary_Click(object sender, RoutedEventArgs e)
+    {
+        _isPersonalLibraryExpanded = !_isPersonalLibraryExpanded;
+        ApplyLibrarySectionState();
+    }
 
     private async void IconLibraryListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -368,6 +464,33 @@ public partial class MainWindow : Window
         {
             SetStatus(exception.Message, isError: true);
         }
+    }
+
+    private void PersonalIconLibraryListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (PersonalIconLibraryListBox.SelectedItem is not PersonalLibraryListItem personalItem)
+        {
+            UpdateSelectionSummaryVisibility();
+            return;
+        }
+
+        _selectedPersonalIconItem = personalItem;
+        _selectedHistoryItem = null;
+        _selectedImagePath = null;
+        _selectedImageWidth = 0;
+        _selectedImageHeight = 0;
+        HistoryListBox.SelectedItem = null;
+        IconLibraryListBox.SelectedItem = null;
+
+        SelectedImageNameTextBlock.Text = personalItem.DisplayName;
+        SelectedImageMetaTextBlock.Text = "Icone salvo na biblioteca pessoal.";
+        SourcePreviewImage.Source = personalItem.PreviewImage;
+        GeneratedPreviewImage.Source = personalItem.PreviewImage;
+        SourcePreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
+        GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
+        UpdateAdjustmentVisibility();
+        PreviewModeTextBlock.Text = "Icone salvo selecionado para aplicar.";
+        UpdateSelectionSummaryVisibility();
     }
 
     private async void ChooseFolderButton_Click(object sender, RoutedEventArgs e)
@@ -468,6 +591,7 @@ public partial class MainWindow : Window
         }
 
         if (_selectedHistoryItem is null &&
+            _selectedPersonalIconItem is null &&
             string.IsNullOrWhiteSpace(_selectedImagePath))
         {
             SetStatus("Selecione uma imagem, um ícone recente ou um ícone da biblioteca antes de aplicar.", isError: true);
@@ -480,8 +604,34 @@ public partial class MainWindow : Window
         {
             BeginBusy("Aplicando icone e atualizando o Explorer...");
             SetStatus("Aplicando icone e atualizando o Explorer...", isError: false);
+            _pendingPersonalLibraryEntry = null;
 
-            if (_selectedHistoryItem is not null)
+            if (_selectedPersonalIconItem is not null)
+            {
+                var historyEntry = new FolderIconHistoryEntry(
+                    Guid.NewGuid(),
+                    _services.UserContext.UserId,
+                    _selectedPersonalIconItem.Entry.Id,
+                    _selectedFolderPath!,
+                    _selectedPersonalIconItem.Entry.StoredIconPath,
+                    _selectedPersonalIconItem.Entry.StoredPreviewPath,
+                    _selectedPersonalIconItem.Entry.StoredPreviewPath,
+                    ResolveFitMode(),
+                    DateTimeOffset.UtcNow);
+
+                await _services.FolderIconIntegrationService.ApplyIconAsync(_selectedFolderPath!, _selectedPersonalIconItem.Entry.StoredIconPath);
+                await _services.IconHistoryRepository.AddAsync(historyEntry);
+
+                GeneratedPreviewImage.Source = _selectedPersonalIconItem.PreviewImage;
+                GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
+                PreviewModeTextBlock.Text = "Icone salvo reaplicado da biblioteca pessoal.";
+
+                await LoadHistoryAsync();
+                SetStatus("Icone salvo aplicado na pasta atual.", isError: false);
+                successMessage = "Icone aplicado com sucesso. Fechando...";
+            }
+
+            else if (_selectedHistoryItem is not null)
             {
                 await _services.FolderIconIntegrationService.ApplyIconAsync(_selectedFolderPath, _selectedHistoryItem.Entry.StoredIconPath);
                 SetStatus("Ícone recente aplicado na pasta atual.", isError: false);
@@ -501,6 +651,12 @@ public partial class MainWindow : Window
                 if (result.Succeeded)
                 {
                     await LoadHistoryAsync();
+                    if (result.Value is not null)
+                    {
+                        _pendingPersonalLibraryEntry = result.Value;
+                        SaveToLibraryOverlayRoot.Visibility = Visibility.Visible;
+                        return;
+                    }
                     successMessage = "Ícone aplicado com sucesso. Fechando...";
                 }
             }
@@ -636,14 +792,19 @@ public partial class MainWindow : Window
         }
 
         _selectedHistoryItem = historyItem;
+        _selectedPersonalIconItem = null;
         _selectedImagePath = null;
+        _selectedImageWidth = 0;
+        _selectedImageHeight = 0;
         IconLibraryListBox.SelectedItem = null;
+        PersonalIconLibraryListBox.SelectedItem = null;
         SelectedImageNameTextBlock.Text = historyItem.Title;
         SelectedImageMetaTextBlock.Text = historyItem.Subtitle;
         SourcePreviewImage.Source = historyItem.PreviewImage;
         SourcePreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
         GeneratedPreviewImage.Source = historyItem.PreviewImage;
         GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
+        UpdateAdjustmentVisibility();
         UpdateSelectionSummaryVisibility();
         PreviewModeTextBlock.Text = "Ícone recente selecionado para aplicar.";
     }
@@ -659,7 +820,9 @@ public partial class MainWindow : Window
         var sourcePreview = CreateBitmapImageFromPath(imagePath, decodePixelWidth: 420);
 
         _selectedHistoryItem = null;
+        _selectedPersonalIconItem = null;
         HistoryListBox.SelectedItem = null;
+        PersonalIconLibraryListBox.SelectedItem = null;
         _selectedImagePath = imagePath;
         (_selectedImageWidth, _selectedImageHeight) = imageInfo;
 
@@ -741,7 +904,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        var requiresAdjustment = _selectedImageWidth > 0 &&
+        var requiresAdjustment = !string.IsNullOrWhiteSpace(_selectedImagePath) &&
+            _selectedImageWidth > 0 &&
             _selectedImageHeight > 0 &&
             _selectedImageWidth != _selectedImageHeight;
 
@@ -772,9 +936,480 @@ public partial class MainWindow : Window
             return;
         }
 
-        SelectionSummaryCard.Visibility = string.IsNullOrWhiteSpace(_selectedImagePath) && _selectedHistoryItem is null
+        SelectionSummaryCard.Visibility = string.IsNullOrWhiteSpace(_selectedImagePath) &&
+            _selectedHistoryItem is null &&
+            _selectedPersonalIconItem is null
             ? Visibility.Collapsed
             : Visibility.Visible;
+    }
+
+    private void RefreshFolderMonitorStatus()
+    {
+        var isInstalled = _services.FolderMonitorRegistrationService.IsInstalled();
+        var workerPath = ResolveFolderMonitorWorkerPath();
+        var workerAvailable = !string.IsNullOrWhiteSpace(workerPath);
+
+        InstallFolderMonitorButton.Visibility = isInstalled ? Visibility.Collapsed : Visibility.Visible;
+        FolderMonitorInstalledPanel.Visibility = isInstalled ? Visibility.Visible : Visibility.Collapsed;
+        InstallFolderMonitorButton.IsEnabled = workerAvailable;
+        InstallFolderMonitorButton.Content = workerAvailable ? "Instalar" : "Worker indisponivel";
+        InstallFolderMonitorButton.ToolTip = workerAvailable
+            ? null
+            : "O executavel FolderMonitorWorker.exe precisa estar ao lado do Auralis para concluir a instalacao.";
+    }
+
+    private string? ResolveFolderMonitorWorkerPath()
+    {
+        var primaryPath = Path.Combine(AppContext.BaseDirectory, "FolderMonitorWorker.exe");
+        if (File.Exists(primaryPath))
+        {
+            return primaryPath;
+        }
+
+        var fallbackPath = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "MelhorWindows.FolderMonitorWorker",
+            "bin",
+            "Debug",
+            "net8.0-windows",
+            "FolderMonitorWorker.exe"));
+
+        return File.Exists(fallbackPath) ? fallbackPath : null;
+    }
+
+    private void CloseResourcePanels()
+    {
+        if (TempCleanerConfirmPanel is not null) TempCleanerConfirmPanel.Visibility = Visibility.Collapsed;
+        if (StartupManagerPanel is not null) StartupManagerPanel.Visibility = Visibility.Collapsed;
+        if (DuplicateFinderPanel is not null) DuplicateFinderPanel.Visibility = Visibility.Collapsed;
+        if (ContextMenuCleanerPanel is not null) ContextMenuCleanerPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private static void RevealResourcePanel(FrameworkElement panel)
+    {
+        panel.Visibility = Visibility.Visible;
+        panel.UpdateLayout();
+        panel.BringIntoView();
+    }
+
+    private void InstallFolderMonitorButton_Click(object sender, RoutedEventArgs e)
+    {
+        var workerPath = ResolveFolderMonitorWorkerPath();
+        if (string.IsNullOrWhiteSpace(workerPath))
+        {
+            SetStatus("Nao encontrei o executavel FolderMonitorWorker.exe para instalar o recurso.", isError: true);
+            return;
+        }
+
+        try
+        {
+            BeginBusy("Instalando monitor de pasta...");
+            _services.FolderMonitorRegistrationService.Install(workerPath);
+            RefreshFolderMonitorStatus();
+            InstallSuccessOverlayRoot.Visibility = Visibility.Visible;
+            SetStatus("Monitor de pasta instalado no Explorer.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private void UninstallFolderMonitorButton_Click(object sender, RoutedEventArgs e)
+    {
+        var confirmation = System.Windows.MessageBox.Show(
+            "Deseja remover a entrada 'Monitorar essa pasta' do Explorer?",
+            "Auralis",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (confirmation != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            _services.FolderMonitorRegistrationService.Uninstall();
+            RefreshFolderMonitorStatus();
+            SetStatus("Monitor de pasta removido do Explorer.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+    }
+
+    private async void RunTempCleanerButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            BeginBusy("Escaneando arquivos temporarios...");
+            CloseResourcePanels();
+
+            var result = await Task.Run(_services.TempCleanerService.Scan);
+            _hasTempCleanerPreview = result.FilesDeleted > 0;
+
+            TempCleanerResultTextBlock.Text = result.FilesDeleted == 0
+                ? "Nenhum arquivo temporario relevante foi encontrado."
+                : $"{result.FilesDeleted} arquivo(s) temporario(s) encontrados. Potencial de limpeza: {FormatBytes(result.BytesFreed)}. O painel de correcao foi aberto logo abaixo.";
+            TempCleanerPreviewTextBlock.Text = result.FilesDeleted == 0
+                ? "Nao ha itens para remover neste momento."
+                : $"A limpeza pode remover {result.FilesDeleted} arquivo(s) e liberar aproximadamente {FormatBytes(result.BytesFreed)}.";
+            if (result.FilesDeleted > 0)
+            {
+                RevealResourcePanel(TempCleanerConfirmPanel);
+            }
+            else
+            {
+                TempCleanerConfirmPanel.Visibility = Visibility.Collapsed;
+            }
+
+            SetStatus("Escaneamento de temporarios concluido.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private async void ConfirmTempCleanButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_hasTempCleanerPreview)
+        {
+            TempCleanerConfirmPanel.Visibility = Visibility.Collapsed;
+            SetStatus("Execute um escaneamento antes de confirmar a limpeza.", isError: true);
+            return;
+        }
+
+        try
+        {
+            BeginBusy("Removendo arquivos temporarios...");
+            var result = await Task.Run(_services.TempCleanerService.Clean);
+            _hasTempCleanerPreview = false;
+            TempCleanerConfirmPanel.Visibility = Visibility.Collapsed;
+            TempCleanerResultTextBlock.Text =
+                $"{result.FilesDeleted} arquivo(s) removido(s), {result.FilesSkipped} ignorado(s) e {FormatBytes(result.BytesFreed)} liberados.";
+            SetStatus("Limpeza de temporarios concluida.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private void CancelTempCleanButton_Click(object sender, RoutedEventArgs e)
+    {
+        _hasTempCleanerPreview = false;
+        TempCleanerConfirmPanel.Visibility = Visibility.Collapsed;
+        SetStatus("Limpeza de temporarios cancelada.", isError: false);
+    }
+
+    private void OpenStartupManagerButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            CloseResourcePanels();
+
+            var items = _services.StartupManagerService.GetAll()
+                .OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(entry => new StartupEntryListItem(
+                    $"{entry.Source}|{entry.Name}",
+                    entry,
+                    entry.Name,
+                    entry.Source,
+                    entry.IsEnabled ? "Desativar" : "Ativar",
+                    entry.Source.StartsWith("HKCU\\Run", StringComparison.OrdinalIgnoreCase)))
+                .ToArray();
+
+            _startupEntryLookup = items.ToDictionary(item => item.Key, StringComparer.OrdinalIgnoreCase);
+            StartupItemsControl.ItemsSource = items;
+            StartupManagerCountTextBlock.Text = items.Length == 0
+                ? "Nenhum programa de inicializacao encontrado."
+                : $"{items.Length} item(ns) de inicializacao encontrado(s).";
+            RevealResourcePanel(StartupManagerPanel);
+            SetStatus("Painel de inicializacao carregado.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+    }
+
+    private void ToggleStartupEntryButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement element ||
+            element.Tag is not string key ||
+            !_startupEntryLookup.TryGetValue(key, out var item))
+        {
+            return;
+        }
+
+        if (!item.CanToggle)
+        {
+            SetStatus("Este item esta em modo somente leitura dentro do app.", isError: true);
+            return;
+        }
+
+        try
+        {
+            if (item.Entry.IsEnabled)
+            {
+                _services.StartupManagerService.Disable(item.Entry.Name);
+                SetStatus($"Item '{item.Entry.Name}' desativado da inicializacao.", isError: false);
+            }
+            else
+            {
+                _services.StartupManagerService.Enable(item.Entry.Name);
+                SetStatus($"Item '{item.Entry.Name}' reativado na inicializacao.", isError: false);
+            }
+
+            OpenStartupManagerButton_Click(sender, e);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+    }
+
+    private void CloseStartupManagerPanel_Click(object sender, RoutedEventArgs e)
+    {
+        StartupManagerPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private async void OpenDuplicateFinderButton_Click(object sender, RoutedEventArgs e)
+    {
+        using var dialog = new System.Windows.Forms.FolderBrowserDialog
+        {
+            Description = "Selecione a pasta para procurar arquivos duplicados.",
+            UseDescriptionForTitle = true,
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
+        };
+
+        if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK ||
+            string.IsNullOrWhiteSpace(dialog.SelectedPath))
+        {
+            SetStatus("Nenhuma pasta foi selecionada para a busca de duplicatas.", isError: false);
+            return;
+        }
+
+        try
+        {
+            BeginBusy("Escaneando arquivos duplicados...");
+            CloseResourcePanels();
+            _lastDuplicateGroups = Array.Empty<DuplicateFinderService.DuplicateGroup>();
+
+            var progress = new Progress<string>(message => SetStatus(message, isError: false));
+            var groups = await _services.DuplicateFinderService.ScanAsync(dialog.SelectedPath, progress);
+            _lastDuplicateGroups = groups;
+            var duplicateBytes = groups.Sum(group => Math.Max(group.Paths.Count - 1, 0) * group.FileSize);
+            var items = groups
+                .Select(group => new DuplicateGroupListItem(
+                    $"{FormatBytes(group.FileSize)} por arquivo - {group.Paths.Count} copia(s)",
+                    string.Join(Environment.NewLine, group.Paths)))
+                .ToArray();
+
+            DuplicateGroupsItemsControl.ItemsSource = items;
+            DuplicateFinderSummaryTextBlock.Text = items.Length == 0
+                ? "Nenhuma duplicata encontrada para a pasta selecionada."
+                : $"{items.Length} grupo(s) encontrado(s), com aproximadamente {FormatBytes(duplicateBytes)} em arquivos repetidos. Use a acao abaixo para corrigir mantendo 1 copia por grupo.";
+            DuplicateFinderResultTextBlock.Text = items.Length == 0
+                ? DuplicateFinderSummaryTextBlock.Text
+                : $"{items.Length} grupo(s) encontrado(s). O painel de correcao foi aberto logo abaixo.";
+            ResolveDuplicateGroupsButton.Visibility = items.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+            DuplicateFinderActionHintTextBlock.Visibility = items.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+            RevealResourcePanel(DuplicateFinderPanel);
+            SetStatus(
+                items.Length == 0
+                    ? "Analise de duplicatas concluida. Nenhuma correcao necessaria."
+                    : "Analise de duplicatas concluida. O painel de correcao foi aberto logo abaixo.",
+                isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private void CloseDuplicateFinderPanel_Click(object sender, RoutedEventArgs e)
+    {
+        DuplicateFinderPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private async void ResolveDuplicateGroupsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_lastDuplicateGroups.Count == 0)
+        {
+            SetStatus("Escaneie uma pasta antes de corrigir duplicatas.", isError: true);
+            return;
+        }
+
+        var confirmation = System.Windows.MessageBox.Show(
+            "O Auralis vai manter 1 copia por grupo e mover o restante para a Lixeira. Deseja continuar?",
+            "Auralis",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (confirmation != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            BeginBusy("Movendo arquivos duplicados para a Lixeira...");
+
+            var progress = new Progress<string>(message => SetStatus(message, isError: false));
+            var result = await Task.Run(() => _services.DuplicateFinderService.RemoveDuplicates(_lastDuplicateGroups, progress));
+
+            _lastDuplicateGroups = Array.Empty<DuplicateFinderService.DuplicateGroup>();
+            DuplicateGroupsItemsControl.ItemsSource = Array.Empty<DuplicateGroupListItem>();
+            DuplicateFinderSummaryTextBlock.Text = result.FilesMoved == 0
+                ? "Nenhuma duplicata foi movida automaticamente."
+                : $"{result.FilesMoved} arquivo(s) duplicado(s) enviados para a Lixeira, com {FormatBytes(result.BytesRecovered)} resolvidos e {result.FilesSkipped} item(ns) ignorado(s).";
+            DuplicateFinderResultTextBlock.Text = DuplicateFinderSummaryTextBlock.Text;
+            ResolveDuplicateGroupsButton.Visibility = Visibility.Collapsed;
+            DuplicateFinderActionHintTextBlock.Visibility = Visibility.Collapsed;
+            RevealResourcePanel(DuplicateFinderPanel);
+            SetStatus(
+                result.FilesMoved == 0
+                    ? "Nenhuma duplicata foi corrigida automaticamente."
+                    : "Correcao de duplicatas concluida.",
+                isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private void OpenContextMenuCleanerButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            CloseResourcePanels();
+
+            var items = _services.ContextMenuCleanerService.GetAll()
+                .OrderBy(item => item.DisplayName, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            ContextMenuItemsControl.ItemsSource = items;
+            ContextMenuCleanerCountTextBlock.Text = items.Length == 0
+                ? "Nenhuma entrada de menu de contexto foi encontrada."
+                : $"{items.Length} entrada(s) carregada(s) do menu de contexto.";
+            RevealResourcePanel(ContextMenuCleanerPanel);
+            SetStatus("Entradas do menu de contexto carregadas.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+    }
+
+    private void RemoveContextMenuEntryButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement element ||
+            element.Tag is not string keyPath ||
+            string.IsNullOrWhiteSpace(keyPath))
+        {
+            return;
+        }
+
+        var confirmation = System.Windows.MessageBox.Show(
+            "Deseja remover esta entrada do menu de contexto?",
+            "Auralis",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (confirmation != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            _services.ContextMenuCleanerService.Remove(keyPath);
+            OpenContextMenuCleanerButton_Click(sender, e);
+            SetStatus("Entrada removida do menu de contexto.", isError: false);
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+    }
+
+    private void CloseContextMenuCleanerPanel_Click(object sender, RoutedEventArgs e)
+    {
+        ContextMenuCleanerPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private void CloseInstallSuccessDialog_Click(object sender, RoutedEventArgs e)
+    {
+        InstallSuccessOverlayRoot.Visibility = Visibility.Collapsed;
+    }
+
+    private async void SaveToPersonalLibraryButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_pendingPersonalLibraryEntry is null)
+        {
+            SaveToLibraryOverlayRoot.Visibility = Visibility.Collapsed;
+            await ShowSuccessAndCloseAsync("Icone aplicado com sucesso.");
+            return;
+        }
+
+        try
+        {
+            BeginBusy("Salvando icone na biblioteca pessoal...");
+
+            await _services.PersonalIconLibraryService.AddAsync(
+                Path.GetFileNameWithoutExtension(_pendingPersonalLibraryEntry.SourceImagePath),
+                _pendingPersonalLibraryEntry.StoredIconPath,
+                _pendingPersonalLibraryEntry.StoredPreviewImagePath);
+
+            await RefreshPersonalIconLibraryAsync();
+            SaveToLibraryOverlayRoot.Visibility = Visibility.Collapsed;
+            _pendingPersonalLibraryEntry = null;
+            await ShowSuccessAndCloseAsync("Icone salvo na biblioteca pessoal. Fechando...");
+        }
+        catch (Exception exception)
+        {
+            SetStatus(exception.Message, isError: true);
+        }
+        finally
+        {
+            EndBusy();
+        }
+    }
+
+    private async void SkipSaveToLibraryButton_Click(object sender, RoutedEventArgs e)
+    {
+        SaveToLibraryOverlayRoot.Visibility = Visibility.Collapsed;
+        _pendingPersonalLibraryEntry = null;
+        await ShowSuccessAndCloseAsync("Icone aplicado com sucesso. Fechando...");
     }
 
     private string DescribePreviewMode()
@@ -2343,6 +2978,34 @@ public partial class MainWindow : Window
         Close();
     }
 
+    private static string ResolvePersonalLibraryPreviewPath(PersonalIconEntry entry)
+    {
+        if (!string.IsNullOrWhiteSpace(entry.StoredPreviewPath) &&
+            File.Exists(entry.StoredPreviewPath))
+        {
+            return entry.StoredPreviewPath;
+        }
+
+        return entry.StoredIconPath;
+    }
+
+    private static string ResolveSectionArrowGlyph(bool isExpanded) => isExpanded ? "\uE70D" : "\uE76C";
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB", "TB"];
+        double value = Math.Max(bytes, 0);
+        var unitIndex = 0;
+
+        while (value >= 1024 && unitIndex < units.Length - 1)
+        {
+            value /= 1024;
+            unitIndex++;
+        }
+
+        return $"{value:0.##} {units[unitIndex]}";
+    }
+
     private static string ResolveUserInitials(string userName)
     {
         var parts = userName
@@ -2673,12 +3336,26 @@ public partial class MainWindow : Window
         string Subtitle,
         string AppliedText);
 
-
+    private sealed record PersonalLibraryListItem(
+        PersonalIconEntry Entry,
+        string DisplayName,
+        string PreviewPath,
+        BitmapImage PreviewImage);
 
     private sealed record RegistryAuditListItem(string DisplayText)
     {
         public override string ToString() => DisplayText;
     }
+
+    private sealed record StartupEntryListItem(
+        string Key,
+        StartupManagerService.StartupEntry Entry,
+        string Name,
+        string Source,
+        string ToggleText,
+        bool CanToggle);
+
+    private sealed record DuplicateGroupListItem(string SizeText, string PathsText);
 
     private sealed record GameBoosterListItem(
         string Id,
@@ -2736,7 +3413,8 @@ public partial class MainWindow : Window
         Home,
         History,
         GameBooster,
-        Settings
+        Settings,
+        Resources
     }
 
     private static void ReportInitializationProgress(
@@ -2810,6 +3488,13 @@ public partial class MainWindow : Window
         if (CropYTextBox != null) CropYTextBox.IsEnabled = enabled;
         if (CropWidthTextBox != null) CropWidthTextBox.IsEnabled = enabled;
         if (CropHeightTextBox != null) CropHeightTextBox.IsEnabled = enabled;
+        if (InstallFolderMonitorButton != null) InstallFolderMonitorButton.IsEnabled = enabled && !string.IsNullOrWhiteSpace(ResolveFolderMonitorWorkerPath());
+        if (RunTempCleanerButton != null) RunTempCleanerButton.IsEnabled = enabled;
+        if (OpenStartupManagerButton != null) OpenStartupManagerButton.IsEnabled = enabled;
+        if (OpenDuplicateFinderButton != null) OpenDuplicateFinderButton.IsEnabled = enabled;
+        if (OpenContextMenuCleanerButton != null) OpenContextMenuCleanerButton.IsEnabled = enabled;
+        if (ConfirmTempCleanButton != null) ConfirmTempCleanButton.IsEnabled = enabled;
+        if (ResolveDuplicateGroupsButton != null) ResolveDuplicateGroupsButton.IsEnabled = enabled && _lastDuplicateGroups.Count > 0;
     }
 
     private void SetBusyMessage(string message)

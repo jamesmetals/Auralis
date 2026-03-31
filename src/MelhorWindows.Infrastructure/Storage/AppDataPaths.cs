@@ -13,8 +13,10 @@ public sealed class AppDataPaths
         PreviewCacheDirectory = Path.Combine(RootDirectory, "previews");
         StateDirectory = Path.Combine(RootDirectory, "state");
         SecureStateDirectory = Path.Combine(RootDirectory, "secure-state");
+        PersonalIconsDirectory = Path.Combine(RootDirectory, "personal-icons");
         HistoryFilePath = Path.Combine(StateDirectory, "folder-icon-history.json");
         RegistryAuditFilePath = Path.Combine(StateDirectory, "registry-audit.json");
+        PersonalIconsFilePath = Path.Combine(StateDirectory, "personal-icons.json");
     }
 
     public string RootDirectory { get; }
@@ -31,6 +33,10 @@ public sealed class AppDataPaths
 
     public string RegistryAuditFilePath { get; }
 
+    public string PersonalIconsDirectory { get; }
+
+    public string PersonalIconsFilePath { get; }
+
     public void EnsureCreated()
     {
         Directory.CreateDirectory(RootDirectory);
@@ -38,5 +44,6 @@ public sealed class AppDataPaths
         Directory.CreateDirectory(PreviewCacheDirectory);
         Directory.CreateDirectory(StateDirectory);
         Directory.CreateDirectory(SecureStateDirectory);
+        Directory.CreateDirectory(PersonalIconsDirectory);
     }
 }

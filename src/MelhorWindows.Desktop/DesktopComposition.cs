@@ -29,6 +29,12 @@ internal static class DesktopComposition
         var windowsRestorePointService = new PowerShellRestorePointService();
         var computerDiagnosticsService = new WindowsComputerDiagnosticsService();
         var localAiGameBoosterService = new GoogleGeminiLocalAiGameBoosterService();
+        var personalIconLibraryService = new JsonPersonalIconRepository(appDataPaths);
+        var folderMonitorRegistrationService = new FolderMonitorRegistrationService(authorizationService);
+        var tempCleanerService = new TempCleanerService();
+        var startupManagerService = new StartupManagerService();
+        var contextMenuCleanerService = new ContextMenuCleanerService();
+        var duplicateFinderService = new DuplicateFinderService();
         var rustGameProfileService = new RustGameProfileService();
         var rustGameOptimizationWorkflowService = new RustGameOptimizationWorkflowService(
             protectedStateStore,
@@ -78,7 +84,13 @@ internal static class DesktopComposition
             registryEditingService,
             windowsFeatureWorkflowService,
             gameBoosterWorkflowService,
-            gameBoosterAiWorkflowService);
+            gameBoosterAiWorkflowService,
+            personalIconLibraryService,
+            folderMonitorRegistrationService,
+            tempCleanerService,
+            startupManagerService,
+            contextMenuCleanerService,
+            duplicateFinderService);
     }
 }
 
@@ -97,4 +109,11 @@ internal sealed record DesktopServices(
     IRegistryEditingService RegistryEditingService,
     WindowsFeatureWorkflowService WindowsFeatureWorkflowService,
     GameBoosterWorkflowService GameBoosterWorkflowService,
-    GameBoosterAiWorkflowService GameBoosterAiWorkflowService);
+    GameBoosterAiWorkflowService GameBoosterAiWorkflowService,
+    IPersonalIconLibraryService PersonalIconLibraryService,
+    FolderMonitorRegistrationService FolderMonitorRegistrationService,
+    TempCleanerService TempCleanerService,
+    StartupManagerService StartupManagerService,
+    ContextMenuCleanerService ContextMenuCleanerService,
+    DuplicateFinderService DuplicateFinderService);
+

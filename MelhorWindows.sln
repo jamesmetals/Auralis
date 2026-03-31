@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -13,6 +13,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MelhorWindows.Desktop", "src\MelhorWindows.Desktop\MelhorWindows.Desktop.csproj", "{5F3025A4-3D27-41AE-B5AD-0EBFFB7B51B4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MelhorWindows.Domain.Tests", "tests\MelhorWindows.Domain.Tests\MelhorWindows.Domain.Tests.csproj", "{A3E9985F-0E95-4A54-9E27-85A6AAE9B77E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2EF24CEA-3E4E-43F3-AD23-48AD24E2C05D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MelhorWindows.FolderMonitorWorker", "src\MelhorWindows.FolderMonitorWorker\MelhorWindows.FolderMonitorWorker.csproj", "{3DBCAB4A-99CA-47C5-B35C-4B85F04A9199}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,8 +48,15 @@ Global
 		{A3E9985F-0E95-4A54-9E27-85A6AAE9B77E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3E9985F-0E95-4A54-9E27-85A6AAE9B77E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3E9985F-0E95-4A54-9E27-85A6AAE9B77E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DBCAB4A-99CA-47C5-B35C-4B85F04A9199}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DBCAB4A-99CA-47C5-B35C-4B85F04A9199}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DBCAB4A-99CA-47C5-B35C-4B85F04A9199}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DBCAB4A-99CA-47C5-B35C-4B85F04A9199}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3DBCAB4A-99CA-47C5-B35C-4B85F04A9199} = {2EF24CEA-3E4E-43F3-AD23-48AD24E2C05D}
 	EndGlobalSection
 EndGlobal
