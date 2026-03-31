@@ -789,8 +789,6 @@
                                             VerticalAlignment="Center" />
                                     </StackPanel>
 
-                                    <TextBlock x:Name="PreviewFolderNameTextBlock" Visibility="Collapsed" />
-
                                     <Button
                                         Grid.Column="2"
                                         Height="30"
@@ -886,15 +884,6 @@
                                                     Text="Prévia" />
                                             </Grid>
                                         </Border>
-
-                                        <!-- Hidden compatibility elements -->
-                                        <StackPanel Grid.Row="0" Visibility="Collapsed">
-                                            <TextBlock x:Name="SelectedImageNameTextBlock" />
-                                            <TextBlock x:Name="SelectedImageMetaTextBlock" />
-                                            <TextBlock x:Name="PreviewModeTextBlock" />
-                                            <Button x:Name="ReplaceImageButton" Click="ChooseImageButton_Click" Content="Trocar imagem" />
-                                            <Button x:Name="UpdatePreviewButton" Click="UpdatePreviewButton_Click" Content="Atualizar" />
-                                        </StackPanel>
 
                                         <Button
                                             x:Name="ApplyIconButton"
@@ -1190,35 +1179,7 @@
                             </StackPanel>
                         </ScrollViewer>
 
-                        <!-- ─────────────────────────────────────
-                             PAGE: HistoryView
-                             ───────────────────────────────────── -->
-                        <ScrollViewer x:Name="HistoryView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Histórico completo" />
-                                <ItemsControl Margin="0,12,0,0" ItemsSource="{Binding ElementName=HistoryListBox, Path=ItemsSource}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Width="160" Margin="0,0,12,12" Padding="16" Background="{StaticResource PanelBrush}" CornerRadius="22">
-                                                <StackPanel>
-                                                    <Border Height="96" Background="{StaticResource DeepPanelBrush}" CornerRadius="16">
-                                                        <Image Source="{Binding PreviewImage}" Margin="14" Stretch="Uniform" />
-                                                    </Border>
-                                                    <TextBlock Margin="0,10,0,0" FontSize="13" FontWeight="SemiBold" Text="{Binding Title}" />
-                                                    <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="{StaticResource MutedBrush}" Text="{Binding Subtitle}" />
-                                                    <TextBlock Margin="0,3,0,0" FontSize="11" Foreground="{StaticResource SoftBrush}" Text="{Binding AppliedText}" />
-                                                </StackPanel>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </ScrollViewer>
+
 
                         <!-- ─────────────────────────────────────
                              PAGE: GameBoosterView
@@ -1745,13 +1706,6 @@
                                             </Border>
                                         </StackPanel>
                                     </Border>
-
-                                    <Border Margin="0,12,0,0" Padding="16" Background="{StaticResource SurfaceBrush}" CornerRadius="20">
-                                        <StackPanel>
-                                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Jogos especificos" />
-                                            <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="As leituras dedicadas, automacoes reversiveis e o FOCO EXTREMO de cada jogo ficam na aba Jogos especificos para nao misturar com o booster geral." TextWrapping="Wrap" />
-                                        </StackPanel>
-                                    </Border>
                                 </StackPanel>
                             </ScrollViewer>
                         </Grid>
@@ -1761,62 +1715,12 @@
                              ───────────────────────────────────── -->
                         <ScrollViewer x:Name="SettingsView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <Border x:Name="IntegrationSettingsCard" Margin="0,0,0,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
+                                <Border Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24">
                                     <StackPanel>
-                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Explorer" />
-                                        <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Integração com clique direito" />
-                                        <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Registre ou remova o atalho do Auralis no Explorer." TextWrapping="Wrap" />
-                                        <Grid Margin="0,14,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" Margin="0,0,10,0" Style="{StaticResource PrimaryButtonStyle}" Click="RegisterVerbButton_Click" Content="Registrar no Explorer" />
-                                            <Button Grid.Column="1" Margin="0,0,10,0" Click="UnregisterVerbButton_Click" Content="Remover do Explorer" />
-                                            <Button Grid.Column="2" Click="CheckUpdatesButton_Click" Content="Verificar atualizações" />
-                                        </Grid>
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Configurações" />
+                                        <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Opções do aplicativo" />
+                                        <TextBlock Margin="0,6,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Configurações globais do Auralis." TextWrapping="Wrap" />
                                     </StackPanel>
-                                </Border>
-                                <Border x:Name="AdminFeatureSettingsCard" Margin="0,0,0,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
-                                    <StackPanel>
-                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Admin" />
-                                        <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Recursos do Windows" />
-                                        <Grid Margin="0,14,0,10">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" Margin="0,0,10,0" Style="{StaticResource PrimaryButtonStyle}" Click="EnableFeatureButton_Click" Content="Habilitar selecionada" />
-                                            <Button Grid.Column="1" Margin="0,0,10,0" Click="DisableFeatureButton_Click" Content="Desabilitar selecionada" />
-                                            <Button Grid.Column="2" Click="RefreshFeaturesButton_Click" Content="Atualizar lista" />
-                                        </Grid>
-                                        <ListView x:Name="FeatureListView">
-                                            <ListView.ItemTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock FontSize="11" Text="{Binding}" TextWrapping="Wrap" />
-                                                </DataTemplate>
-                                            </ListView.ItemTemplate>
-                                        </ListView>
-                                    </StackPanel>
-                                </Border>
-                                <Border x:Name="AdminAuditSettingsCard" Margin="0,0,0,14" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
-                                    <StackPanel>
-                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Auditoria" />
-                                        <TextBlock Margin="0,8,0,0" FontFamily="Segoe UI Variable Display" FontSize="16" FontWeight="Bold" Text="Histórico administrativo" />
-                                        <Button Margin="0,14,0,10" Click="RefreshAuditButton_Click" Content="Atualizar auditoria" />
-                                        <ListView x:Name="AuditListView">
-                                            <ListView.ItemTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock FontSize="11" Text="{Binding}" TextWrapping="Wrap" />
-                                                </DataTemplate>
-                                            </ListView.ItemTemplate>
-                                        </ListView>
-                                    </StackPanel>
-                                </Border>
-                                <Border x:Name="UserSettingsInfoCard" Padding="20" Background="{StaticResource PanelBrush}" CornerRadius="24" Visibility="Collapsed">
-                                    <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}" Text="Este perfil verá apenas recursos relevantes." TextWrapping="Wrap" />
                                 </Border>
                             </StackPanel>
                         </ScrollViewer>

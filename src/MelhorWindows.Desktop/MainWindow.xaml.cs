@@ -230,8 +230,6 @@ public partial class MainWindow : Window
 
     private void LoadEditorDefaults()
     {
-        SelectedImageNameTextBlock.Text = "Nenhuma imagem selecionada";
-        SelectedImageMetaTextBlock.Text = "Escolha uma imagem para gerar o icone.";
         CropXTextBox.Text = "0";
         CropYTextBox.Text = "0";
         CropWidthTextBox.Text = "0";
@@ -334,13 +332,6 @@ public partial class MainWindow : Window
 
     private void UpdateSettingsVisibility()
     {
-        var canManageExplorer = _services.AuthorizationService.HasPermission(DefaultPermissions.RegisterExplorerIntegration);
-        var canManageWindows = CanManageWindowsFeatures();
-
-        IntegrationSettingsCard.Visibility = canManageExplorer ? Visibility.Visible : Visibility.Collapsed;
-        AdminFeatureSettingsCard.Visibility = canManageWindows ? Visibility.Visible : Visibility.Collapsed;
-        AdminAuditSettingsCard.Visibility = canManageWindows ? Visibility.Visible : Visibility.Collapsed;
-        UserSettingsInfoCard.Visibility = canManageWindows ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void LoadBuiltInIconLibrary()
@@ -427,7 +418,6 @@ public partial class MainWindow : Window
         var folderLabel = hasFolder ? Path.GetFileName(_selectedFolderPath!.TrimEnd(Path.DirectorySeparatorChar)) : "Nenhuma pasta selecionada";
 
         CurrentFolderNameTextBlock.Text = folderLabel;
-        PreviewFolderNameTextBlock.Text = folderLabel;
         FolderPathTextBlock.Text = hasFolder
             ? _selectedFolderPath
             : "Escolha uma pasta aqui ou abra o app pelo menu de contexto do Explorer.";
@@ -482,14 +472,11 @@ public partial class MainWindow : Window
         HistoryListBox.SelectedItem = null;
         IconLibraryListBox.SelectedItem = null;
 
-        SelectedImageNameTextBlock.Text = personalItem.DisplayName;
-        SelectedImageMetaTextBlock.Text = "Icone salvo na biblioteca pessoal.";
         SourcePreviewImage.Source = personalItem.PreviewImage;
         GeneratedPreviewImage.Source = personalItem.PreviewImage;
         SourcePreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
         GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
         UpdateAdjustmentVisibility();
-        PreviewModeTextBlock.Text = "Icone salvo selecionado para aplicar.";
         UpdateSelectionSummaryVisibility();
     }
 
@@ -624,7 +611,6 @@ public partial class MainWindow : Window
 
                 GeneratedPreviewImage.Source = _selectedPersonalIconItem.PreviewImage;
                 GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
-                PreviewModeTextBlock.Text = "Icone salvo reaplicado da biblioteca pessoal.";
 
                 await LoadHistoryAsync();
                 SetStatus("Icone salvo aplicado na pasta atual.", isError: false);
@@ -762,7 +748,6 @@ public partial class MainWindow : Window
 
             GeneratedPreviewImage.Source = historyItem.PreviewImage;
             GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
-            PreviewModeTextBlock.Text = "Icone reaplicado do historico.";
 
             await LoadHistoryAsync();
             SetStatus("Icone do historico aplicado na pasta atual.", isError: false);
@@ -798,15 +783,12 @@ public partial class MainWindow : Window
         _selectedImageHeight = 0;
         IconLibraryListBox.SelectedItem = null;
         PersonalIconLibraryListBox.SelectedItem = null;
-        SelectedImageNameTextBlock.Text = historyItem.Title;
-        SelectedImageMetaTextBlock.Text = historyItem.Subtitle;
         SourcePreviewImage.Source = historyItem.PreviewImage;
         SourcePreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
         GeneratedPreviewImage.Source = historyItem.PreviewImage;
         GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
         UpdateAdjustmentVisibility();
         UpdateSelectionSummaryVisibility();
-        PreviewModeTextBlock.Text = "Ícone recente selecionado para aplicar.";
     }
 
     private Task LoadSelectedImageAsync(string imagePath, bool refreshPreview)
@@ -825,11 +807,6 @@ public partial class MainWindow : Window
         PersonalIconLibraryListBox.SelectedItem = null;
         _selectedImagePath = imagePath;
         (_selectedImageWidth, _selectedImageHeight) = imageInfo;
-
-        SelectedImageNameTextBlock.Text = Path.GetFileName(imagePath);
-        SelectedImageMetaTextBlock.Text = _selectedImageWidth == _selectedImageHeight
-            ? $"{_selectedImageWidth} x {_selectedImageHeight} • imagem quadrada"
-            : $"{_selectedImageWidth} x {_selectedImageHeight} • ajuste de enquadramento disponivel";
 
         ApplyCenteredCrop();
         UpdateAdjustmentVisibility();
@@ -876,7 +853,6 @@ public partial class MainWindow : Window
 
             GeneratedPreviewImage.Source = CreateBitmapImageFromBytes(prepared.PreviewPngBytes);
             GeneratedPreviewPlaceholderTextBlock.Visibility = Visibility.Collapsed;
-            PreviewModeTextBlock.Text = DescribePreviewMode();
             SetStatus("Preview atualizado.", isError: false);
         }
         catch (OperationCanceledException)
@@ -898,7 +874,6 @@ public partial class MainWindow : Window
         if (ImageAdjustmentCard is null ||
             ManualCropPanel is null ||
             ManualCropCheckBox is null ||
-            PreviewModeTextBlock is null ||
             AdjustmentHintTextBlock is null)
         {
             return;
@@ -919,14 +894,10 @@ public partial class MainWindow : Window
         if (!requiresAdjustment)
         {
             ManualCropCheckBox.IsChecked = false;
-            PreviewModeTextBlock.Text = string.IsNullOrWhiteSpace(_selectedImagePath)
-                ? "Escolha uma imagem para gerar o icone."
-                : "A imagem ja e quadrada, entao nenhum ajuste extra foi exibido.";
             return;
         }
 
         AdjustmentHintTextBlock.Text = "A imagem nao e quadrada. Escolha entre enquadrar ou manter tudo visivel.";
-        PreviewModeTextBlock.Text = DescribePreviewMode();
     }
 
     private void UpdateSelectionSummaryVisibility()
@@ -1608,32 +1579,10 @@ public partial class MainWindow : Window
 
     private async Task LoadFeatureStatesAsync()
     {
-        if (!CanManageWindowsFeatures())
-        {
-            FeatureListView.ItemsSource = Array.Empty<object>();
-            return;
-        }
-
-        var states = await _services.WindowsFeatureWorkflowService.GetStatesAsync();
-        FeatureListView.ItemsSource = states
-            .Select(state => new FeatureListItem(
-                state.Id,
-                $"{state.DisplayName} [{FormatStatus(state.Status)}] - {state.Description}"))
-            .ToArray();
     }
 
     private async Task LoadAuditAsync()
     {
-        if (!CanManageWindowsFeatures())
-        {
-            AuditListView.ItemsSource = Array.Empty<object>();
-            return;
-        }
-
-        var entries = await _services.RegistryAuditRepository.GetRecentAsync();
-        AuditListView.ItemsSource = entries
-            .Select(entry => new RegistryAuditListItem(FormatAuditEntry(entry)))
-            .ToArray();
     }
 
     private async Task LoadGameBoosterAsync(bool includeLocalAi = true)
@@ -2865,23 +2814,6 @@ public partial class MainWindow : Window
 
     private async Task SetSelectedFeatureStateAsync(bool enabled)
     {
-        if (FeatureListView.SelectedItem is not FeatureListItem selectedFeature)
-        {
-            SetStatus("Selecione uma feature do Windows antes de continuar.", isError: true);
-            return;
-        }
-
-        try
-        {
-            var result = await _services.WindowsFeatureWorkflowService.SetStateAsync(selectedFeature.Id, enabled);
-            SetStatus(result.Message, isError: !result.Succeeded);
-            await LoadFeatureStatesAsync();
-            await LoadAuditAsync();
-        }
-        catch (Exception exception)
-        {
-            SetStatus(exception.Message, isError: true);
-        }
     }
 
     private bool CanManageWindowsFeatures() =>
@@ -3451,9 +3383,7 @@ public partial class MainWindow : Window
 
         if (ApplyIconButton != null) ApplyIconButton.IsEnabled = enabled;
         if (RestoreDefaultButton != null) RestoreDefaultButton.IsEnabled = enabled;
-        if (UpdatePreviewButton != null) UpdatePreviewButton.IsEnabled = enabled;
         if (ChooseImageButton != null) ChooseImageButton.IsEnabled = enabled;
-        if (ReplaceImageButton != null) ReplaceImageButton.IsEnabled = enabled;
         if (ApplyRecommendedGameBoosterButton != null) ApplyRecommendedGameBoosterButton.IsEnabled = enabled && CanManageWindowsFeatures();
         if (RevertGameBoosterSessionButton != null) RevertGameBoosterSessionButton.IsEnabled = enabled && _canRevertGameBoosterSession;
         if (RefreshGameBoosterButton != null) RefreshGameBoosterButton.IsEnabled = enabled;
