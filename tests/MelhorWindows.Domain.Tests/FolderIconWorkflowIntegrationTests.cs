@@ -64,6 +64,13 @@ public sealed class FolderIconWorkflowIntegrationTests
             Assert.True(desktopIniAttributes.HasFlag(FileAttributes.Hidden));
             Assert.True(desktopIniAttributes.HasFlag(FileAttributes.System));
 
+            var folderIconAttributes = File.GetAttributes(folderIconPath);
+            Assert.True(folderIconAttributes.HasFlag(FileAttributes.Hidden));
+            Assert.True(folderIconAttributes.HasFlag(FileAttributes.System));
+            Assert.DoesNotContain(
+                Directory.GetFiles(folderPath, "desktop*.ini"),
+                path => !string.Equals(Path.GetFileName(path), "desktop.ini", StringComparison.OrdinalIgnoreCase));
+
             var copiedRoot = Path.Combine(testRoot, "CopiedFolder");
             CopyDirectory(folderPath, copiedRoot);
             var copiedIconPath = Directory.GetFiles(copiedRoot, "auralis-folder-icon-*.ico").Single();

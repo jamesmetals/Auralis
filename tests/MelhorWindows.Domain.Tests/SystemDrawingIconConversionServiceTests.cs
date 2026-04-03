@@ -1,6 +1,7 @@
 using MelhorWindows.Application.Models;
 using MelhorWindows.Domain.Enums;
 using MelhorWindows.Infrastructure.Imaging;
+using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using Xunit;
@@ -86,5 +87,70 @@ public sealed class SystemDrawingIconConversionServiceTests
                 Directory.Delete(testRoot, recursive: true);
             }
         }
+    }
+
+    [Fact]
+    public async Task PrepareIconAsync_GeneratesCommonShellResolutions()
+    {
+        var testRoot = Path.Combine(Path.GetTempPath(), "MelhorWindows.Tests", Guid.NewGuid().ToString("N"));
+        var imagePath = Path.Combine(testRoot, "sample-image.png");
+        Directory.CreateDirectory(testRoot);
+
+        try
+        {
+            using (var image = new SixLabors.ImageSharp.Image<Rgba32>(320, 180, new Rgba32(72, 116, 255)))
+            using (var stream = File.Open(imagePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                await image.SaveAsync(stream, new PngEncoder());
+            }
+
+            var service = new SystemDrawingIconConversionService();
+            var result = await service.PrepareIconAsync(
+                new PrepareIconRequest(
+                    imagePath,
+                    ImageFitMode.CropToSquare,
+                    new CropSelection(40, 0, 180, 180),
+                    "sample-image"));
+
+            var sizes = ReadIconFrameSizes(result.IconBytes);
+            int[] expectedSizes = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256];
+
+            Assert.Equal(expectedSizes, sizes.OrderBy(size => size).ToArray());
+        }
+        finally
+        {
+            if (Directory.Exists(testRoot))
+            {
+                Directory.Delete(testRoot, recursive: true);
+            }
+        }
+    }
+
+    private static int[] ReadIconFrameSizes(byte[] iconBytes)
+    {
+        using var stream = new MemoryStream(iconBytes);
+        using var reader = new BinaryReader(stream);
+
+        Assert.Equal(0, reader.ReadUInt16());
+        Assert.Equal(1, reader.ReadUInt16());
+
+        var entryCount = reader.ReadUInt16();
+        var sizes = new int[entryCount];
+
+        for (var entryIndex = 0; entryIndex < entryCount; entryIndex++)
+        {
+            var width = reader.ReadByte();
+            _ = reader.ReadByte();
+            _ = reader.ReadByte();
+            _ = reader.ReadByte();
+            _ = reader.ReadUInt16();
+            _ = reader.ReadUInt16();
+            _ = reader.ReadUInt32();
+            _ = reader.ReadUInt32();
+
+            sizes[entryIndex] = width == 0 ? 256 : width;
+        }
+
+        return sizes;
     }
 }

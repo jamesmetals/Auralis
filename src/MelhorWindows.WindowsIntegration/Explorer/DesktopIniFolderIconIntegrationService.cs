@@ -58,6 +58,7 @@ public sealed class DesktopIniFolderIconIntegrationService : IFolderIconIntegrat
         var iconAttributes = File.GetAttributes(storedIconPathInFolder);
         File.SetAttributes(storedIconPathInFolder, iconAttributes | FileAttributes.Hidden | FileAttributes.System);
 
+        TryForceDesktopIniReload(folderPath, desktopIniPath);
         RefreshShell(folderPath, desktopIniPath, storedIconPathInFolder, Path.GetDirectoryName(folderPath));
         await RefreshExplorerIconCacheAsync(cancellationToken);
         await FinalizeShellRefreshAsync(folderPath, desktopIniPath, storedIconPathInFolder, cancellationToken);
@@ -301,6 +302,92 @@ public sealed class DesktopIniFolderIconIntegrationService : IFolderIconIntegrat
         File.Delete(filePath);
     }
 
+    private static void TryForceDesktopIniReload(string folderPath, string desktopIniPath)
+    {
+        if (!Directory.Exists(folderPath) || !File.Exists(desktopIniPath))
+        {
+            return;
+        }
+
+        var folderAttributes = File.GetAttributes(folderPath);
+        var desktopIniAttributes = File.GetAttributes(desktopIniPath);
+        var normalizedFolderAttributes = folderAttributes & ~(FileAttributes.ReadOnly | FileAttributes.System);
+        var refreshDesktopIniPath = Path.Combine(folderPath, "desktop.auralis-refresh.ini");
+        var desktopIniMoved = false;
+
+        try
+        {
+            if (normalizedFolderAttributes != folderAttributes)
+            {
+                File.SetAttributes(folderPath, normalizedFolderAttributes);
+            }
+
+            if (File.Exists(refreshDesktopIniPath))
+            {
+                File.SetAttributes(refreshDesktopIniPath, FileAttributes.Normal);
+                File.Delete(refreshDesktopIniPath);
+            }
+
+            File.SetAttributes(desktopIniPath, FileAttributes.Normal);
+            File.Move(desktopIniPath, refreshDesktopIniPath);
+            desktopIniMoved = true;
+            File.Move(refreshDesktopIniPath, desktopIniPath);
+            desktopIniMoved = false;
+            File.SetLastWriteTimeUtc(desktopIniPath, DateTime.UtcNow);
+            Directory.SetLastWriteTimeUtc(folderPath, DateTime.UtcNow);
+        }
+        catch (IOException)
+        {
+            // Best-effort: Explorer cache invalidation should not fail icon persistence.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Best-effort: antivirus or shell locks can temporarily block the refresh step.
+        }
+        finally
+        {
+            try
+            {
+                if (desktopIniMoved &&
+                    File.Exists(refreshDesktopIniPath) &&
+                    !File.Exists(desktopIniPath))
+                {
+                    File.Move(refreshDesktopIniPath, desktopIniPath);
+                }
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+
+            try
+            {
+                if (File.Exists(desktopIniPath))
+                {
+                    File.SetAttributes(desktopIniPath, desktopIniAttributes | FileAttributes.Hidden | FileAttributes.System);
+                }
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+
+            try
+            {
+                if (File.Exists(refreshDesktopIniPath))
+                {
+                    File.SetAttributes(refreshDesktopIniPath, FileAttributes.Normal);
+                    File.Delete(refreshDesktopIniPath);
+                }
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+
+            try
+            {
+                File.SetAttributes(folderPath, folderAttributes | FileAttributes.ReadOnly | FileAttributes.System);
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+        }
+    }
+
     private static void RefreshShell(
         string folderPath,
         string desktopIniPath,
@@ -389,6 +476,7 @@ public sealed class DesktopIniFolderIconIntegrationService : IFolderIconIntegrat
         string? iconPath,
         CancellationToken cancellationToken)
     {
+        TryForceDesktopIniReload(folderPath, desktopIniPath);
         // Second shell notification pass — no delay needed since SHChangeNotify is synchronous.
         RefreshShell(folderPath, desktopIniPath, iconPath, Path.GetDirectoryName(folderPath));
         return Task.CompletedTask;
